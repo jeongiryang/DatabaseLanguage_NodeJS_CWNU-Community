@@ -1,21 +1,21 @@
 const express = require("express");
 
+const authController = require("../controllers/auth.controller");
+
 const router = express.Router();
 
-router.post("/register", (req, res) => {
-  res.status(501).json({ message: "Register API is not implemented yet." });
-});
+function asyncHandler(handler) {
+  return (req, res, next) => {
+    Promise.resolve(handler(req, res, next)).catch(next);
+  };
+}
 
-router.post("/login", (req, res) => {
-  res.status(501).json({ message: "Login API is not implemented yet." });
-});
+router.post("/register", asyncHandler(authController.register));
 
-router.post("/logout", (req, res) => {
-  res.status(501).json({ message: "Logout API is not implemented yet." });
-});
+router.post("/login", asyncHandler(authController.login));
 
-router.get("/me", (req, res) => {
-  res.status(501).json({ message: "Current user API is not implemented yet." });
-});
+router.post("/logout", authController.logout);
+
+router.get("/me", asyncHandler(authController.me));
 
 module.exports = router;

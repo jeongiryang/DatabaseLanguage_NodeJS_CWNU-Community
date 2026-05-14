@@ -10,8 +10,10 @@
   <header class="site-header">
     <a class="brand" href="/">CWNU Community</a>
     <nav class="nav-links" aria-label="Main navigation">
-      <a href="/login.html">로그인</a>
-      <a href="/register.html">회원가입</a>
+      <span class="auth-status" id="auth-status">로그인 상태 확인 중</span>
+      <a data-auth-link="login" href="/login.html">로그인</a>
+      <a data-auth-link="register" href="/register.html">회원가입</a>
+      <button class="link-button" type="button" id="logout-button" hidden>로그아웃</button>
       <a class="button-link" href="/post-write.html">글쓰기</a>
     </nav>
   </header>

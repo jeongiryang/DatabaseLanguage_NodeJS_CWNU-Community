@@ -35,4 +35,11 @@ app.use("/api", (req, res) => {
   });
 });
 
+app.use((err, req, res, next) => {
+  console.error(err.message);
+  res.status(500).json({
+    message: "Internal server error.",
+  });
+});
+
 module.exports = app;
