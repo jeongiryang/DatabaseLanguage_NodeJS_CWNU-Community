@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>로그인 - CWNU Community</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="/">CWNU Community</a>
+    <nav class="nav-links" aria-label="Main navigation">
+      <a href="/register.html">회원가입</a>
+    </nav>
+  </header>
+
+  <main class="page narrow">
+    <section class="page-title">
+      <h1>로그인</h1>
+      <p>JWT httpOnly cookie 기반 로그인 API가 연결될 예정입니다.</p>
+    </section>
+
+    <form class="form-panel" id="login-form">
+      <label>
+        이메일
+        <input type="email" name="email" autocomplete="email" required>
+      </label>
+      <label>
+        비밀번호
+        <input type="password" name="password" autocomplete="current-password" required>
+      </label>
+      <button type="submit">로그인</button>
+    </form>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+</body>
+</html>

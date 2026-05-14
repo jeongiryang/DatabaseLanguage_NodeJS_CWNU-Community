@@ -1,0 +1,175 @@
+:root {
+  --bg: #f5f7fb;
+  --surface: #ffffff;
+  --text: #1f2937;
+  --muted: #6b7280;
+  --line: #d8dee9;
+  --primary: #1f6feb;
+  --primary-dark: #1a56b3;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Arial, "Noto Sans KR", sans-serif;
+  line-height: 1.5;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 32px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+
+.brand {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.button-link,
+button {
+  border: 0;
+  border-radius: 6px;
+  background: var(--primary);
+  color: #ffffff;
+  cursor: pointer;
+  font: inherit;
+  padding: 10px 14px;
+}
+
+.button-link:hover,
+button:hover {
+  background: var(--primary-dark);
+}
+
+.page {
+  width: min(1080px, calc(100% - 32px));
+  margin: 32px auto;
+}
+
+.page.narrow {
+  width: min(520px, calc(100% - 32px));
+}
+
+.page-title {
+  margin-bottom: 24px;
+}
+
+.page-title h1 {
+  margin: 0 0 8px;
+  font-size: 28px;
+}
+
+.page-title p,
+.meta {
+  margin: 0;
+  color: var(--muted);
+}
+
+.toolbar,
+.panel,
+.form-panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 16px;
+  padding: 16px;
+}
+
+.panel {
+  margin-bottom: 20px;
+  padding: 20px;
+}
+
+.form-panel {
+  display: grid;
+  gap: 16px;
+  padding: 20px;
+}
+
+label {
+  display: grid;
+  gap: 8px;
+  font-weight: 600;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font: inherit;
+  padding: 10px 12px;
+}
+
+.post-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.post-table th,
+.post-table td {
+  border-bottom: 1px solid var(--line);
+  padding: 12px;
+  text-align: left;
+}
+
+.content-block {
+  margin: 24px 0;
+  min-height: 160px;
+  white-space: pre-wrap;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+}
+
+.comment-form {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 640px) {
+  .site-header {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 16px;
+  }
+
+  .nav-links {
+    flex-wrap: wrap;
+  }
+
+  .post-table {
+    font-size: 14px;
+  }
+}

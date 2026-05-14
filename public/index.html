@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CWNU Community</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="/">CWNU Community</a>
+    <nav class="nav-links" aria-label="Main navigation">
+      <a href="/login.html">로그인</a>
+      <a href="/register.html">회원가입</a>
+      <a class="button-link" href="/post-write.html">글쓰기</a>
+    </nav>
+  </header>
+
+  <main class="page">
+    <section class="page-title">
+      <h1>학내 커뮤니티 게시판</h1>
+      <p>게시글 목록, 페이징, 정렬 기능이 이 화면에 연결될 예정입니다.</p>
+    </section>
+
+    <section class="toolbar" aria-label="Post list controls">
+      <label>
+        표시 개수
+        <select id="page-size">
+          <option value="10">10개</option>
+          <option value="20">20개</option>
+          <option value="30">30개</option>
+          <option value="40">40개</option>
+          <option value="50">50개</option>
+        </select>
+      </label>
+      <label>
+        정렬
+        <select id="sort">
+          <option value="latest">최신순</option>
+          <option value="likes">좋아요순</option>
+          <option value="views">조회수순</option>
+        </select>
+      </label>
+    </section>
+
+    <section class="panel">
+      <table class="post-table">
+        <thead>
+          <tr>
+            <th>제목</th>
+            <th>게시자</th>
+            <th>등록일</th>
+            <th>댓글</th>
+            <th>좋아요</th>
+          </tr>
+        </thead>
+        <tbody id="post-list">
+          <tr>
+            <td colspan="5">게시글 API 구현 후 목록이 표시됩니다.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/posts.js"></script>
+</body>
+</html>
