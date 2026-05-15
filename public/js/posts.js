@@ -78,6 +78,14 @@ function formatDate(dateValue) {
   }).format(new Date(dateValue));
 }
 
+function formatUpdatedAt(createdAtValue, updatedAtValue) {
+  const createdAt = new Date(createdAtValue);
+  const updatedAt = new Date(updatedAtValue);
+  const isEdited = Math.abs(updatedAt.getTime() - createdAt.getTime()) > 1000;
+
+  return isEdited ? formatDate(updatedAtValue) : "-";
+}
+
 function getPostIdFromQuery() {
   const postId = Number.parseInt(new URLSearchParams(window.location.search).get("id"), 10);
   return Number.isInteger(postId) && postId > 0 ? postId : null;
@@ -166,7 +174,7 @@ function renderPostRows(posts) {
   if (posts.length === 0) {
     const row = document.createElement("tr");
     const cell = document.createElement("td");
-    cell.colSpan = 7;
+    cell.colSpan = 8;
     cell.textContent = postState.q ? "검색 결과가 없습니다." : "등록된 게시글이 없습니다.";
     row.appendChild(cell);
     postList.appendChild(row);
@@ -179,6 +187,7 @@ function renderPostRows(posts) {
     const titleLink = document.createElement("a");
     const authorCell = document.createElement("td");
     const createdAtCell = document.createElement("td");
+    const updatedAtCell = document.createElement("td");
     const viewCountCell = document.createElement("td");
     const commentCell = document.createElement("td");
     const likeCell = document.createElement("td");
@@ -189,12 +198,22 @@ function renderPostRows(posts) {
     titleCell.appendChild(titleLink);
     authorCell.textContent = post.author.nickname;
     createdAtCell.textContent = formatDate(post.createdAt);
+    updatedAtCell.textContent = formatUpdatedAt(post.createdAt, post.updatedAt);
     viewCountCell.textContent = post.viewCount;
     commentCell.textContent = post.commentCount;
     likeCell.textContent = post.likeCount;
     dislikeCell.textContent = post.dislikeCount || 0;
 
-    row.append(titleCell, authorCell, createdAtCell, viewCountCell, commentCell, likeCell, dislikeCell);
+    row.append(
+      titleCell,
+      authorCell,
+      createdAtCell,
+      updatedAtCell,
+      viewCountCell,
+      commentCell,
+      likeCell,
+      dislikeCell
+    );
     postList.appendChild(row);
   });
 }
@@ -240,7 +259,7 @@ async function loadPostList() {
     return;
   }
 
-  postList.innerHTML = '<tr><td colspan="7">게시글 목록을 불러오는 중입니다.</td></tr>';
+  postList.innerHTML = '<tr><td colspan="8">게시글 목록을 불러오는 중입니다.</td></tr>';
 
   try {
     const query = new URLSearchParams({
@@ -261,7 +280,7 @@ async function loadPostList() {
     postList.innerHTML = "";
     const row = document.createElement("tr");
     const cell = document.createElement("td");
-    cell.colSpan = 7;
+    cell.colSpan = 8;
     cell.textContent = error.message;
     row.appendChild(cell);
     postList.appendChild(row);
