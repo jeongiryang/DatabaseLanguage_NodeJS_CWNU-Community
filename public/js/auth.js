@@ -13,11 +13,34 @@ function getFormPayload(form) {
   return Object.fromEntries(new FormData(form).entries());
 }
 
+function getAccountDeleteButton() {
+  const navLinks = document.querySelector(".nav-links");
+
+  if (!navLinks) {
+    return null;
+  }
+
+  let accountDeleteButton = document.querySelector("#account-delete-button");
+
+  if (!accountDeleteButton) {
+    accountDeleteButton = document.createElement("button");
+    accountDeleteButton.className = "link-button";
+    accountDeleteButton.id = "account-delete-button";
+    accountDeleteButton.type = "button";
+    accountDeleteButton.textContent = "회원 탈퇴";
+    accountDeleteButton.addEventListener("click", handleDeleteAccount);
+    navLinks.appendChild(accountDeleteButton);
+  }
+
+  return accountDeleteButton;
+}
+
 function setAuthLinks(result) {
   const statusElement = document.querySelector("#auth-status");
   const loginLink = document.querySelector('[data-auth-link="login"]');
   const registerLink = document.querySelector('[data-auth-link="register"]');
   const logoutButton = document.querySelector("#logout-button");
+  const accountDeleteButton = getAccountDeleteButton();
   const authOnlyElements = document.querySelectorAll("[data-requires-auth]");
 
   if (result.authenticated) {
@@ -25,6 +48,7 @@ function setAuthLinks(result) {
     if (loginLink) loginLink.hidden = true;
     if (registerLink) registerLink.hidden = true;
     if (logoutButton) logoutButton.hidden = false;
+    if (accountDeleteButton) accountDeleteButton.hidden = false;
     authOnlyElements.forEach((element) => {
       element.hidden = false;
     });
@@ -35,6 +59,7 @@ function setAuthLinks(result) {
   if (loginLink) loginLink.hidden = false;
   if (registerLink) registerLink.hidden = false;
   if (logoutButton) logoutButton.hidden = true;
+  if (accountDeleteButton) accountDeleteButton.hidden = true;
   authOnlyElements.forEach((element) => {
     element.hidden = true;
   });
@@ -96,6 +121,27 @@ async function handleLogout() {
     if (window.location.pathname === "/post-write.html") {
       window.location.href = "/login.html";
     }
+  } catch (error) {
+    alert(error.message);
+  }
+}
+
+async function handleDeleteAccount() {
+  const confirmed = confirm(
+    "회원 탈퇴 시 작성한 게시글, 댓글, 좋아요가 삭제됩니다. 계속하시겠습니까?"
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+  try {
+    await api.request("/api/auth/me", {
+      method: "DELETE",
+    });
+
+    await refreshAuthStatus();
+    window.location.href = "/";
   } catch (error) {
     alert(error.message);
   }

@@ -108,6 +108,31 @@ function logout(req, res) {
   return res.json({ message: "Logout completed." });
 }
 
+async function deleteMe(req, res) {
+  const userId = req.user.id;
+
+  await prisma.$transaction(async (tx) => {
+    await tx.post.deleteMany({
+      where: { userId },
+    });
+
+    await tx.comment.deleteMany({
+      where: { userId },
+    });
+
+    await tx.like.deleteMany({
+      where: { userId },
+    });
+
+    await tx.user.delete({
+      where: { id: userId },
+    });
+  });
+
+  clearAuthCookie(res);
+  return res.json({ message: "Account deleted." });
+}
+
 async function me(req, res) {
   const token = req.cookies?.[COOKIE_NAME];
 
@@ -159,5 +184,6 @@ module.exports = {
   register,
   login,
   logout,
+  deleteMe,
   me,
 };
