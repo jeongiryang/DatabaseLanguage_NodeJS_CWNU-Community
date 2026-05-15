@@ -79,6 +79,7 @@ function clearLikeUi() {
   }
 
   if (likeStatus) {
+    likeStatus.hidden = false;
     likeStatus.textContent = "";
   }
 
@@ -87,6 +88,7 @@ function clearLikeUi() {
   }
 
   if (dislikeStatus) {
+    dislikeStatus.hidden = false;
     dislikeStatus.textContent = "";
   }
 
@@ -95,6 +97,7 @@ function clearLikeUi() {
   }
 
   if (bookmarkStatus) {
+    bookmarkStatus.hidden = false;
     bookmarkStatus.textContent = "";
   }
 }
@@ -250,7 +253,8 @@ function updateBookmarkUi(post, auth) {
   const bookmarkStatus = document.querySelector("#bookmark-status");
 
   if (bookmarkStatus) {
-    bookmarkStatus.textContent = `북마크 ${post.bookmarkCount || 0}개`;
+    bookmarkStatus.hidden = Boolean(auth.authenticated);
+    bookmarkStatus.textContent = auth.authenticated ? "" : `🔖 ${post.bookmarkCount || 0}`;
   }
 
   if (!bookmarkButton) {
@@ -263,8 +267,11 @@ function updateBookmarkUi(post, auth) {
   }
 
   bookmarkButton.hidden = false;
-  bookmarkButton.textContent = post.bookmarked ? "북마크 취소" : "북마크";
+  bookmarkButton.textContent = `🔖 ${post.bookmarkCount || 0}`;
+  bookmarkButton.classList.toggle("is-selected", Boolean(post.bookmarked));
   bookmarkButton.dataset.bookmarked = post.bookmarked ? "true" : "false";
+  bookmarkButton.setAttribute("aria-pressed", String(Boolean(post.bookmarked)));
+  bookmarkButton.title = post.bookmarked ? "북마크 취소" : "북마크";
 }
 
 function updateLikeUi(post, auth) {
@@ -272,7 +279,8 @@ function updateLikeUi(post, auth) {
   const likeStatus = document.querySelector("#like-status");
 
   if (likeStatus) {
-    likeStatus.textContent = `좋아요 ${post.likeCount}개`;
+    likeStatus.hidden = Boolean(auth.authenticated);
+    likeStatus.textContent = auth.authenticated ? "" : `👍 ${post.likeCount}`;
   }
 
   if (!likeButton) {
@@ -285,8 +293,11 @@ function updateLikeUi(post, auth) {
   }
 
   likeButton.hidden = false;
-  likeButton.textContent = post.liked ? "좋아요 취소" : "좋아요";
+  likeButton.textContent = `👍 ${post.likeCount}`;
+  likeButton.classList.toggle("is-selected", Boolean(post.liked));
   likeButton.dataset.liked = post.liked ? "true" : "false";
+  likeButton.setAttribute("aria-pressed", String(Boolean(post.liked)));
+  likeButton.title = post.liked ? "좋아요 취소" : "좋아요";
 }
 
 function updateDislikeUi(post, auth) {
@@ -294,7 +305,8 @@ function updateDislikeUi(post, auth) {
   const dislikeStatus = document.querySelector("#dislike-status");
 
   if (dislikeStatus) {
-    dislikeStatus.textContent = `싫어요 ${post.dislikeCount || 0}개`;
+    dislikeStatus.hidden = Boolean(auth.authenticated);
+    dislikeStatus.textContent = auth.authenticated ? "" : `👎 ${post.dislikeCount || 0}`;
   }
 
   if (!dislikeButton) {
@@ -307,8 +319,11 @@ function updateDislikeUi(post, auth) {
   }
 
   dislikeButton.hidden = false;
-  dislikeButton.textContent = post.disliked ? "싫어요 취소" : "싫어요";
+  dislikeButton.textContent = `👎 ${post.dislikeCount || 0}`;
+  dislikeButton.classList.toggle("is-selected", Boolean(post.disliked));
   dislikeButton.dataset.disliked = post.disliked ? "true" : "false";
+  dislikeButton.setAttribute("aria-pressed", String(Boolean(post.disliked)));
+  dislikeButton.title = post.disliked ? "싫어요 취소" : "싫어요";
 }
 
 function renderPostRows(posts) {
@@ -965,14 +980,14 @@ function createCommentElement(comment, auth, isReply = false) {
     const editButton = document.createElement("button");
     editButton.type = "button";
     editButton.className = "link-button";
-    editButton.textContent = "수정";
+    editButton.textContent = "✏️ 수정";
     editButton.addEventListener("click", () => showCommentEditForm(item, comment, isReply));
     header.appendChild(editButton);
 
     const deleteButton = document.createElement("button");
     deleteButton.type = "button";
     deleteButton.className = "link-button danger-link";
-    deleteButton.textContent = "삭제";
+    deleteButton.textContent = "🗑️ 삭제";
     deleteButton.addEventListener("click", () => deleteComment(comment.id));
     header.appendChild(deleteButton);
   }

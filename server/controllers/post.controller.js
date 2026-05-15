@@ -3,7 +3,7 @@ const { COOKIE_NAME } = require("../utils/authCookie");
 const { verifyAuthToken } = require("../utils/jwt");
 
 const ALLOWED_PAGE_SIZES = [10, 20, 30, 40, 50];
-const ALLOWED_SORTS = ["latest", "likes", "views"];
+const ALLOWED_SORTS = ["latest", "likes", "views", "comments"];
 const ALLOWED_BOARDS = ["all", "hot", "notice"];
 const ALLOWED_CATEGORIES = ["notice", "free", "study", "question", "info", "market", "lost"];
 
@@ -24,6 +24,10 @@ function getPostOrderBy(sort) {
 
   if (sort === "views") {
     return [{ viewCount: "desc" }, { createdAt: "desc" }];
+  }
+
+  if (sort === "comments") {
+    return [{ comments: { _count: "desc" } }, { createdAt: "desc" }];
   }
 
   return [{ createdAt: "desc" }];
@@ -143,7 +147,7 @@ async function listPosts(req, res) {
   }
 
   if (!ALLOWED_SORTS.includes(sort)) {
-    return res.status(400).json({ message: "sort must be latest, likes, or views." });
+    return res.status(400).json({ message: "sort must be latest, likes, views, or comments." });
   }
 
   if (!ALLOWED_BOARDS.includes(board)) {

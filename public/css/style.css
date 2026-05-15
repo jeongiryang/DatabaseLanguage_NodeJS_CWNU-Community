@@ -184,13 +184,13 @@ button {
 .button-link:hover,
 button:hover {
   background: var(--primary-dark);
-  box-shadow: 0 10px 22px rgba(21, 91, 181, 0.22);
-  transform: translateY(-1px);
+  box-shadow: 0 14px 28px rgba(21, 91, 181, 0.26);
+  transform: translateY(-2px);
 }
 
 html[data-theme="dark"] .button-link:hover,
 html[data-theme="dark"] button:hover {
-  box-shadow: 0 10px 22px rgba(91, 157, 255, 0.2);
+  box-shadow: 0 14px 28px rgba(91, 157, 255, 0.24);
 }
 
 button:active,
@@ -220,6 +220,31 @@ button:disabled:hover {
   border: 0;
   cursor: pointer;
   font: inherit;
+}
+
+.button-link {
+  border: 1px solid #bdd0ea;
+  background: #ffffff;
+  box-shadow: 0 8px 18px rgba(20, 48, 86, 0.08);
+  color: var(--primary-dark);
+}
+
+.button-link:hover {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: #ffffff;
+}
+
+html[data-theme="dark"] .button-link {
+  background: #1d2a42;
+  border-color: #455d7d;
+  color: #dbeafe;
+}
+
+html[data-theme="dark"] .button-link:hover {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #081322;
 }
 
 .danger-link,
@@ -391,8 +416,8 @@ html[data-theme="dark"] .board-shortcut {
 }
 
 .board-shortcut:hover {
-  box-shadow: 0 8px 16px rgba(20, 48, 86, 0.13);
-  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(20, 48, 86, 0.17);
+  transform: translateY(-2px);
 }
 
 .board-shortcut.active {
@@ -477,7 +502,7 @@ html[data-theme="dark"] .shortcut-group {
 .form-panel:hover {
   border-color: #c8d7eb;
   box-shadow: var(--shadow-hover);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
 }
 
 .toolbar {
@@ -696,8 +721,8 @@ html[data-theme="dark"] .post-table tbody tr:hover td {
 .anonymous-badge:hover,
 .reply-badge:hover,
 .edited-badge:hover {
-  box-shadow: 0 6px 14px rgba(20, 48, 86, 0.12);
-  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(20, 48, 86, 0.16);
+  transform: translateY(-2px);
 }
 
 .category-badge {
@@ -847,6 +872,247 @@ html[data-theme="dark"] .content-block {
   flex-wrap: wrap;
   align-items: center;
   gap: 10px;
+}
+
+.actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  border: 1px solid #bdd0ea;
+  background: #ffffff;
+  box-shadow: 0 8px 18px rgba(20, 48, 86, 0.09);
+  color: var(--primary-dark);
+  gap: 6px;
+  padding: 10px 14px;
+}
+
+.actions button:hover {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  color: var(--primary-dark);
+  box-shadow: 0 14px 28px rgba(21, 91, 181, 0.18);
+}
+
+.actions .meta {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-soft);
+  color: #3b4a62;
+  font-size: 14px;
+  font-weight: 800;
+  padding: 7px 11px;
+}
+
+#like-button {
+  min-width: 68px;
+  min-height: 38px;
+  border-radius: 999px;
+  background: #ffffff;
+  border-color: #b7d7c3;
+  color: #166534;
+  font-size: 15px;
+  padding: 8px 12px;
+}
+
+#like-button:hover {
+  background: #e8f7ef;
+  border-color: #72b78a;
+  color: #14532d;
+}
+
+#like-button.is-selected {
+  background: #dff3e7;
+  border-color: #4f9f68;
+  box-shadow:
+    inset 0 0 0 1px rgba(79, 159, 104, 0.24),
+    0 10px 22px rgba(22, 101, 52, 0.16);
+  color: #14532d;
+}
+
+#dislike-button {
+  min-width: 68px;
+  min-height: 38px;
+  border-radius: 999px;
+  background: #ffffff;
+  border-color: #f0c0c0;
+  color: #b42318;
+  font-size: 15px;
+  padding: 8px 12px;
+}
+
+#dislike-button:hover {
+  background: #fff0f0;
+  border-color: #dc7a7a;
+  color: #991b1b;
+}
+
+#dislike-button.is-selected {
+  background: #ffe6e6;
+  border-color: #cf5f5f;
+  box-shadow:
+    inset 0 0 0 1px rgba(207, 95, 95, 0.22),
+    0 10px 22px rgba(180, 35, 24, 0.14);
+  color: #991b1b;
+}
+
+#bookmark-button {
+  min-width: 68px;
+  min-height: 38px;
+  border-radius: 999px;
+  background: #ffffff;
+  border-color: #d6c4ff;
+  color: #5b35a8;
+  font-size: 15px;
+  padding: 8px 12px;
+}
+
+#bookmark-button:hover {
+  background: #f3edff;
+  border-color: #a58bde;
+  color: #4c1d95;
+}
+
+#bookmark-button.is-selected {
+  background: #eee6ff;
+  border-color: #8a6fd1;
+  box-shadow:
+    inset 0 0 0 1px rgba(138, 111, 209, 0.22),
+    0 10px 22px rgba(91, 53, 168, 0.14);
+  color: #4c1d95;
+}
+
+#share-post-button {
+  border-color: #b6e1f7;
+  color: #075985;
+}
+
+#share-post-button:hover {
+  background: #e9f7ff;
+  border-color: #75bfe3;
+  color: #075985;
+}
+
+.actions #delete-post-button {
+  border-color: #e59696;
+  background: var(--danger);
+  color: #ffffff;
+}
+
+.actions #delete-post-button:hover {
+  border-color: #9f2424;
+  background: #9f2424;
+  color: #ffffff;
+  box-shadow: 0 14px 28px rgba(199, 53, 53, 0.26);
+}
+
+html[data-theme="dark"] .actions button {
+  background: #1d2a42;
+  border-color: #455d7d;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
+  color: #dbeafe;
+}
+
+html[data-theme="dark"] .actions button:hover {
+  background: #263b5d;
+  border-color: #6c9add;
+  color: #ffffff;
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.28);
+}
+
+html[data-theme="dark"] .actions .meta {
+  background: #142036;
+  border-color: #415875;
+  color: #d5dfef;
+}
+
+html[data-theme="dark"] #like-button {
+  background: #162a20;
+  border-color: #47795b;
+  color: #a9edc1;
+}
+
+html[data-theme="dark"] #like-button:hover {
+  background: #183524;
+  border-color: #63a978;
+  color: #c8f7d8;
+}
+
+html[data-theme="dark"] #like-button.is-selected {
+  background: #1f5131;
+  border-color: #7ed99a;
+  box-shadow:
+    inset 0 0 0 1px rgba(126, 217, 154, 0.2),
+    0 10px 22px rgba(0, 0, 0, 0.24);
+  color: #dcffe6;
+}
+
+html[data-theme="dark"] #dislike-button {
+  background: #321c21;
+  border-color: #8e4a52;
+  color: #ffb4bb;
+}
+
+html[data-theme="dark"] #dislike-button:hover {
+  background: #3b2024;
+  border-color: #cf6e78;
+  color: #ffd4d8;
+}
+
+html[data-theme="dark"] #dislike-button.is-selected {
+  background: #632932;
+  border-color: #ff9ca6;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 156, 166, 0.18),
+    0 10px 22px rgba(0, 0, 0, 0.24);
+  color: #ffe1e4;
+}
+
+html[data-theme="dark"] #bookmark-button {
+  background: #251f3a;
+  border-color: #745ba8;
+  color: #d8c8ff;
+}
+
+html[data-theme="dark"] #bookmark-button:hover {
+  background: #2c2445;
+  border-color: #9a7dd5;
+  color: #eee7ff;
+}
+
+html[data-theme="dark"] #bookmark-button.is-selected {
+  background: #46306f;
+  border-color: #c1a9ff;
+  box-shadow:
+    inset 0 0 0 1px rgba(193, 169, 255, 0.18),
+    0 10px 22px rgba(0, 0, 0, 0.24);
+  color: #f4efff;
+}
+
+html[data-theme="dark"] #share-post-button {
+  border-color: #427895;
+  color: #abe4ff;
+}
+
+html[data-theme="dark"] #share-post-button:hover {
+  background: #133142;
+  border-color: #60a5c7;
+  color: #d9f4ff;
+}
+
+html[data-theme="dark"] .actions #delete-post-button {
+  background: #d94b4b;
+  border-color: #e47777;
+  color: #ffffff;
+}
+
+html[data-theme="dark"] .actions #delete-post-button:hover {
+  background: #f05d5d;
+  border-color: #ff9c9c;
+  box-shadow: 0 14px 28px rgba(255, 107, 107, 0.18);
 }
 
 .comment-form {
@@ -1066,6 +1332,128 @@ html[data-theme="dark"] .mypage-tabs button {
   text-decoration: underline;
 }
 
+.site-footer {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  width: min(1180px, calc(100% - 32px));
+  margin: 30px auto 0;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 13px;
+  padding: 24px 0 30px;
+  text-align: center;
+}
+
+.site-footer p {
+  margin: 0;
+}
+
+.footer-title {
+  color: #314158;
+  font-weight: 800;
+}
+
+.footer-meta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.footer-github {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow: 0 8px 18px rgba(20, 48, 86, 0.08);
+  color: var(--primary-dark);
+  transition:
+    background-color var(--motion-fast),
+    border-color var(--motion-fast),
+    color var(--motion-fast),
+    box-shadow var(--motion-fast),
+    transform var(--motion-fast);
+}
+
+.footer-github svg {
+  width: 19px;
+  height: 19px;
+  fill: currentColor;
+  transition: transform var(--motion-fast);
+}
+
+.footer-github::after {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  border-radius: 6px;
+  background: #101827;
+  color: #ffffff;
+  content: attr(data-tooltip);
+  font-size: 12px;
+  font-weight: 800;
+  opacity: 0;
+  padding: 5px 8px;
+  pointer-events: none;
+  transform: translateX(-50%) translateY(4px);
+  transition:
+    opacity var(--motion-fast),
+    transform var(--motion-fast);
+  white-space: nowrap;
+}
+
+.footer-github:hover {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  color: var(--primary-dark);
+  box-shadow: 0 12px 24px rgba(21, 91, 181, 0.16);
+  transform: translateY(-2px) scale(1.04);
+}
+
+.footer-github:focus-visible {
+  outline: 3px solid rgba(21, 91, 181, 0.2);
+  outline-offset: 3px;
+}
+
+.footer-github:hover svg,
+.footer-github:focus-visible svg {
+  transform: scale(1.12);
+}
+
+.footer-github:hover::after,
+.footer-github:focus-visible::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+html[data-theme="dark"] .footer-title {
+  color: #d5dfef;
+}
+
+html[data-theme="dark"] .footer-github {
+  background: #1d2a42;
+  border-color: #455d7d;
+  color: #dbeafe;
+}
+
+html[data-theme="dark"] .footer-github:hover {
+  background: #263b5d;
+  border-color: #6c9add;
+  color: #ffffff;
+}
+
+html[data-theme="dark"] .footer-github::after {
+  background: #edf3fb;
+  color: #101827;
+}
+
 @media (max-width: 840px) {
   .site-header {
     align-items: flex-start;
@@ -1134,6 +1522,14 @@ html[data-theme="dark"] .mypage-tabs button {
   .anonymous-badge:hover,
   .reply-badge:hover,
   .edited-badge:hover {
+    transform: none;
+  }
+
+  .footer-github:hover,
+  .footer-github:hover svg,
+  .footer-github:hover::after,
+  .footer-github:focus-visible svg,
+  .footer-github:focus-visible::after {
     transform: none;
   }
 }
