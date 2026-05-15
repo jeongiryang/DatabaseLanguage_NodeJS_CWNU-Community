@@ -29,6 +29,14 @@ function getCategoryLabel(category) {
   return CATEGORY_LABELS[category] || CATEGORY_LABELS.free;
 }
 
+function createCategoryChip(category) {
+  const chip = document.createElement("span");
+  chip.className = "category-chip";
+  chip.dataset.category = category || "free";
+  chip.textContent = getCategoryLabel(category);
+  return chip;
+}
+
 function showPanel(selector) {
   const panel = document.querySelector(selector);
 
@@ -94,7 +102,7 @@ function renderMyPosts(posts) {
     const dislikeCountCell = document.createElement("td");
 
     titleCell.appendChild(makePostLink(post));
-    categoryCell.textContent = getCategoryLabel(post.category);
+    categoryCell.appendChild(createCategoryChip(post.category));
     createdAtCell.textContent = formatDate(post.createdAt);
     updatedAtCell.textContent = formatUpdatedAt(post.createdAt, post.updatedAt);
     viewCountCell.textContent = post.viewCount;

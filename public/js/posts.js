@@ -119,6 +119,14 @@ function getCategoryLabel(category) {
   return CATEGORY_LABELS[category] || CATEGORY_LABELS.free;
 }
 
+function createCategoryChip(category) {
+  const chip = document.createElement("span");
+  chip.className = "category-chip";
+  chip.dataset.category = category || "free";
+  chip.textContent = getCategoryLabel(category);
+  return chip;
+}
+
 function initializeCategoryFilterFromQuery() {
   const categoryFromQuery = new URLSearchParams(window.location.search).get("category") || "all";
 
@@ -136,6 +144,7 @@ function updatePostCategoryUi(post) {
 
   categoryElement.hidden = false;
   categoryElement.textContent = `[${getCategoryLabel(post.category)}]`;
+  categoryElement.dataset.category = post.category || "free";
 }
 
 function updatePostMetaLegacy(post, commentCount = post.commentCount) {
@@ -244,7 +253,7 @@ function renderPostRows(posts) {
     titleLink.href = `/post-detail.html?id=${post.id}`;
     titleLink.textContent = post.title;
     titleCell.appendChild(titleLink);
-    categoryCell.textContent = getCategoryLabel(post.category);
+    categoryCell.appendChild(createCategoryChip(post.category));
     authorCell.textContent = post.author.nickname;
     createdAtCell.textContent = formatDate(post.createdAt);
     updatedAtCell.textContent = formatUpdatedAt(post.createdAt, post.updatedAt);
@@ -813,7 +822,7 @@ function renderComments(comments, auth) {
     if (auth.authenticated && auth.user.id === comment.author.id) {
       const deleteButton = document.createElement("button");
       deleteButton.type = "button";
-      deleteButton.className = "link-button";
+      deleteButton.className = "link-button danger-link";
       deleteButton.textContent = "삭제";
       deleteButton.addEventListener("click", () => deleteComment(comment.id));
       header.appendChild(deleteButton);

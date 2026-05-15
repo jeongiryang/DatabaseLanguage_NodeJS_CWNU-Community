@@ -41,7 +41,7 @@ function getAccountDeleteButton() {
 
   if (!accountDeleteButton) {
     accountDeleteButton = document.createElement("button");
-    accountDeleteButton.className = "link-button";
+    accountDeleteButton.className = "link-button danger-link";
     accountDeleteButton.id = "account-delete-button";
     accountDeleteButton.type = "button";
     accountDeleteButton.textContent = "회원 탈퇴";
