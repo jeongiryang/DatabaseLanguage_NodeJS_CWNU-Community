@@ -35,12 +35,23 @@ function getCategoryLabel(category) {
   return CATEGORY_LABELS[category] || CATEGORY_LABELS.free;
 }
 
+function getAuthorLabel(post) {
+  return post?.isAnonymous ? "익명" : post?.author?.nickname || "";
+}
+
 function createCategoryChip(category) {
   const chip = document.createElement("span");
   chip.className = "category-chip";
   chip.dataset.category = category || "free";
   chip.textContent = getCategoryLabel(category);
   return chip;
+}
+
+function createAnonymousBadge() {
+  const badge = document.createElement("span");
+  badge.className = "anonymous-badge";
+  badge.textContent = "익명 작성";
+  return badge;
 }
 
 function showPanel(selector) {
@@ -175,6 +186,10 @@ function renderMyPosts(posts) {
     const dislikeCountCell = document.createElement("td");
 
     titleCell.appendChild(makePostLink(post));
+    if (post.isAnonymous) {
+      titleCell.append(" ");
+      titleCell.appendChild(createAnonymousBadge());
+    }
     categoryCell.appendChild(createCategoryChip(post.category));
     createdAtCell.textContent = formatDate(post.createdAt);
     updatedAtCell.textContent = formatUpdatedAt(post.createdAt, post.updatedAt);
@@ -235,6 +250,10 @@ function renderComments(comments) {
 
     item.className = "activity-item";
     content.textContent = comment.content;
+    if (comment.isAnonymous) {
+      content.append(" ");
+      content.appendChild(createAnonymousBadge());
+    }
     link.href = `/post-detail.html?id=${comment.post.id}`;
     link.textContent = comment.post.title;
     meta.className = "meta";
@@ -272,7 +291,7 @@ function renderReactions(selector, panelSelector, reactions, emptyMessage, dateL
     title.className = "activity-title";
     title.append(category, link);
     meta.className = "meta";
-    meta.textContent = `작성자 ${reaction.post.author.nickname} | ${dateLabel} ${formatDate(reaction.createdAt)}`;
+    meta.textContent = `작성자 ${getAuthorLabel(reaction.post)} | ${dateLabel} ${formatDate(reaction.createdAt)}`;
     item.append(title, meta);
     container.appendChild(item);
   });
@@ -306,7 +325,7 @@ function renderBookmarks(bookmarks) {
     title.className = "activity-title";
     title.append(category, link);
     meta.className = "meta";
-    meta.textContent = `작성자 ${bookmark.post.author.nickname} | 등록일 ${formatDate(bookmark.post.createdAt)} | 북마크 ${formatDate(bookmark.createdAt)}`;
+    meta.textContent = `작성자 ${getAuthorLabel(bookmark.post)} | 등록일 ${formatDate(bookmark.post.createdAt)} | 북마크 ${formatDate(bookmark.createdAt)}`;
     item.append(title, meta);
     container.appendChild(item);
   });

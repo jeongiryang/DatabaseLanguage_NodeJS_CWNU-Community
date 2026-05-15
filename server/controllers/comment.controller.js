@@ -5,11 +5,16 @@ function parseId(value) {
   return Number.isInteger(id) && id > 0 ? id : null;
 }
 
+function parseBoolean(value) {
+  return value === true || value === "true" || value === "on" || value === "1";
+}
+
 function formatComment(comment) {
   return {
     id: comment.id,
     postId: comment.postId,
     content: comment.content,
+    isAnonymous: comment.isAnonymous,
     createdAt: comment.createdAt,
     updatedAt: comment.updatedAt,
     author: {
@@ -62,6 +67,7 @@ async function listComments(req, res) {
 async function createComment(req, res) {
   const postId = parseId(req.params.postId);
   const content = typeof req.body.content === "string" ? req.body.content.trim() : "";
+  const isAnonymous = parseBoolean(req.body.isAnonymous);
 
   if (!postId) {
     return res.status(400).json({ message: "Invalid post id." });
@@ -82,6 +88,7 @@ async function createComment(req, res) {
       postId,
       userId: req.user.id,
       content,
+      isAnonymous,
     },
     include: {
       author: {

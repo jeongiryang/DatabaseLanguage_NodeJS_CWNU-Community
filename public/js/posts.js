@@ -137,6 +137,17 @@ function getCategoryLabel(category) {
   return CATEGORY_LABELS[category] || CATEGORY_LABELS.free;
 }
 
+function getAuthorLabel(item) {
+  return item?.isAnonymous ? "익명" : item?.author?.nickname || "";
+}
+
+function createAnonymousBadge() {
+  const badge = document.createElement("span");
+  badge.className = "anonymous-badge";
+  badge.textContent = "익명 작성";
+  return badge;
+}
+
 function getCurrentBoardLabel() {
   if (postState.board === "hot" || postState.board === "notice") {
     return BOARD_LABELS[postState.board];
@@ -210,7 +221,7 @@ function updatePostMetaLegacy(post, commentCount = post.commentCount) {
     return;
   }
 
-  metaElement.textContent = `작성자 ${post.author.nickname} | 등록일 ${formatDate(post.createdAt)} | 조회수 ${post.viewCount} | 댓글 ${commentCount} | 좋아요 ${post.likeCount}`;
+  metaElement.textContent = `작성자 ${getAuthorLabel(post)} | 등록일 ${formatDate(post.createdAt)} | 조회수 ${post.viewCount} | 댓글 ${commentCount} | 좋아요 ${post.likeCount}`;
 }
 
 function updatePostMeta(post, commentCount = post.commentCount) {
@@ -227,7 +238,7 @@ function updatePostMeta(post, commentCount = post.commentCount) {
     ? `등록일 ${formatDate(post.createdAt)} | 수정일 ${formatDate(post.updatedAt)}`
     : `등록일 ${formatDate(post.createdAt)}`;
 
-  metaElement.textContent = `작성자 ${post.author.nickname} | ${dates} | 조회수 ${post.viewCount} | 댓글 ${commentCount} | 좋아요 ${post.likeCount} | 싫어요 ${post.dislikeCount || 0}`;
+  metaElement.textContent = `작성자 ${getAuthorLabel(post)} | ${dates} | 조회수 ${post.viewCount} | 댓글 ${commentCount} | 좋아요 ${post.likeCount} | 싫어요 ${post.dislikeCount || 0}`;
 }
 
 function updateBookmarkUi(post, auth) {
@@ -332,7 +343,7 @@ function renderPostRows(posts) {
     titleLink.textContent = post.title;
     titleCell.appendChild(titleLink);
     categoryCell.appendChild(createCategoryChip(post.category));
-    authorCell.textContent = post.author.nickname;
+    authorCell.textContent = getAuthorLabel(post);
     createdAtCell.textContent = formatDate(post.createdAt);
     updatedAtCell.textContent = formatUpdatedAt(post.createdAt, post.updatedAt);
     viewCountCell.textContent = post.viewCount;
@@ -806,6 +817,7 @@ async function loadPostEditForm() {
     if (titleElement) titleElement.textContent = "게시글 수정";
     if (submitButton) submitButton.textContent = "수정 완료";
     if (form.elements.category) form.elements.category.value = post.category || "free";
+    if (form.elements.isAnonymous) form.elements.isAnonymous.checked = Boolean(post.isAnonymous);
     form.elements.title.value = post.title;
     form.elements.content.value = post.content;
   } catch (error) {
@@ -821,6 +833,7 @@ async function handlePostCreate(form) {
 
   try {
     const payload = Object.fromEntries(new FormData(form).entries());
+    payload.isAnonymous = form.elements.isAnonymous?.checked || false;
     const result = await api.request(isEditMode ? `/api/posts/${postId}` : "/api/posts", {
       method: isEditMode ? "PUT" : "POST",
       body: JSON.stringify(payload),
@@ -852,6 +865,7 @@ function bindCommentForm(postId, auth) {
   commentForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     const contentInput = commentForm.elements.content;
+    const anonymousInput = commentForm.elements.isAnonymous;
     const content = contentInput.value.trim();
 
     if (!content) {
@@ -862,9 +876,10 @@ function bindCommentForm(postId, auth) {
     try {
       await api.request(`/api/posts/${postId}/comments`, {
         method: "POST",
-        body: JSON.stringify({ content }),
+        body: JSON.stringify({ content, isAnonymous: anonymousInput?.checked || false }),
       });
       contentInput.value = "";
+      if (anonymousInput) anonymousInput.checked = false;
       setCommentMessage("댓글이 등록되었습니다.", "success");
       await loadComments(postId, auth);
     } catch (error) {
@@ -917,11 +932,14 @@ function renderComments(comments, auth) {
 
     item.className = "comment-item";
     header.className = "comment-header";
-    author.textContent = comment.author.nickname;
+    author.textContent = getAuthorLabel(comment);
     date.textContent = formatDate(comment.createdAt);
     content.textContent = comment.content;
 
     header.append(author, date);
+    if (comment.isAnonymous) {
+      header.appendChild(createAnonymousBadge());
+    }
 
     if (auth.authenticated && auth.user.id === comment.author.id) {
       const deleteButton = document.createElement("button");

@@ -157,6 +157,7 @@ function formatActivityPost(post) {
     id: post.id,
     title: post.title,
     category: post.category,
+    isAnonymous: post.isAnonymous,
     createdAt: post.createdAt,
     updatedAt: post.updatedAt,
     viewCount: post.viewCount,
@@ -175,6 +176,7 @@ function formatActivityReaction(reaction) {
       id: reaction.post.id,
       title: reaction.post.title,
       category: reaction.post.category,
+      isAnonymous: reaction.post.isAnonymous,
       createdAt: reaction.post.createdAt,
       author: {
         id: reaction.post.author.id,
@@ -237,6 +239,7 @@ async function activity(req, res) {
         id: true,
         title: true,
         category: true,
+        isAnonymous: true,
         createdAt: true,
         updatedAt: true,
         viewCount: true,
@@ -256,6 +259,7 @@ async function activity(req, res) {
       select: {
         id: true,
         content: true,
+        isAnonymous: true,
         createdAt: true,
         post: {
           select: {
@@ -276,6 +280,7 @@ async function activity(req, res) {
             id: true,
             title: true,
             category: true,
+            isAnonymous: true,
             createdAt: true,
             author: {
               select: {
@@ -298,6 +303,7 @@ async function activity(req, res) {
             id: true,
             title: true,
             category: true,
+            isAnonymous: true,
             createdAt: true,
             author: {
               select: {
@@ -320,6 +326,7 @@ async function activity(req, res) {
             id: true,
             title: true,
             category: true,
+            isAnonymous: true,
             createdAt: true,
             author: {
               select: {

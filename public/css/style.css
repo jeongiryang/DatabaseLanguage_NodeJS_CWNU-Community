@@ -330,6 +330,17 @@ label {
   font-weight: 800;
 }
 
+.checkbox-label {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  justify-self: start;
+}
+
+.checkbox-label input {
+  width: auto;
+}
+
 input,
 select,
 textarea {
@@ -411,7 +422,8 @@ textarea {
 }
 
 .category-chip,
-.category-badge {
+.category-badge,
+.anonymous-badge {
   display: inline-block;
   border: 1px solid var(--line);
   border-radius: 999px;
@@ -426,6 +438,13 @@ textarea {
 
 .category-badge {
   margin: 0 0 10px;
+}
+
+.anonymous-badge {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+  color: #4b5563;
+  margin-left: 6px;
 }
 
 .category-chip[data-category="notice"],

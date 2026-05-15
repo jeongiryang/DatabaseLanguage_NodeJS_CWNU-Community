@@ -62,6 +62,10 @@ function parseCategoryFilter(value) {
   return category === "all" ? "all" : category;
 }
 
+function parseBoolean(value) {
+  return value === true || value === "true" || value === "on" || value === "1";
+}
+
 function formatPostListItem(post) {
   const hotScore =
     post.hotScore ?? post.viewCount + post._count.likes * 10 + post._count.comments * 5 - post._count.dislikes * 3;
@@ -74,6 +78,7 @@ function formatPostListItem(post) {
       nickname: post.author.nickname,
     },
     category: post.category,
+    isAnonymous: post.isAnonymous,
     createdAt: post.createdAt,
     updatedAt: post.updatedAt,
     viewCount: post.viewCount,
@@ -111,6 +116,7 @@ function formatPostDetail(post, liked = false, disliked = false, bookmarked = fa
       nickname: post.author.nickname,
     },
     category: post.category,
+    isAnonymous: post.isAnonymous,
     createdAt: post.createdAt,
     updatedAt: post.updatedAt,
     viewCount: post.viewCount,
@@ -316,6 +322,7 @@ async function createPost(req, res) {
   const title = typeof req.body.title === "string" ? req.body.title.trim() : "";
   const content = typeof req.body.content === "string" ? req.body.content.trim() : "";
   const category = normalizeCategory(req.body.category);
+  const isAnonymous = parseBoolean(req.body.isAnonymous);
 
   if (!title) {
     return res.status(400).json({ message: "Title is required." });
@@ -338,6 +345,7 @@ async function createPost(req, res) {
       title,
       content,
       category,
+      isAnonymous,
       userId: req.user.id,
     },
     include: {
@@ -369,6 +377,7 @@ async function updatePost(req, res) {
   const title = typeof req.body.title === "string" ? req.body.title.trim() : "";
   const content = typeof req.body.content === "string" ? req.body.content.trim() : "";
   const category = normalizeCategory(req.body.category);
+  const isAnonymous = parseBoolean(req.body.isAnonymous);
 
   if (!postId) {
     return res.status(400).json({ message: "Invalid post id." });
@@ -412,6 +421,7 @@ async function updatePost(req, res) {
       title,
       content,
       category,
+      isAnonymous,
     },
     include: {
       author: {

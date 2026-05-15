@@ -42,6 +42,10 @@
       <p class="form-message" id="comment-auth-message" role="status"></p>
       <form class="comment-form" id="comment-form" hidden>
         <textarea name="content" rows="4" placeholder="따뜻한 댓글을 남겨주세요. 욕설과 비방은 삼가주세요." required></textarea>
+        <label class="checkbox-label">
+          <input type="checkbox" name="isAnonymous" value="true">
+          익명으로 댓글 작성
+        </label>
         <button type="submit">댓글 작성</button>
       </form>
       <div class="comment-list" id="comment-list">댓글을 불러오는 중입니다.</div>
