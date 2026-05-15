@@ -218,6 +218,16 @@ textarea {
   white-space: pre-wrap;
 }
 
+.category-badge {
+  display: inline-block;
+  margin: 0 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--primary);
+  font-weight: 700;
+  padding: 4px 8px;
+}
+
 .actions {
   display: flex;
   gap: 10px;

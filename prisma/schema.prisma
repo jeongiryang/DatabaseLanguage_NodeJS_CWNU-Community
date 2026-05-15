@@ -28,6 +28,7 @@ model Post {
   userId    Int       @map("user_id")
   title     String
   content   String
+  category  String    @default("free")
   viewCount Int       @default(0) @map("view_count")
   author    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   comments  Comment[]

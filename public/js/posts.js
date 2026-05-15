@@ -3,7 +3,20 @@ const postState = {
   pageSize: 10,
   sort: "latest",
   q: "",
+  category: "all",
 };
+
+const CATEGORY_LABELS = {
+  all: "전체",
+  free: "자유게시판",
+  study: "공부이야기",
+  question: "질문게시판",
+  info: "정보공유",
+  market: "중고장터",
+  lost: "분실물",
+};
+
+const ALLOWED_CATEGORIES = Object.keys(CATEGORY_LABELS);
 
 let currentDetailPost = null;
 let currentDetailAuth = { authenticated: false, user: null };
@@ -68,6 +81,17 @@ function clearLikeUi() {
   }
 }
 
+function clearPostCategoryUi() {
+  const categoryElement = document.querySelector("#post-category");
+
+  if (!categoryElement) {
+    return;
+  }
+
+  categoryElement.hidden = true;
+  categoryElement.textContent = "";
+}
+
 function formatDate(dateValue) {
   return new Intl.DateTimeFormat("ko-KR", {
     year: "numeric",
@@ -89,6 +113,29 @@ function formatUpdatedAt(createdAtValue, updatedAtValue) {
 function getPostIdFromQuery() {
   const postId = Number.parseInt(new URLSearchParams(window.location.search).get("id"), 10);
   return Number.isInteger(postId) && postId > 0 ? postId : null;
+}
+
+function getCategoryLabel(category) {
+  return CATEGORY_LABELS[category] || CATEGORY_LABELS.free;
+}
+
+function initializeCategoryFilterFromQuery() {
+  const categoryFromQuery = new URLSearchParams(window.location.search).get("category") || "all";
+
+  if (ALLOWED_CATEGORIES.includes(categoryFromQuery)) {
+    postState.category = categoryFromQuery;
+  }
+}
+
+function updatePostCategoryUi(post) {
+  const categoryElement = document.querySelector("#post-category");
+
+  if (!categoryElement) {
+    return;
+  }
+
+  categoryElement.hidden = false;
+  categoryElement.textContent = `[${getCategoryLabel(post.category)}]`;
 }
 
 function updatePostMetaLegacy(post, commentCount = post.commentCount) {
@@ -174,7 +221,7 @@ function renderPostRows(posts) {
   if (posts.length === 0) {
     const row = document.createElement("tr");
     const cell = document.createElement("td");
-    cell.colSpan = 8;
+    cell.colSpan = 9;
     cell.textContent = postState.q ? "검색 결과가 없습니다." : "등록된 게시글이 없습니다.";
     row.appendChild(cell);
     postList.appendChild(row);
@@ -185,6 +232,7 @@ function renderPostRows(posts) {
     const row = document.createElement("tr");
     const titleCell = document.createElement("td");
     const titleLink = document.createElement("a");
+    const categoryCell = document.createElement("td");
     const authorCell = document.createElement("td");
     const createdAtCell = document.createElement("td");
     const updatedAtCell = document.createElement("td");
@@ -196,6 +244,7 @@ function renderPostRows(posts) {
     titleLink.href = `/post-detail.html?id=${post.id}`;
     titleLink.textContent = post.title;
     titleCell.appendChild(titleLink);
+    categoryCell.textContent = getCategoryLabel(post.category);
     authorCell.textContent = post.author.nickname;
     createdAtCell.textContent = formatDate(post.createdAt);
     updatedAtCell.textContent = formatUpdatedAt(post.createdAt, post.updatedAt);
@@ -206,6 +255,7 @@ function renderPostRows(posts) {
 
     row.append(
       titleCell,
+      categoryCell,
       authorCell,
       createdAtCell,
       updatedAtCell,
@@ -259,7 +309,7 @@ async function loadPostList() {
     return;
   }
 
-  postList.innerHTML = '<tr><td colspan="8">게시글 목록을 불러오는 중입니다.</td></tr>';
+  postList.innerHTML = '<tr><td colspan="9">게시글 목록을 불러오는 중입니다.</td></tr>';
 
   try {
     const query = new URLSearchParams({
@@ -272,6 +322,10 @@ async function loadPostList() {
       query.set("q", postState.q);
     }
 
+    if (postState.category !== "all") {
+      query.set("category", postState.category);
+    }
+
     const result = await api.request(`/api/posts?${query.toString()}`);
 
     renderPostRows(result.posts);
@@ -280,7 +334,7 @@ async function loadPostList() {
     postList.innerHTML = "";
     const row = document.createElement("tr");
     const cell = document.createElement("td");
-    cell.colSpan = 8;
+    cell.colSpan = 9;
     cell.textContent = error.message;
     row.appendChild(cell);
     postList.appendChild(row);
@@ -289,6 +343,7 @@ async function loadPostList() {
 
 function bindPostListControls() {
   const pageSizeSelect = document.querySelector("#page-size");
+  const categorySelect = document.querySelector("#category-filter");
   const sortSelect = document.querySelector("#sort");
   const searchForm = document.querySelector("#post-search-form");
   const searchInput = document.querySelector("#post-search");
@@ -306,6 +361,15 @@ function bindPostListControls() {
     sortSelect.addEventListener("change", () => {
       postState.page = 1;
       postState.sort = sortSelect.value;
+      loadPostList();
+    });
+  }
+
+  if (categorySelect) {
+    categorySelect.value = postState.category;
+    categorySelect.addEventListener("change", () => {
+      postState.page = 1;
+      postState.category = categorySelect.value;
       loadPostList();
     });
   }
@@ -340,7 +404,7 @@ async function ensureWriteAccess() {
 
   if (!auth.authenticated) {
     setPostMessage("로그인 후 게시글을 작성할 수 있습니다.", "error");
-    form.querySelectorAll("input, textarea, button").forEach((element) => {
+    form.querySelectorAll("input, select, textarea, button").forEach((element) => {
       element.disabled = true;
     });
   }
@@ -388,6 +452,7 @@ async function loadPostDetail() {
 
   if (!postId) {
     titleElement.textContent = "잘못된 게시글 주소입니다.";
+    clearPostCategoryUi();
     clearCommentUi();
     clearLikeUi();
     return;
@@ -402,6 +467,7 @@ async function loadPostDetail() {
     currentDetailPost = post;
     currentDetailAuth = auth;
     titleElement.textContent = post.title;
+    updatePostCategoryUi(post);
     updatePostMeta(post);
     contentElement.textContent = post.content;
     bindPostDelete(post, auth);
@@ -413,6 +479,7 @@ async function loadPostDetail() {
   } catch (error) {
     titleElement.textContent = error.message;
     contentElement.textContent = "";
+    clearPostCategoryUi();
     clearCommentUi();
     clearLikeUi();
   }
@@ -540,7 +607,7 @@ function bindPostEditButton(post, auth) {
 }
 
 function disablePostForm(form) {
-  form.querySelectorAll("input, textarea, button").forEach((element) => {
+  form.querySelectorAll("input, select, textarea, button").forEach((element) => {
     element.disabled = true;
   });
 }
@@ -570,6 +637,7 @@ async function loadPostEditForm() {
 
     if (titleElement) titleElement.textContent = "게시글 수정";
     if (submitButton) submitButton.textContent = "수정 완료";
+    if (form.elements.category) form.elements.category.value = post.category || "free";
     form.elements.title.value = post.title;
     form.elements.content.value = post.content;
   } catch (error) {
@@ -718,6 +786,7 @@ async function deleteComment(commentId) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  initializeCategoryFilterFromQuery();
   bindPostListControls();
   bindPostWriteForm();
   loadPostList();

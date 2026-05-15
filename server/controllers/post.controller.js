@@ -4,6 +4,7 @@ const { verifyAuthToken } = require("../utils/jwt");
 
 const ALLOWED_PAGE_SIZES = [10, 20, 30, 40, 50];
 const ALLOWED_SORTS = ["latest", "likes", "views"];
+const ALLOWED_CATEGORIES = ["free", "study", "question", "info", "market", "lost"];
 
 function parsePositiveInteger(value, fallback) {
   const parsed = Number.parseInt(value, 10);
@@ -27,20 +28,37 @@ function getPostOrderBy(sort) {
   return [{ createdAt: "desc" }];
 }
 
-function getPostSearchWhere(query) {
+function getPostSearchWhere(query, category = "all") {
   const keyword = typeof query === "string" ? query.trim() : "";
+  const where = {};
 
-  if (!keyword) {
-    return {};
+  if (category !== "all") {
+    where.category = category;
   }
 
-  return {
-    OR: [
+  if (keyword) {
+    where.OR = [
       { title: { contains: keyword, mode: "insensitive" } },
       { content: { contains: keyword, mode: "insensitive" } },
       { author: { is: { nickname: { contains: keyword, mode: "insensitive" } } } },
-    ],
-  };
+    ];
+  }
+
+  return where;
+}
+
+function normalizeCategory(value, fallback = "free") {
+  const category = typeof value === "string" ? value.trim() : "";
+  return category || fallback;
+}
+
+function isAllowedCategory(category) {
+  return ALLOWED_CATEGORIES.includes(category);
+}
+
+function parseCategoryFilter(value) {
+  const category = normalizeCategory(value, "all");
+  return category === "all" ? "all" : category;
 }
 
 function formatPostListItem(post) {
@@ -51,6 +69,7 @@ function formatPostListItem(post) {
       id: post.author.id,
       nickname: post.author.nickname,
     },
+    category: post.category,
     createdAt: post.createdAt,
     updatedAt: post.updatedAt,
     viewCount: post.viewCount,
@@ -85,6 +104,7 @@ function formatPostDetail(post, liked = false, disliked = false) {
       id: post.author.id,
       nickname: post.author.nickname,
     },
+    category: post.category,
     createdAt: post.createdAt,
     updatedAt: post.updatedAt,
     viewCount: post.viewCount,
@@ -101,6 +121,7 @@ async function listPosts(req, res) {
   const pageSize = parsePositiveInteger(req.query.pageSize, 10);
   const sort = typeof req.query.sort === "string" ? req.query.sort : "latest";
   const q = typeof req.query.q === "string" ? req.query.q.trim() : "";
+  const category = parseCategoryFilter(req.query.category);
 
   if (!ALLOWED_PAGE_SIZES.includes(pageSize)) {
     return res.status(400).json({ message: "pageSize must be one of 10, 20, 30, 40, 50." });
@@ -110,8 +131,12 @@ async function listPosts(req, res) {
     return res.status(400).json({ message: "sort must be latest, likes, or views." });
   }
 
+  if (category !== "all" && !isAllowedCategory(category)) {
+    return res.status(400).json({ message: "category must be all, free, study, question, info, market, or lost." });
+  }
+
   const skip = (page - 1) * pageSize;
-  const where = getPostSearchWhere(q);
+  const where = getPostSearchWhere(q, category);
   const [totalCount, posts] = await Promise.all([
     prisma.post.count({ where }),
     prisma.post.findMany({
@@ -147,6 +172,7 @@ async function listPosts(req, res) {
     },
     sort,
     q,
+    category,
   });
 }
 
@@ -219,6 +245,7 @@ async function getPost(req, res) {
 async function createPost(req, res) {
   const title = typeof req.body.title === "string" ? req.body.title.trim() : "";
   const content = typeof req.body.content === "string" ? req.body.content.trim() : "";
+  const category = normalizeCategory(req.body.category);
 
   if (!title) {
     return res.status(400).json({ message: "Title is required." });
@@ -232,10 +259,15 @@ async function createPost(req, res) {
     return res.status(400).json({ message: "Content is required." });
   }
 
+  if (!isAllowedCategory(category)) {
+    return res.status(400).json({ message: "Invalid post category." });
+  }
+
   const post = await prisma.post.create({
     data: {
       title,
       content,
+      category,
       userId: req.user.id,
     },
     include: {
@@ -265,6 +297,7 @@ async function updatePost(req, res) {
   const postId = parsePostId(req.params.id);
   const title = typeof req.body.title === "string" ? req.body.title.trim() : "";
   const content = typeof req.body.content === "string" ? req.body.content.trim() : "";
+  const category = normalizeCategory(req.body.category);
 
   if (!postId) {
     return res.status(400).json({ message: "Invalid post id." });
@@ -280,6 +313,10 @@ async function updatePost(req, res) {
 
   if (!content) {
     return res.status(400).json({ message: "Content is required." });
+  }
+
+  if (!isAllowedCategory(category)) {
+    return res.status(400).json({ message: "Invalid post category." });
   }
 
   const existingPost = await prisma.post.findUnique({
@@ -303,6 +340,7 @@ async function updatePost(req, res) {
     data: {
       title,
       content,
+      category,
     },
     include: {
       author: {

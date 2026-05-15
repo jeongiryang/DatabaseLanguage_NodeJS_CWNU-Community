@@ -24,6 +24,17 @@
 
     <form class="form-panel" id="post-write-form">
       <label>
+        카테고리
+        <select name="category" required>
+          <option value="free">자유게시판</option>
+          <option value="study">공부이야기</option>
+          <option value="question">질문게시판</option>
+          <option value="info">정보공유</option>
+          <option value="market">중고장터</option>
+          <option value="lost">분실물</option>
+        </select>
+      </label>
+      <label>
         제목
         <input type="text" name="title" maxlength="120" required>
       </label>
