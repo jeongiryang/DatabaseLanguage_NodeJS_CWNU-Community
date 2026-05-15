@@ -1,3 +1,70 @@
+const THEME_STORAGE_KEY = "cwnu-community-theme";
+
+function getStoredTheme() {
+  try {
+    return localStorage.getItem(THEME_STORAGE_KEY);
+  } catch (error) {
+    return null;
+  }
+}
+
+function storeTheme(theme) {
+  try {
+    localStorage.setItem(THEME_STORAGE_KEY, theme);
+  } catch (error) {
+    // Ignore storage failures so the page remains usable.
+  }
+}
+
+function applyTheme(theme) {
+  const normalizedTheme = theme === "dark" ? "dark" : "light";
+  const isDark = normalizedTheme === "dark";
+
+  document.documentElement.dataset.theme = normalizedTheme;
+
+  const themeToggleButton = document.querySelector("#theme-toggle-button");
+
+  if (themeToggleButton) {
+    themeToggleButton.textContent = isDark ? "\uB77C\uC774\uD2B8\uBAA8\uB4DC" : "\uB2E4\uD06C\uBAA8\uB4DC";
+    themeToggleButton.setAttribute("aria-pressed", String(isDark));
+    themeToggleButton.title = isDark ? "\uB77C\uC774\uD2B8\uBAA8\uB4DC\uB85C \uC804\uD658" : "\uB2E4\uD06C\uBAA8\uB4DC\uB85C \uC804\uD658";
+  }
+}
+
+function initializeTheme() {
+  applyTheme(getStoredTheme() || "light");
+}
+
+function getThemeToggleButton() {
+  const navLinks = document.querySelector(".nav-links");
+
+  if (!navLinks) {
+    return null;
+  }
+
+  let themeToggleButton = document.querySelector("#theme-toggle-button");
+
+  if (!themeToggleButton) {
+    themeToggleButton = document.createElement("button");
+    themeToggleButton.className = "link-button theme-toggle";
+    themeToggleButton.id = "theme-toggle-button";
+    themeToggleButton.type = "button";
+    themeToggleButton.addEventListener("click", () => {
+      const currentTheme = document.documentElement.dataset.theme === "dark" ? "dark" : "light";
+      const nextTheme = currentTheme === "dark" ? "light" : "dark";
+
+      storeTheme(nextTheme);
+      applyTheme(nextTheme);
+    });
+    navLinks.appendChild(themeToggleButton);
+  }
+
+  applyTheme(getStoredTheme() || document.documentElement.dataset.theme || "light");
+  return themeToggleButton;
+}
+
+initializeTheme();
+
 function setMessage(message, type = "info") {
   const messageElement = document.querySelector("#auth-message");
 
@@ -195,6 +262,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const registerForm = document.querySelector("#register-form");
   const logoutButton = document.querySelector("#logout-button");
 
+  getThemeToggleButton();
   bindPasswordToggles();
 
   if (loginForm) {
