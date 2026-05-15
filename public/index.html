@@ -22,6 +22,29 @@
     <section class="page-title">
       <h1>학내 커뮤니티 게시판</h1>
       <p>창원대학교 구성원을 위한 커뮤니티 게시판입니다.</p>
+      <p class="current-board" id="current-board-name">전체글</p>
+    </section>
+
+    <section class="board-shortcuts" aria-label="게시판 바로가기">
+      <div class="shortcut-group shortcut-group-primary">
+        <h2>주요 게시판</h2>
+        <div class="shortcut-links">
+          <a class="board-shortcut hot" href="/?board=hot" data-board-link="hot">인기글</a>
+          <a class="board-shortcut notice" href="/?board=notice" data-board-link="notice">공지사항</a>
+          <a class="board-shortcut" href="/" data-board-link="all">전체글</a>
+        </div>
+      </div>
+      <div class="shortcut-group">
+        <h2>커뮤니티 게시판</h2>
+        <div class="shortcut-links">
+          <a class="board-shortcut" href="/?category=free" data-category-link="free">자유게시판</a>
+          <a class="board-shortcut" href="/?category=study" data-category-link="study">공부이야기</a>
+          <a class="board-shortcut" href="/?category=question" data-category-link="question">질문게시판</a>
+          <a class="board-shortcut" href="/?category=info" data-category-link="info">정보공유</a>
+          <a class="board-shortcut" href="/?category=market" data-category-link="market">중고장터</a>
+          <a class="board-shortcut" href="/?category=lost" data-category-link="lost">분실물</a>
+        </div>
+      </div>
     </section>
 
     <section class="toolbar" aria-label="Post list controls">
@@ -33,18 +56,6 @@
           <option value="30">30개</option>
           <option value="40">40개</option>
           <option value="50">50개</option>
-        </select>
-      </label>
-      <label>
-        카테고리
-        <select id="category-filter">
-          <option value="all">전체</option>
-          <option value="free">자유게시판</option>
-          <option value="study">공부이야기</option>
-          <option value="question">질문게시판</option>
-          <option value="info">정보공유</option>
-          <option value="market">중고장터</option>
-          <option value="lost">분실물</option>
         </select>
       </label>
       <label>

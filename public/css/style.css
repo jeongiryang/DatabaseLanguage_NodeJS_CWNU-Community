@@ -184,6 +184,86 @@ button:disabled {
   color: var(--muted);
 }
 
+.current-board {
+  display: inline-flex;
+  margin-top: 12px !important;
+  border: 1px solid #bfd0e9;
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--primary-dark) !important;
+  font-weight: 800;
+  padding: 7px 12px;
+}
+
+.board-shortcuts {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.8fr) minmax(0, 1.2fr);
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.shortcut-group {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  padding: 16px;
+}
+
+.shortcut-group h2 {
+  margin: 0 0 12px;
+  color: #16233b;
+  font-size: 16px;
+}
+
+.shortcut-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.board-shortcut {
+  border: 1px solid #c9d6e7;
+  border-radius: 999px;
+  background: #f8fbff;
+  color: #24364f;
+  font-weight: 800;
+  padding: 9px 13px;
+}
+
+.board-shortcut:hover,
+.board-shortcut.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #ffffff;
+}
+
+.board-shortcut.hot {
+  background: #fff1f3;
+  border-color: #ffc6cf;
+  color: #be123c;
+}
+
+.board-shortcut.hot:hover,
+.board-shortcut.hot.active {
+  background: #be123c;
+  border-color: #be123c;
+  color: #ffffff;
+}
+
+.board-shortcut.notice {
+  background: #fff7e6;
+  border-color: #ffd891;
+  color: #9a5a00;
+}
+
+.board-shortcut.notice:hover,
+.board-shortcut.notice.active {
+  background: #d97706;
+  border-color: #d97706;
+  color: #ffffff;
+}
+
 .toolbar,
 .panel,
 .form-panel {
@@ -195,7 +275,7 @@ button:disabled {
 
 .toolbar {
   display: grid;
-  grid-template-columns: repeat(3, minmax(150px, 1fr));
+  grid-template-columns: repeat(2, minmax(150px, 1fr));
   gap: 14px;
   margin-bottom: 18px;
   padding: 18px;
@@ -348,6 +428,13 @@ textarea {
   margin: 0 0 10px;
 }
 
+.category-chip[data-category="notice"],
+.category-badge[data-category="notice"] {
+  background: #eaf1ff;
+  border-color: #a9c5ff;
+  color: #123f8c;
+}
+
 .category-chip[data-category="study"],
 .category-badge[data-category="study"] {
   background: #e8f7ef;
@@ -491,8 +578,39 @@ textarea {
   gap: 12px;
 }
 
+.mypage-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 16px;
+}
+
+.mypage-tabs button {
+  background: #eef4ff;
+  border: 1px solid #c7d8f7;
+  color: var(--primary-dark);
+}
+
+.mypage-tabs button.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #ffffff;
+}
+
+.inline-filter {
+  max-width: 260px;
+  margin-bottom: 14px;
+}
+
 .activity-item p {
   margin: 0 0 6px;
+}
+
+.activity-title {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .activity-item a {
@@ -509,6 +627,7 @@ textarea {
 
   .toolbar,
   .toolbar form,
+  .board-shortcuts,
   .profile-list {
     grid-template-columns: 1fr;
   }

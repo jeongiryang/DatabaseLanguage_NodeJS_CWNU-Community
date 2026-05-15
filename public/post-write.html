@@ -26,7 +26,8 @@
       <label>
         카테고리
         <select name="category" required>
-          <option value="free">자유게시판</option>
+          <option value="notice">공지사항</option>
+          <option value="free" selected>자유게시판</option>
           <option value="study">공부이야기</option>
           <option value="question">질문게시판</option>
           <option value="info">정보공유</option>
@@ -36,11 +37,11 @@
       </label>
       <label>
         제목
-        <input type="text" name="title" maxlength="120" required>
+        <input type="text" name="title" maxlength="120" placeholder="게시글 제목을 입력하세요" required>
       </label>
       <label>
         내용
-        <textarea name="content" rows="10" required></textarea>
+        <textarea name="content" rows="10" placeholder="욕설, 비방, 개인정보 노출을 피하고 서로에게 도움이 되는 글을 작성해주세요." required></textarea>
       </label>
       <p class="form-message" id="post-message" role="status"></p>
       <button type="submit" id="post-submit-button">등록</button>

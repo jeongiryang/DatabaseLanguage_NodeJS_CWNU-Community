@@ -4,10 +4,12 @@ const postState = {
   sort: "latest",
   q: "",
   category: "all",
+  board: "all",
 };
 
 const CATEGORY_LABELS = {
   all: "전체",
+  notice: "공지사항",
   free: "자유게시판",
   study: "공부이야기",
   question: "질문게시판",
@@ -17,6 +19,12 @@ const CATEGORY_LABELS = {
 };
 
 const ALLOWED_CATEGORIES = Object.keys(CATEGORY_LABELS);
+const ALLOWED_BOARDS = ["all", "hot", "notice"];
+const BOARD_LABELS = {
+  all: "전체글",
+  hot: "인기글",
+  notice: "공지사항",
+};
 
 let currentDetailPost = null;
 let currentDetailAuth = { authenticated: false, user: null };
@@ -119,6 +127,14 @@ function getCategoryLabel(category) {
   return CATEGORY_LABELS[category] || CATEGORY_LABELS.free;
 }
 
+function getCurrentBoardLabel() {
+  if (postState.board === "hot" || postState.board === "notice") {
+    return BOARD_LABELS[postState.board];
+  }
+
+  return postState.category === "all" ? BOARD_LABELS.all : getCategoryLabel(postState.category);
+}
+
 function createCategoryChip(category) {
   const chip = document.createElement("span");
   chip.className = "category-chip";
@@ -128,11 +144,41 @@ function createCategoryChip(category) {
 }
 
 function initializeCategoryFilterFromQuery() {
-  const categoryFromQuery = new URLSearchParams(window.location.search).get("category") || "all";
+  const query = new URLSearchParams(window.location.search);
+  const categoryFromQuery = query.get("category") || "all";
+  const boardFromQuery = query.get("board") || "all";
 
-  if (ALLOWED_CATEGORIES.includes(categoryFromQuery)) {
+  if (ALLOWED_BOARDS.includes(boardFromQuery)) {
+    postState.board = boardFromQuery;
+  }
+
+  if (categoryFromQuery === "notice" && boardFromQuery === "all") {
+    postState.board = "notice";
+    postState.category = "all";
+    return;
+  }
+
+  if (ALLOWED_CATEGORIES.includes(categoryFromQuery) && categoryFromQuery !== "notice") {
     postState.category = categoryFromQuery;
   }
+}
+
+function updateBoardUi() {
+  const currentBoardElement = document.querySelector("#current-board-name");
+
+  if (currentBoardElement) {
+    currentBoardElement.textContent = getCurrentBoardLabel();
+  }
+
+  document.querySelectorAll("[data-board-link], [data-category-link]").forEach((link) => {
+    const board = link.dataset.boardLink;
+    const category = link.dataset.categoryLink;
+    const isActive =
+      (board && postState.board === board && (board !== "all" || postState.category === "all")) ||
+      (category && postState.board === "all" && postState.category === category);
+
+    link.classList.toggle("active", Boolean(isActive));
+  });
 }
 
 function updatePostCategoryUi(post) {
@@ -331,8 +377,14 @@ async function loadPostList() {
       query.set("q", postState.q);
     }
 
-    if (postState.category !== "all") {
+    if (postState.board === "notice") {
+      query.set("board", "notice");
+    } else if (postState.category !== "all") {
       query.set("category", postState.category);
+    }
+
+    if (postState.board !== "all" && postState.board !== "notice") {
+      query.set("board", postState.board);
     }
 
     const result = await api.request(`/api/posts?${query.toString()}`);
@@ -352,7 +404,6 @@ async function loadPostList() {
 
 function bindPostListControls() {
   const pageSizeSelect = document.querySelector("#page-size");
-  const categorySelect = document.querySelector("#category-filter");
   const sortSelect = document.querySelector("#sort");
   const searchForm = document.querySelector("#post-search-form");
   const searchInput = document.querySelector("#post-search");
@@ -374,15 +425,6 @@ function bindPostListControls() {
     });
   }
 
-  if (categorySelect) {
-    categorySelect.value = postState.category;
-    categorySelect.addEventListener("change", () => {
-      postState.page = 1;
-      postState.category = categorySelect.value;
-      loadPostList();
-    });
-  }
-
   if (searchForm && searchInput) {
     searchForm.addEventListener("submit", (event) => {
       event.preventDefault();
@@ -394,10 +436,7 @@ function bindPostListControls() {
 
   if (searchClearButton && searchInput) {
     searchClearButton.addEventListener("click", () => {
-      searchInput.value = "";
-      postState.page = 1;
-      postState.q = "";
-      loadPostList();
+      window.location.href = "/";
     });
   }
 }
@@ -852,6 +891,7 @@ async function deleteComment(commentId) {
 document.addEventListener("DOMContentLoaded", () => {
   initializeCategoryFilterFromQuery();
   bindPostListControls();
+  updateBoardUi();
   bindPostWriteForm();
   loadPostList();
   ensureWriteAccess();

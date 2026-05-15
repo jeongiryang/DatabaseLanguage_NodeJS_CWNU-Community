@@ -4,7 +4,8 @@ const { verifyAuthToken } = require("../utils/jwt");
 
 const ALLOWED_PAGE_SIZES = [10, 20, 30, 40, 50];
 const ALLOWED_SORTS = ["latest", "likes", "views"];
-const ALLOWED_CATEGORIES = ["free", "study", "question", "info", "market", "lost"];
+const ALLOWED_BOARDS = ["all", "hot", "notice"];
+const ALLOWED_CATEGORIES = ["notice", "free", "study", "question", "info", "market", "lost"];
 
 function parsePositiveInteger(value, fallback) {
   const parsed = Number.parseInt(value, 10);
@@ -62,6 +63,9 @@ function parseCategoryFilter(value) {
 }
 
 function formatPostListItem(post) {
+  const hotScore =
+    post.hotScore ?? post.viewCount + post._count.likes * 10 + post._count.comments * 5 - post._count.dislikes * 3;
+
   return {
     id: post.id,
     title: post.title,
@@ -76,6 +80,7 @@ function formatPostListItem(post) {
     commentCount: post._count.comments,
     likeCount: post._count.likes,
     dislikeCount: post._count.dislikes,
+    hotScore,
   };
 }
 
@@ -122,6 +127,7 @@ async function listPosts(req, res) {
   const sort = typeof req.query.sort === "string" ? req.query.sort : "latest";
   const q = typeof req.query.q === "string" ? req.query.q.trim() : "";
   const category = parseCategoryFilter(req.query.category);
+  const board = typeof req.query.board === "string" ? req.query.board.trim() || "all" : "all";
 
   if (!ALLOWED_PAGE_SIZES.includes(pageSize)) {
     return res.status(400).json({ message: "pageSize must be one of 10, 20, 30, 40, 50." });
@@ -131,12 +137,60 @@ async function listPosts(req, res) {
     return res.status(400).json({ message: "sort must be latest, likes, or views." });
   }
 
+  if (!ALLOWED_BOARDS.includes(board)) {
+    return res.status(400).json({ message: "board must be all, hot, or notice." });
+  }
+
   if (category !== "all" && !isAllowedCategory(category)) {
-    return res.status(400).json({ message: "category must be all, free, study, question, info, market, or lost." });
+    return res.status(400).json({ message: "category must be all, notice, free, study, question, info, market, or lost." });
   }
 
   const skip = (page - 1) * pageSize;
-  const where = getPostSearchWhere(q, category);
+  const effectiveCategory = board === "notice" ? "notice" : category;
+  const where = getPostSearchWhere(q, effectiveCategory);
+
+  if (board === "hot") {
+    const posts = await prisma.post.findMany({
+      where,
+      include: {
+        author: {
+          select: {
+            id: true,
+            nickname: true,
+          },
+        },
+        _count: {
+          select: {
+            comments: true,
+            likes: true,
+            dislikes: true,
+          },
+        },
+      },
+    });
+
+    const sortedPosts = posts
+      .map((post) => ({
+        ...post,
+        hotScore: post.viewCount + post._count.likes * 10 + post._count.comments * 5 - post._count.dislikes * 3,
+      }))
+      .sort((a, b) => b.hotScore - a.hotScore || b.createdAt.getTime() - a.createdAt.getTime());
+
+    return res.json({
+      posts: sortedPosts.slice(skip, skip + pageSize).map(formatPostListItem),
+      pagination: {
+        page,
+        pageSize,
+        totalCount: sortedPosts.length,
+        totalPages: Math.max(1, Math.ceil(sortedPosts.length / pageSize)),
+      },
+      sort,
+      q,
+      category: effectiveCategory,
+      board,
+    });
+  }
+
   const [totalCount, posts] = await Promise.all([
     prisma.post.count({ where }),
     prisma.post.findMany({
@@ -172,7 +226,8 @@ async function listPosts(req, res) {
     },
     sort,
     q,
-    category,
+    category: effectiveCategory,
+    board,
   });
 }
 

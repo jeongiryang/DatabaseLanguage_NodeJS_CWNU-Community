@@ -1,10 +1,16 @@
 const CATEGORY_LABELS = {
+  notice: "공지사항",
   free: "자유게시판",
   study: "공부이야기",
   question: "질문게시판",
   info: "정보공유",
   market: "중고장터",
   lost: "분실물",
+};
+
+const myPageState = {
+  posts: [],
+  postCategory: "all",
 };
 
 function formatDate(dateValue) {
@@ -45,6 +51,22 @@ function showPanel(selector) {
   }
 }
 
+function activateMyPageTab(targetId) {
+  document.querySelectorAll("[data-tab-target]").forEach((button) => {
+    button.classList.toggle("active", button.dataset.tabTarget === targetId);
+  });
+
+  document.querySelectorAll(".mypage-section").forEach((panel) => {
+    panel.hidden = panel.id !== targetId;
+  });
+}
+
+function bindMyPageTabs() {
+  document.querySelectorAll("[data-tab-target]").forEach((button) => {
+    button.addEventListener("click", () => activateMyPageTab(button.dataset.tabTarget));
+  });
+}
+
 function setMyPageMessage(message, type = "info") {
   const messageElement = document.querySelector("#mypage-message");
 
@@ -77,20 +99,23 @@ function renderMyPosts(posts) {
     return;
   }
 
+  const filteredPosts =
+    myPageState.postCategory === "all" ? posts : posts.filter((post) => post.category === myPageState.postCategory);
+
   tbody.innerHTML = "";
 
-  if (posts.length === 0) {
+  if (filteredPosts.length === 0) {
     const row = document.createElement("tr");
     const cell = document.createElement("td");
     cell.colSpan = 8;
-    cell.textContent = "작성한 게시글이 없습니다.";
+    cell.textContent = myPageState.postCategory === "all" ? "작성한 게시글이 없습니다." : "선택한 카테고리에 작성한 게시글이 없습니다.";
     row.appendChild(cell);
     tbody.appendChild(row);
     showPanel("#my-posts-panel");
     return;
   }
 
-  posts.forEach((post) => {
+  filteredPosts.forEach((post) => {
     const row = document.createElement("tr");
     const titleCell = document.createElement("td");
     const categoryCell = document.createElement("td");
@@ -124,6 +149,19 @@ function renderMyPosts(posts) {
   });
 
   showPanel("#my-posts-panel");
+}
+
+function bindMyPostCategoryFilter() {
+  const filter = document.querySelector("#my-post-category-filter");
+
+  if (!filter) {
+    return;
+  }
+
+  filter.addEventListener("change", () => {
+    myPageState.postCategory = filter.value;
+    renderMyPosts(myPageState.posts);
+  });
 }
 
 function renderComments(comments) {
@@ -179,12 +217,14 @@ function renderReactions(selector, panelSelector, reactions, emptyMessage, dateL
     const item = document.createElement("article");
     const title = document.createElement("p");
     const meta = document.createElement("p");
+    const category = createCategoryChip(reaction.post.category);
     const link = makePostLink(reaction.post);
 
     item.className = "activity-item";
-    title.appendChild(link);
+    title.className = "activity-title";
+    title.append(category, link);
     meta.className = "meta";
-    meta.textContent = `${getCategoryLabel(reaction.post.category)} | 작성자 ${reaction.post.author.nickname} | ${dateLabel} ${formatDate(reaction.createdAt)}`;
+    meta.textContent = `작성자 ${reaction.post.author.nickname} | ${dateLabel} ${formatDate(reaction.createdAt)}`;
     item.append(title, meta);
     container.appendChild(item);
   });
@@ -196,12 +236,14 @@ async function loadMyPage() {
   try {
     const activity = await api.request("/api/auth/me/activity");
 
+    myPageState.posts = activity.posts;
     renderProfile(activity.user);
-    renderMyPosts(activity.posts);
+    renderMyPosts(myPageState.posts);
     renderComments(activity.comments);
     renderReactions("#my-likes", "#my-likes-panel", activity.likes, "좋아요 누른 게시글이 없습니다.", "좋아요");
     renderReactions("#my-dislikes", "#my-dislikes-panel", activity.dislikes, "싫어요 누른 게시글이 없습니다.", "싫어요");
     setMyPageMessage("");
+    activateMyPageTab("profile-panel");
   } catch (error) {
     setMyPageMessage("마이페이지를 보려면 로그인하세요.", "error");
     window.setTimeout(() => {
@@ -211,5 +253,7 @@ async function loadMyPage() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  bindMyPageTabs();
+  bindMyPostCategoryFilter();
   loadMyPage();
 });

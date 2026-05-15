@@ -25,7 +25,15 @@
 
     <p class="form-message" id="mypage-message" role="status">활동 정보를 불러오는 중입니다.</p>
 
-    <section class="panel" id="profile-panel" hidden>
+    <nav class="mypage-tabs" aria-label="마이페이지 메뉴">
+      <button type="button" data-tab-target="profile-panel" class="active">내 정보</button>
+      <button type="button" data-tab-target="my-posts-panel">작성한 글</button>
+      <button type="button" data-tab-target="my-comments-panel">작성한 댓글</button>
+      <button type="button" data-tab-target="my-likes-panel">좋아요</button>
+      <button type="button" data-tab-target="my-dislikes-panel">싫어요</button>
+    </nav>
+
+    <section class="panel mypage-section" id="profile-panel" hidden>
       <h2>내 정보</h2>
       <dl class="profile-list">
         <div>
@@ -43,8 +51,21 @@
       </dl>
     </section>
 
-    <section class="panel" id="my-posts-panel" hidden>
+    <section class="panel mypage-section" id="my-posts-panel" hidden>
       <h2>내가 작성한 게시글</h2>
+      <label class="inline-filter">
+        카테고리
+        <select id="my-post-category-filter">
+          <option value="all">전체</option>
+          <option value="notice">공지사항</option>
+          <option value="free">자유게시판</option>
+          <option value="study">공부이야기</option>
+          <option value="question">질문게시판</option>
+          <option value="info">정보공유</option>
+          <option value="market">중고장터</option>
+          <option value="lost">분실물</option>
+        </select>
+      </label>
       <div class="responsive-table">
         <table class="post-table">
           <thead>
@@ -64,17 +85,17 @@
       </div>
     </section>
 
-    <section class="panel" id="my-comments-panel" hidden>
+    <section class="panel mypage-section" id="my-comments-panel" hidden>
       <h2>내가 작성한 댓글</h2>
       <div class="activity-list" id="my-comments"></div>
     </section>
 
-    <section class="panel" id="my-likes-panel" hidden>
+    <section class="panel mypage-section" id="my-likes-panel" hidden>
       <h2>내가 좋아요 누른 게시글</h2>
       <div class="activity-list" id="my-likes"></div>
     </section>
 
-    <section class="panel" id="my-dislikes-panel" hidden>
+    <section class="panel mypage-section" id="my-dislikes-panel" hidden>
       <h2>내가 싫어요 누른 게시글</h2>
       <div class="activity-list" id="my-dislikes"></div>
     </section>
