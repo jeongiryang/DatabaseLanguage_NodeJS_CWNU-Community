@@ -2,6 +2,7 @@ const postState = {
   page: 1,
   pageSize: 10,
   sort: "latest",
+  q: "",
 };
 
 let currentDetailPost = null;
@@ -166,7 +167,7 @@ function renderPostRows(posts) {
     const row = document.createElement("tr");
     const cell = document.createElement("td");
     cell.colSpan = 7;
-    cell.textContent = "등록된 게시글이 없습니다.";
+    cell.textContent = postState.q ? "검색 결과가 없습니다." : "등록된 게시글이 없습니다.";
     row.appendChild(cell);
     postList.appendChild(row);
     return;
@@ -247,6 +248,11 @@ async function loadPostList() {
       pageSize: String(postState.pageSize),
       sort: postState.sort,
     });
+
+    if (postState.q) {
+      query.set("q", postState.q);
+    }
+
     const result = await api.request(`/api/posts?${query.toString()}`);
 
     renderPostRows(result.posts);
@@ -265,6 +271,9 @@ async function loadPostList() {
 function bindPostListControls() {
   const pageSizeSelect = document.querySelector("#page-size");
   const sortSelect = document.querySelector("#sort");
+  const searchForm = document.querySelector("#post-search-form");
+  const searchInput = document.querySelector("#post-search");
+  const searchClearButton = document.querySelector("#post-search-clear");
 
   if (pageSizeSelect) {
     pageSizeSelect.addEventListener("change", () => {
@@ -278,6 +287,24 @@ function bindPostListControls() {
     sortSelect.addEventListener("change", () => {
       postState.page = 1;
       postState.sort = sortSelect.value;
+      loadPostList();
+    });
+  }
+
+  if (searchForm && searchInput) {
+    searchForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      postState.page = 1;
+      postState.q = searchInput.value.trim();
+      loadPostList();
+    });
+  }
+
+  if (searchClearButton && searchInput) {
+    searchClearButton.addEventListener("click", () => {
+      searchInput.value = "";
+      postState.page = 1;
+      postState.q = "";
       loadPostList();
     });
   }

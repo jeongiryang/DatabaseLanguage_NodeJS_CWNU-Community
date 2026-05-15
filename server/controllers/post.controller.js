@@ -27,6 +27,22 @@ function getPostOrderBy(sort) {
   return [{ createdAt: "desc" }];
 }
 
+function getPostSearchWhere(query) {
+  const keyword = typeof query === "string" ? query.trim() : "";
+
+  if (!keyword) {
+    return {};
+  }
+
+  return {
+    OR: [
+      { title: { contains: keyword, mode: "insensitive" } },
+      { content: { contains: keyword, mode: "insensitive" } },
+      { author: { is: { nickname: { contains: keyword, mode: "insensitive" } } } },
+    ],
+  };
+}
+
 function formatPostListItem(post) {
   return {
     id: post.id,
@@ -84,6 +100,7 @@ async function listPosts(req, res) {
   const page = parsePositiveInteger(req.query.page, 1);
   const pageSize = parsePositiveInteger(req.query.pageSize, 10);
   const sort = typeof req.query.sort === "string" ? req.query.sort : "latest";
+  const q = typeof req.query.q === "string" ? req.query.q.trim() : "";
 
   if (!ALLOWED_PAGE_SIZES.includes(pageSize)) {
     return res.status(400).json({ message: "pageSize must be one of 10, 20, 30, 40, 50." });
@@ -94,9 +111,11 @@ async function listPosts(req, res) {
   }
 
   const skip = (page - 1) * pageSize;
+  const where = getPostSearchWhere(q);
   const [totalCount, posts] = await Promise.all([
-    prisma.post.count(),
+    prisma.post.count({ where }),
     prisma.post.findMany({
+      where,
       skip,
       take: pageSize,
       orderBy: getPostOrderBy(sort),
@@ -127,6 +146,7 @@ async function listPosts(req, res) {
       totalPages: Math.max(1, Math.ceil(totalCount / pageSize)),
     },
     sort,
+    q,
   });
 }
 
