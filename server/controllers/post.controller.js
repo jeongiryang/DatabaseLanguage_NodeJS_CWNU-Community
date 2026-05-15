@@ -1,4 +1,6 @@
 const prisma = require("../prisma");
+const { COOKIE_NAME } = require("../utils/authCookie");
+const { verifyAuthToken } = require("../utils/jwt");
 
 const ALLOWED_PAGE_SIZES = [10, 20, 30, 40, 50];
 const ALLOWED_SORTS = ["latest", "likes", "views"];
@@ -41,7 +43,23 @@ function formatPostListItem(post) {
   };
 }
 
-function formatPostDetail(post) {
+function getOptionalUserId(req) {
+  const token = req.cookies?.[COOKIE_NAME];
+
+  if (!token) {
+    return null;
+  }
+
+  try {
+    const payload = verifyAuthToken(token);
+    const userId = Number(payload.sub);
+    return Number.isInteger(userId) ? userId : null;
+  } catch (error) {
+    return null;
+  }
+}
+
+function formatPostDetail(post, liked = false) {
   return {
     id: post.id,
     title: post.title,
@@ -55,6 +73,7 @@ function formatPostDetail(post) {
     viewCount: post.viewCount,
     commentCount: post._count.comments,
     likeCount: post._count.likes,
+    liked,
   };
 }
 
@@ -109,6 +128,7 @@ async function listPosts(req, res) {
 
 async function getPost(req, res) {
   const postId = parsePostId(req.params.id);
+  const currentUserId = getOptionalUserId(req);
 
   if (!postId) {
     return res.status(400).json({ message: "Invalid post id." });
@@ -138,7 +158,21 @@ async function getPost(req, res) {
       },
     });
 
-    return res.json({ post: formatPostDetail(post) });
+    const liked = currentUserId
+      ? Boolean(
+          await prisma.like.findUnique({
+            where: {
+              postId_userId: {
+                postId,
+                userId: currentUserId,
+              },
+            },
+            select: { id: true },
+          })
+        )
+      : false;
+
+    return res.json({ post: formatPostDetail(post, liked) });
   } catch (error) {
     if (error.code === "P2025") {
       return res.status(404).json({ message: "Post not found." });

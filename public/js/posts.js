@@ -44,6 +44,19 @@ function clearCommentUi() {
   setCommentMessage("");
 }
 
+function clearLikeUi() {
+  const likeButton = document.querySelector("#like-button");
+  const likeStatus = document.querySelector("#like-status");
+
+  if (likeButton) {
+    likeButton.hidden = true;
+  }
+
+  if (likeStatus) {
+    likeStatus.textContent = "";
+  }
+}
+
 function formatDate(dateValue) {
   return new Intl.DateTimeFormat("ko-KR", {
     year: "numeric",
@@ -67,6 +80,28 @@ function updatePostMeta(post, commentCount = post.commentCount) {
   }
 
   metaElement.textContent = `작성자 ${post.author.nickname} | 등록일 ${formatDate(post.createdAt)} | 조회수 ${post.viewCount} | 댓글 ${commentCount} | 좋아요 ${post.likeCount}`;
+}
+
+function updateLikeUi(post, auth) {
+  const likeButton = document.querySelector("#like-button");
+  const likeStatus = document.querySelector("#like-status");
+
+  if (likeStatus) {
+    likeStatus.textContent = `좋아요 ${post.likeCount}개`;
+  }
+
+  if (!likeButton) {
+    return;
+  }
+
+  if (!auth.authenticated) {
+    likeButton.hidden = true;
+    return;
+  }
+
+  likeButton.hidden = false;
+  likeButton.textContent = post.liked ? "좋아요 취소" : "좋아요";
+  likeButton.dataset.liked = post.liked ? "true" : "false";
 }
 
 function renderPostRows(posts) {
@@ -255,6 +290,7 @@ async function loadPostDetail() {
   if (!postId) {
     titleElement.textContent = "잘못된 게시글 주소입니다.";
     clearCommentUi();
+    clearLikeUi();
     return;
   }
 
@@ -270,12 +306,14 @@ async function loadPostDetail() {
     updatePostMeta(post);
     contentElement.textContent = post.content;
     bindPostDelete(post, auth);
+    bindLikeButton(post, auth);
     bindCommentForm(post.id, auth);
     await loadComments(post.id, auth);
   } catch (error) {
     titleElement.textContent = error.message;
     contentElement.textContent = "";
     clearCommentUi();
+    clearLikeUi();
   }
 }
 
@@ -305,6 +343,39 @@ function bindPostDelete(post, auth) {
       window.location.href = "/";
     } catch (error) {
       setPostMessage(error.message, "error");
+    }
+  });
+}
+
+function bindLikeButton(post, auth) {
+  const likeButton = document.querySelector("#like-button");
+
+  updateLikeUi(post, auth);
+
+  if (!likeButton || !auth.authenticated) {
+    return;
+  }
+
+  likeButton.addEventListener("click", async () => {
+    const liked = likeButton.dataset.liked === "true";
+    likeButton.disabled = true;
+
+    try {
+      const result = await api.request(`/api/posts/${post.id}/like`, {
+        method: liked ? "DELETE" : "POST",
+      });
+
+      currentDetailPost = {
+        ...currentDetailPost,
+        liked: result.liked,
+        likeCount: result.likeCount,
+      };
+      updatePostMeta(currentDetailPost);
+      updateLikeUi(currentDetailPost, auth);
+    } catch (error) {
+      setPostMessage(error.message, "error");
+    } finally {
+      likeButton.disabled = false;
     }
   });
 }
