@@ -334,10 +334,40 @@ html[data-theme="dark"] .shortcut-group h2 {
   padding: 7px 12px;
 }
 
+.help-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 12px;
+  margin-left: 8px;
+  border: 1px solid #bdd0ea;
+  background: #ffffff;
+  box-shadow: 0 8px 18px rgba(20, 48, 86, 0.08);
+  color: var(--primary-dark);
+}
+
+.help-button:hover {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  color: var(--primary-dark);
+}
+
 html[data-theme="dark"] .current-board {
   background: #1d2d47;
   border-color: #476489;
   color: #dbeafe !important;
+}
+
+html[data-theme="dark"] .help-button {
+  background: #1d2a42;
+  border-color: #455d7d;
+  color: #dbeafe;
+}
+
+html[data-theme="dark"] .help-button:hover {
+  background: #263b5d;
+  border-color: #6c9add;
+  color: #ffffff;
 }
 
 .board-shortcuts {
@@ -1452,6 +1482,107 @@ html[data-theme="dark"] .footer-github:hover {
 html[data-theme="dark"] .footer-github::after {
   background: #edf3fb;
   color: #101827;
+}
+
+.guide-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(15, 23, 42, 0.58);
+  backdrop-filter: blur(2px);
+}
+
+.guide-highlight {
+  position: relative;
+  z-index: 1002 !important;
+  border-radius: 8px;
+  box-shadow:
+    0 0 0 4px rgba(91, 157, 255, 0.36),
+    0 18px 42px rgba(15, 23, 42, 0.24) !important;
+  pointer-events: none;
+}
+
+.guide-popover {
+  position: fixed;
+  z-index: 1003;
+  border: 1px solid #b9cbe6;
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: 0 20px 48px rgba(15, 23, 42, 0.24);
+  color: var(--text);
+  padding: 18px;
+}
+
+.guide-popover h2 {
+  margin: 0 0 8px;
+  color: #10213b;
+  font-size: 19px;
+}
+
+.guide-popover p {
+  margin: 0;
+}
+
+.guide-popover .guide-step-count {
+  margin-bottom: 8px;
+  color: var(--primary-dark);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.guide-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.guide-actions button {
+  min-height: 36px;
+  padding: 8px 12px;
+}
+
+.guide-actions .guide-secondary {
+  border: 1px solid var(--line-strong);
+  background: var(--surface-soft);
+  color: var(--primary-dark);
+}
+
+.guide-actions .guide-secondary:hover {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  color: var(--primary-dark);
+}
+
+html[data-theme="dark"] .guide-overlay {
+  background: rgba(2, 6, 23, 0.68);
+}
+
+html[data-theme="dark"] .guide-popover {
+  border-color: #516989;
+  background: #182236;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.42);
+}
+
+html[data-theme="dark"] .guide-popover h2 {
+  color: #f3f7ff;
+}
+
+html[data-theme="dark"] .guide-popover .guide-step-count {
+  color: #b9d6ff;
+}
+
+html[data-theme="dark"] .guide-actions .guide-secondary {
+  background: #22314b;
+  border-color: #557093;
+  color: #dbeafe;
+}
+
+html[data-theme="dark"] .guide-actions .guide-secondary:hover {
+  background: #263b5d;
+  border-color: #6c9add;
+  color: #ffffff;
 }
 
 @media (max-width: 840px) {

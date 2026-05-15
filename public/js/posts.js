@@ -1157,10 +1157,274 @@ async function deleteComment(commentId) {
   }
 }
 
+const GUIDE_STEP_DEFINITIONS = [
+  {
+    selector: ".board-shortcuts",
+    title: "게시판 바로가기",
+    description: "인기글, 공지사항, 전체글과 카테고리 게시판으로 바로 이동할 수 있습니다.",
+  },
+  {
+    selector: "#page-size",
+    title: "표시 개수",
+    description: "한 페이지에 10, 20, 30, 40, 50개 단위로 게시글을 볼 수 있습니다.",
+  },
+  {
+    selector: "#sort",
+    title: "정렬",
+    description: "최신순, 좋아요순, 조회수순, 댓글순으로 게시글 목록을 정렬할 수 있습니다.",
+  },
+  {
+    selector: "#post-search-form",
+    title: "검색",
+    description: "게시글 제목, 내용, 작성자 닉네임을 기준으로 원하는 글을 검색할 수 있습니다.",
+  },
+  {
+    selector: ".post-table",
+    title: "게시글 목록",
+    description: "제목, 카테고리, 작성자, 등록일, 수정일, 조회수, 댓글, 좋아요, 싫어요 정보를 한눈에 확인합니다.",
+  },
+  {
+    selector: '[data-requires-auth][href="/post-write.html"]',
+    title: "글쓰기",
+    description: "로그인 후 새 게시글을 작성할 수 있습니다. 비로그인 상태에서는 이 버튼이 숨겨집니다.",
+  },
+  {
+    selector: "#theme-toggle-button",
+    title: "다크모드",
+    description: "라이트모드와 다크모드를 전환할 수 있으며, 선택한 테마는 새로고침 후에도 유지됩니다.",
+  },
+  {
+    selector: "#mypage-link",
+    title: "마이페이지",
+    description: "로그인 후 내가 쓴 글, 댓글, 북마크, 좋아요, 싫어요 활동을 확인할 수 있습니다.",
+  },
+];
+
+const guideState = {
+  currentIndex: 0,
+  highlightedElement: null,
+  keydownHandler: null,
+  repositionHandler: null,
+  steps: [],
+};
+
+function isGuideElementVisible(element) {
+  if (!element || element.hidden) {
+    return false;
+  }
+
+  const style = window.getComputedStyle(element);
+
+  if (style.display === "none" || style.visibility === "hidden") {
+    return false;
+  }
+
+  const rect = element.getBoundingClientRect();
+  return rect.width > 0 && rect.height > 0;
+}
+
+function getGuideTarget(step) {
+  const element = document.querySelector(step.selector);
+
+  if (!isGuideElementVisible(element)) {
+    return null;
+  }
+
+  return element;
+}
+
+function getAvailableGuideSteps() {
+  return GUIDE_STEP_DEFINITIONS.map((step) => ({
+    ...step,
+    element: getGuideTarget(step),
+  })).filter((step) => step.element);
+}
+
+function createGuideOverlay() {
+  const overlay = document.createElement("div");
+  overlay.className = "guide-overlay";
+  overlay.id = "guide-overlay";
+  overlay.setAttribute("aria-hidden", "true");
+  document.body.appendChild(overlay);
+}
+
+function createGuidePopover() {
+  const popover = document.createElement("section");
+  popover.className = "guide-popover";
+  popover.id = "guide-popover";
+  popover.setAttribute("role", "dialog");
+  popover.setAttribute("aria-modal", "true");
+  popover.setAttribute("aria-labelledby", "guide-title");
+  document.body.appendChild(popover);
+}
+
+function getGuidePopover() {
+  return document.querySelector("#guide-popover");
+}
+
+function clearGuideHighlight() {
+  if (guideState.highlightedElement) {
+    guideState.highlightedElement.classList.remove("guide-highlight");
+    guideState.highlightedElement = null;
+  }
+}
+
+function endGuideTour() {
+  clearGuideHighlight();
+  document.querySelector("#guide-overlay")?.remove();
+  document.querySelector("#guide-popover")?.remove();
+
+  if (guideState.keydownHandler) {
+    document.removeEventListener("keydown", guideState.keydownHandler);
+    guideState.keydownHandler = null;
+  }
+
+  if (guideState.repositionHandler) {
+    window.removeEventListener("resize", guideState.repositionHandler);
+    window.removeEventListener("scroll", guideState.repositionHandler, true);
+    guideState.repositionHandler = null;
+  }
+
+  guideState.steps = [];
+  guideState.currentIndex = 0;
+}
+
+function positionGuidePopover(targetElement) {
+  const popover = getGuidePopover();
+
+  if (!popover || !targetElement) {
+    return;
+  }
+
+  const gap = 14;
+  const margin = 16;
+  const rect = targetElement.getBoundingClientRect();
+  const popoverWidth = Math.min(360, window.innerWidth - margin * 2);
+
+  popover.style.width = `${popoverWidth}px`;
+
+  const popoverRect = popover.getBoundingClientRect();
+  let left = rect.left + rect.width / 2 - popoverWidth / 2;
+  let top = rect.bottom + gap;
+
+  left = Math.max(margin, Math.min(left, window.innerWidth - popoverWidth - margin));
+
+  if (top + popoverRect.height > window.innerHeight - margin) {
+    top = rect.top - popoverRect.height - gap;
+  }
+
+  if (top < margin) {
+    top = margin;
+  }
+
+  popover.style.left = `${left}px`;
+  popover.style.top = `${top}px`;
+}
+
+function renderGuideStep() {
+  const step = guideState.steps[guideState.currentIndex];
+  const popover = getGuidePopover();
+
+  if (!step || !popover) {
+    endGuideTour();
+    return;
+  }
+
+  clearGuideHighlight();
+  guideState.highlightedElement = step.element;
+  step.element.classList.add("guide-highlight");
+  step.element.scrollIntoView({
+    behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+    block: "center",
+    inline: "nearest",
+  });
+
+  const isFirst = guideState.currentIndex === 0;
+  const isLast = guideState.currentIndex === guideState.steps.length - 1;
+
+  popover.innerHTML = `
+    <p class="guide-step-count">${guideState.currentIndex + 1} / ${guideState.steps.length}</p>
+    <h2 id="guide-title">${step.title}</h2>
+    <p>${step.description}</p>
+    <div class="guide-actions">
+      <button type="button" class="guide-secondary" data-guide-action="prev" ${isFirst ? "disabled" : ""}>이전</button>
+      <button type="button" data-guide-action="next">${isLast ? "완료" : "다음"}</button>
+      <button type="button" class="guide-secondary" data-guide-action="skip">건너뛰기</button>
+    </div>
+  `;
+
+  popover.querySelector('[data-guide-action="prev"]')?.addEventListener("click", () => {
+    if (guideState.currentIndex > 0) {
+      guideState.currentIndex -= 1;
+      renderGuideStep();
+    }
+  });
+
+  popover.querySelector('[data-guide-action="next"]')?.addEventListener("click", () => {
+    if (isLast) {
+      endGuideTour();
+      return;
+    }
+
+    guideState.currentIndex += 1;
+    renderGuideStep();
+  });
+
+  popover.querySelector('[data-guide-action="skip"]')?.addEventListener("click", endGuideTour);
+
+  positionGuidePopover(step.element);
+  window.setTimeout(() => {
+    positionGuidePopover(step.element);
+  }, 220);
+}
+
+function startGuideTour() {
+  guideState.steps = getAvailableGuideSteps();
+
+  if (guideState.steps.length === 0) {
+    return;
+  }
+
+  endGuideTour();
+  guideState.steps = getAvailableGuideSteps();
+  guideState.currentIndex = 0;
+  createGuideOverlay();
+  createGuidePopover();
+
+  guideState.keydownHandler = (event) => {
+    if (event.key === "Escape") {
+      endGuideTour();
+    }
+  };
+
+  guideState.repositionHandler = () => {
+    const step = guideState.steps[guideState.currentIndex];
+    if (step) {
+      positionGuidePopover(step.element);
+    }
+  };
+
+  document.addEventListener("keydown", guideState.keydownHandler);
+  window.addEventListener("resize", guideState.repositionHandler);
+  window.addEventListener("scroll", guideState.repositionHandler, true);
+  renderGuideStep();
+}
+
+function bindGuideTour() {
+  const guideButton = document.querySelector("#guide-start-button");
+
+  if (!guideButton) {
+    return;
+  }
+
+  guideButton.addEventListener("click", startGuideTour);
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   initializeCategoryFilterFromQuery();
   bindPostListControls();
   updateBoardUi();
+  bindGuideTour();
   bindPostWriteForm();
   loadPostList();
   ensureWriteAccess();
