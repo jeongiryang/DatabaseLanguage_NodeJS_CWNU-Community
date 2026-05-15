@@ -226,6 +226,71 @@ async function createPost(req, res) {
   });
 }
 
+async function updatePost(req, res) {
+  const postId = parsePostId(req.params.id);
+  const title = typeof req.body.title === "string" ? req.body.title.trim() : "";
+  const content = typeof req.body.content === "string" ? req.body.content.trim() : "";
+
+  if (!postId) {
+    return res.status(400).json({ message: "Invalid post id." });
+  }
+
+  if (!title) {
+    return res.status(400).json({ message: "Title is required." });
+  }
+
+  if (title.length > 120) {
+    return res.status(400).json({ message: "Title must be 120 characters or less." });
+  }
+
+  if (!content) {
+    return res.status(400).json({ message: "Content is required." });
+  }
+
+  const existingPost = await prisma.post.findUnique({
+    where: { id: postId },
+    select: {
+      id: true,
+      userId: true,
+    },
+  });
+
+  if (!existingPost) {
+    return res.status(404).json({ message: "Post not found." });
+  }
+
+  if (existingPost.userId !== req.user.id) {
+    return res.status(403).json({ message: "Only the author can update this post." });
+  }
+
+  const post = await prisma.post.update({
+    where: { id: postId },
+    data: {
+      title,
+      content,
+    },
+    include: {
+      author: {
+        select: {
+          id: true,
+          nickname: true,
+        },
+      },
+      _count: {
+        select: {
+          comments: true,
+          likes: true,
+        },
+      },
+    },
+  });
+
+  return res.json({
+    message: "Post updated.",
+    post: formatPostDetail(post),
+  });
+}
+
 async function deletePost(req, res) {
   const postId = parsePostId(req.params.id);
 
@@ -260,5 +325,6 @@ module.exports = {
   listPosts,
   getPost,
   createPost,
+  updatePost,
   deletePost,
 };

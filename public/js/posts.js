@@ -72,7 +72,7 @@ function getPostIdFromQuery() {
   return Number.isInteger(postId) && postId > 0 ? postId : null;
 }
 
-function updatePostMeta(post, commentCount = post.commentCount) {
+function updatePostMetaLegacy(post, commentCount = post.commentCount) {
   const metaElement = document.querySelector("#post-meta");
 
   if (!metaElement) {
@@ -80,6 +80,23 @@ function updatePostMeta(post, commentCount = post.commentCount) {
   }
 
   metaElement.textContent = `작성자 ${post.author.nickname} | 등록일 ${formatDate(post.createdAt)} | 조회수 ${post.viewCount} | 댓글 ${commentCount} | 좋아요 ${post.likeCount}`;
+}
+
+function updatePostMeta(post, commentCount = post.commentCount) {
+  const metaElement = document.querySelector("#post-meta");
+
+  if (!metaElement) {
+    return;
+  }
+
+  const createdAt = new Date(post.createdAt);
+  const updatedAt = new Date(post.updatedAt);
+  const isEdited = Math.abs(updatedAt.getTime() - createdAt.getTime()) > 1000;
+  const dates = isEdited
+    ? `등록일 ${formatDate(post.createdAt)} | 수정일 ${formatDate(post.updatedAt)}`
+    : `등록일 ${formatDate(post.createdAt)}`;
+
+  metaElement.textContent = `작성자 ${post.author.nickname} | ${dates} | 조회수 ${post.viewCount} | 댓글 ${commentCount} | 좋아요 ${post.likeCount}`;
 }
 
 function updateLikeUi(post, auth) {
@@ -306,6 +323,7 @@ async function loadPostDetail() {
     updatePostMeta(post);
     contentElement.textContent = post.content;
     bindPostDelete(post, auth);
+    bindPostEditButton(post, auth);
     bindLikeButton(post, auth);
     bindCommentForm(post.id, auth);
     await loadComments(post.id, auth);
@@ -378,6 +396,83 @@ function bindLikeButton(post, auth) {
       likeButton.disabled = false;
     }
   });
+}
+
+function bindPostEditButton(post, auth) {
+  const editButton = document.querySelector("#edit-post-button");
+
+  if (!editButton) {
+    return;
+  }
+
+  const canEdit = auth.authenticated && auth.user.id === post.author.id;
+  editButton.hidden = !canEdit;
+
+  if (!canEdit) {
+    return;
+  }
+
+  editButton.addEventListener("click", () => {
+    window.location.href = `/post-write.html?id=${post.id}`;
+  });
+}
+
+function disablePostForm(form) {
+  form.querySelectorAll("input, textarea, button").forEach((element) => {
+    element.disabled = true;
+  });
+}
+
+async function loadPostEditForm() {
+  const form = document.querySelector("#post-write-form");
+  const postId = getPostIdFromQuery();
+
+  if (!form || !postId) {
+    return;
+  }
+
+  const titleElement = document.querySelector("#post-form-title");
+  const submitButton = document.querySelector("#post-submit-button");
+
+  try {
+    const [{ post }, auth] = await Promise.all([
+      api.request(`/api/posts/${postId}`),
+      api.request("/api/auth/me"),
+    ]);
+
+    if (!auth.authenticated || auth.user.id !== post.author.id) {
+      setPostMessage("Only the author can edit this post.", "error");
+      disablePostForm(form);
+      return;
+    }
+
+    if (titleElement) titleElement.textContent = "게시글 수정";
+    if (submitButton) submitButton.textContent = "수정 완료";
+    form.elements.title.value = post.title;
+    form.elements.content.value = post.content;
+  } catch (error) {
+    setPostMessage(error.message, "error");
+    disablePostForm(form);
+  }
+}
+
+async function handlePostCreate(form) {
+  const postId = getPostIdFromQuery();
+  const isEditMode = Boolean(postId);
+  setPostMessage(isEditMode ? "게시글 수정 중입니다." : "게시글 등록 중입니다.");
+
+  try {
+    const payload = Object.fromEntries(new FormData(form).entries());
+    const result = await api.request(isEditMode ? `/api/posts/${postId}` : "/api/posts", {
+      method: isEditMode ? "PUT" : "POST",
+      body: JSON.stringify(payload),
+    });
+
+    setPostMessage(isEditMode ? "게시글이 수정되었습니다." : "게시글이 등록되었습니다.", "success");
+    window.location.href = `/post-detail.html?id=${result.post.id}`;
+  } catch (error) {
+    setPostMessage(error.message, "error");
+  }
 }
 
 function bindCommentForm(postId, auth) {
@@ -505,5 +600,6 @@ document.addEventListener("DOMContentLoaded", () => {
   bindPostWriteForm();
   loadPostList();
   ensureWriteAccess();
+  loadPostEditForm();
   loadPostDetail();
 });

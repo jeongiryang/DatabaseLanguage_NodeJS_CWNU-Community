@@ -17,6 +17,8 @@ router.get("/:id", asyncHandler(postController.getPost));
 
 router.post("/", requireAuth, asyncHandler(postController.createPost));
 
+router.put("/:id", requireAuth, asyncHandler(postController.updatePost));
+
 router.delete("/:id", requireAuth, asyncHandler(postController.deletePost));
 
 module.exports = router;
