@@ -5,16 +5,13 @@ function parsePostId(value) {
   return Number.isInteger(postId) && postId > 0 ? postId : null;
 }
 
-async function getLikeCount(postId) {
-  return prisma.like.count({
-    where: { postId },
-  });
-}
+async function getReactionCounts(postId) {
+  const [likeCount, dislikeCount] = await Promise.all([
+    prisma.like.count({ where: { postId } }),
+    prisma.dislike.count({ where: { postId } }),
+  ]);
 
-async function getDislikeCount(postId) {
-  return prisma.dislike.count({
-    where: { postId },
-  });
+  return { likeCount, dislikeCount };
 }
 
 async function ensurePostExists(postId) {
@@ -26,7 +23,7 @@ async function ensurePostExists(postId) {
   return Boolean(post);
 }
 
-async function likePost(req, res) {
+async function dislikePost(req, res) {
   const postId = parsePostId(req.params.postId);
 
   if (!postId) {
@@ -40,14 +37,14 @@ async function likePost(req, res) {
   }
 
   await prisma.$transaction(async (tx) => {
-    await tx.dislike.deleteMany({
+    await tx.like.deleteMany({
       where: {
         postId,
         userId: req.user.id,
       },
     });
 
-    await tx.like.upsert({
+    await tx.dislike.upsert({
       where: {
         postId_userId: {
           postId,
@@ -62,21 +59,18 @@ async function likePost(req, res) {
     });
   });
 
-  const [likeCount, dislikeCount] = await Promise.all([
-    getLikeCount(postId),
-    getDislikeCount(postId),
-  ]);
+  const { likeCount, dislikeCount } = await getReactionCounts(postId);
 
   return res.json({
-    message: "Post liked.",
-    liked: true,
-    disliked: false,
+    message: "Post disliked.",
+    liked: false,
+    disliked: true,
     likeCount,
     dislikeCount,
   });
 }
 
-async function unlikePost(req, res) {
+async function undislikePost(req, res) {
   const postId = parsePostId(req.params.postId);
 
   if (!postId) {
@@ -89,27 +83,24 @@ async function unlikePost(req, res) {
     return res.status(404).json({ message: "Post not found." });
   }
 
-  await prisma.like.deleteMany({
+  await prisma.dislike.deleteMany({
     where: {
       postId,
       userId: req.user.id,
     },
   });
 
-  const [likeCount, dislikeCount] = await Promise.all([
-    getLikeCount(postId),
-    getDislikeCount(postId),
-  ]);
+  const { likeCount, dislikeCount } = await getReactionCounts(postId);
 
   return res.json({
-    message: "Post unliked.",
-    liked: false,
+    message: "Post undisliked.",
+    disliked: false,
     likeCount,
     dislikeCount,
   });
 }
 
 module.exports = {
-  likePost,
-  unlikePost,
+  dislikePost,
+  undislikePost,
 };

@@ -47,6 +47,8 @@ function clearCommentUi() {
 function clearLikeUi() {
   const likeButton = document.querySelector("#like-button");
   const likeStatus = document.querySelector("#like-status");
+  const dislikeButton = document.querySelector("#dislike-button");
+  const dislikeStatus = document.querySelector("#dislike-status");
 
   if (likeButton) {
     likeButton.hidden = true;
@@ -54,6 +56,14 @@ function clearLikeUi() {
 
   if (likeStatus) {
     likeStatus.textContent = "";
+  }
+
+  if (dislikeButton) {
+    dislikeButton.hidden = true;
+  }
+
+  if (dislikeStatus) {
+    dislikeStatus.textContent = "";
   }
 }
 
@@ -96,7 +106,7 @@ function updatePostMeta(post, commentCount = post.commentCount) {
     ? `등록일 ${formatDate(post.createdAt)} | 수정일 ${formatDate(post.updatedAt)}`
     : `등록일 ${formatDate(post.createdAt)}`;
 
-  metaElement.textContent = `작성자 ${post.author.nickname} | ${dates} | 조회수 ${post.viewCount} | 댓글 ${commentCount} | 좋아요 ${post.likeCount}`;
+  metaElement.textContent = `작성자 ${post.author.nickname} | ${dates} | 조회수 ${post.viewCount} | 댓글 ${commentCount} | 좋아요 ${post.likeCount} | 싫어요 ${post.dislikeCount || 0}`;
 }
 
 function updateLikeUi(post, auth) {
@@ -121,6 +131,28 @@ function updateLikeUi(post, auth) {
   likeButton.dataset.liked = post.liked ? "true" : "false";
 }
 
+function updateDislikeUi(post, auth) {
+  const dislikeButton = document.querySelector("#dislike-button");
+  const dislikeStatus = document.querySelector("#dislike-status");
+
+  if (dislikeStatus) {
+    dislikeStatus.textContent = `싫어요 ${post.dislikeCount || 0}개`;
+  }
+
+  if (!dislikeButton) {
+    return;
+  }
+
+  if (!auth.authenticated) {
+    dislikeButton.hidden = true;
+    return;
+  }
+
+  dislikeButton.hidden = false;
+  dislikeButton.textContent = post.disliked ? "싫어요 취소" : "싫어요";
+  dislikeButton.dataset.disliked = post.disliked ? "true" : "false";
+}
+
 function renderPostRows(posts) {
   const postList = document.querySelector("#post-list");
 
@@ -133,7 +165,7 @@ function renderPostRows(posts) {
   if (posts.length === 0) {
     const row = document.createElement("tr");
     const cell = document.createElement("td");
-    cell.colSpan = 5;
+    cell.colSpan = 6;
     cell.textContent = "등록된 게시글이 없습니다.";
     row.appendChild(cell);
     postList.appendChild(row);
@@ -148,6 +180,7 @@ function renderPostRows(posts) {
     const createdAtCell = document.createElement("td");
     const commentCell = document.createElement("td");
     const likeCell = document.createElement("td");
+    const dislikeCell = document.createElement("td");
 
     titleLink.href = `/post-detail.html?id=${post.id}`;
     titleLink.textContent = post.title;
@@ -156,8 +189,9 @@ function renderPostRows(posts) {
     createdAtCell.textContent = formatDate(post.createdAt);
     commentCell.textContent = post.commentCount;
     likeCell.textContent = post.likeCount;
+    dislikeCell.textContent = post.dislikeCount || 0;
 
-    row.append(titleCell, authorCell, createdAtCell, commentCell, likeCell);
+    row.append(titleCell, authorCell, createdAtCell, commentCell, likeCell, dislikeCell);
     postList.appendChild(row);
   });
 }
@@ -203,7 +237,7 @@ async function loadPostList() {
     return;
   }
 
-  postList.innerHTML = '<tr><td colspan="5">게시글 목록을 불러오는 중입니다.</td></tr>';
+  postList.innerHTML = '<tr><td colspan="6">게시글 목록을 불러오는 중입니다.</td></tr>';
 
   try {
     const query = new URLSearchParams({
@@ -219,7 +253,7 @@ async function loadPostList() {
     postList.innerHTML = "";
     const row = document.createElement("tr");
     const cell = document.createElement("td");
-    cell.colSpan = 5;
+    cell.colSpan = 6;
     cell.textContent = error.message;
     row.appendChild(cell);
     postList.appendChild(row);
@@ -325,6 +359,7 @@ async function loadPostDetail() {
     bindPostDelete(post, auth);
     bindPostEditButton(post, auth);
     bindLikeButton(post, auth);
+    bindDislikeButton(post, auth);
     bindCommentForm(post.id, auth);
     await loadComments(post.id, auth);
   } catch (error) {
@@ -386,14 +421,53 @@ function bindLikeButton(post, auth) {
       currentDetailPost = {
         ...currentDetailPost,
         liked: result.liked,
+        disliked: result.disliked || false,
         likeCount: result.likeCount,
+        dislikeCount: result.dislikeCount,
       };
       updatePostMeta(currentDetailPost);
       updateLikeUi(currentDetailPost, auth);
+      updateDislikeUi(currentDetailPost, auth);
     } catch (error) {
       setPostMessage(error.message, "error");
     } finally {
       likeButton.disabled = false;
+    }
+  });
+}
+
+function bindDislikeButton(post, auth) {
+  const dislikeButton = document.querySelector("#dislike-button");
+
+  updateDislikeUi(post, auth);
+
+  if (!dislikeButton || !auth.authenticated) {
+    return;
+  }
+
+  dislikeButton.addEventListener("click", async () => {
+    const disliked = dislikeButton.dataset.disliked === "true";
+    dislikeButton.disabled = true;
+
+    try {
+      const result = await api.request(`/api/posts/${post.id}/dislike`, {
+        method: disliked ? "DELETE" : "POST",
+      });
+
+      currentDetailPost = {
+        ...currentDetailPost,
+        liked: result.liked || false,
+        disliked: result.disliked,
+        likeCount: result.likeCount,
+        dislikeCount: result.dislikeCount,
+      };
+      updatePostMeta(currentDetailPost);
+      updateLikeUi(currentDetailPost, auth);
+      updateDislikeUi(currentDetailPost, auth);
+    } catch (error) {
+      setPostMessage(error.message, "error");
+    } finally {
+      dislikeButton.disabled = false;
     }
   });
 }

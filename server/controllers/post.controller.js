@@ -40,6 +40,7 @@ function formatPostListItem(post) {
     viewCount: post.viewCount,
     commentCount: post._count.comments,
     likeCount: post._count.likes,
+    dislikeCount: post._count.dislikes,
   };
 }
 
@@ -59,7 +60,7 @@ function getOptionalUserId(req) {
   }
 }
 
-function formatPostDetail(post, liked = false) {
+function formatPostDetail(post, liked = false, disliked = false) {
   return {
     id: post.id,
     title: post.title,
@@ -73,7 +74,9 @@ function formatPostDetail(post, liked = false) {
     viewCount: post.viewCount,
     commentCount: post._count.comments,
     likeCount: post._count.likes,
+    dislikeCount: post._count.dislikes,
     liked,
+    disliked,
   };
 }
 
@@ -108,6 +111,7 @@ async function listPosts(req, res) {
           select: {
             comments: true,
             likes: true,
+            dislikes: true,
           },
         },
       },
@@ -153,14 +157,15 @@ async function getPost(req, res) {
           select: {
             comments: true,
             likes: true,
+            dislikes: true,
           },
         },
       },
     });
 
-    const liked = currentUserId
-      ? Boolean(
-          await prisma.like.findUnique({
+    const [like, dislike] = currentUserId
+      ? await Promise.all([
+          prisma.like.findUnique({
             where: {
               postId_userId: {
                 postId,
@@ -168,11 +173,20 @@ async function getPost(req, res) {
               },
             },
             select: { id: true },
-          })
-        )
-      : false;
+          }),
+          prisma.dislike.findUnique({
+            where: {
+              postId_userId: {
+                postId,
+                userId: currentUserId,
+              },
+            },
+            select: { id: true },
+          }),
+        ])
+      : [null, null];
 
-    return res.json({ post: formatPostDetail(post, liked) });
+    return res.json({ post: formatPostDetail(post, Boolean(like), Boolean(dislike)) });
   } catch (error) {
     if (error.code === "P2025") {
       return res.status(404).json({ message: "Post not found." });
@@ -215,6 +229,7 @@ async function createPost(req, res) {
         select: {
           comments: true,
           likes: true,
+          dislikes: true,
         },
       },
     },
@@ -280,6 +295,7 @@ async function updatePost(req, res) {
         select: {
           comments: true,
           likes: true,
+          dislikes: true,
         },
       },
     },

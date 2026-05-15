@@ -124,6 +124,10 @@ async function deleteMe(req, res) {
       where: { userId },
     });
 
+    await tx.dislike.deleteMany({
+      where: { userId },
+    });
+
     await tx.user.delete({
       where: { id: userId },
     });

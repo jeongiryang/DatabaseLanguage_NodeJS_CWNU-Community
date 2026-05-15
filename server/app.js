@@ -6,6 +6,7 @@ const authRoutes = require("./routes/auth.routes");
 const postRoutes = require("./routes/post.routes");
 const commentRoutes = require("./routes/comment.routes");
 const likeRoutes = require("./routes/like.routes");
+const dislikeRoutes = require("./routes/dislike.routes");
 
 const app = express();
 
@@ -28,6 +29,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api", commentRoutes);
 app.use("/api", likeRoutes);
+app.use("/api", dislikeRoutes);
 
 app.use("/api", (req, res) => {
   res.status(404).json({
