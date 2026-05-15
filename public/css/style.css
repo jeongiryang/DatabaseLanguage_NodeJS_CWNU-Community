@@ -199,6 +199,50 @@ textarea {
   text-decoration: underline;
 }
 
+.responsive-table {
+  overflow-x: auto;
+}
+
+.profile-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.profile-list div {
+  display: grid;
+  gap: 4px;
+}
+
+.profile-list dt {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.profile-list dd {
+  margin: 0;
+  font-weight: 700;
+}
+
+.activity-list {
+  display: grid;
+  gap: 12px;
+}
+
+.activity-item {
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+}
+
+.activity-item p {
+  margin: 0 0 6px;
+}
+
+.activity-item a {
+  color: var(--primary);
+  font-weight: 700;
+}
+
 .pagination {
   align-items: center;
   display: flex;

@@ -470,6 +470,7 @@ async function loadPostDetail() {
     updatePostCategoryUi(post);
     updatePostMeta(post);
     contentElement.textContent = post.content;
+    bindShareButton(post);
     bindPostDelete(post, auth);
     bindPostEditButton(post, auth);
     bindLikeButton(post, auth);
@@ -511,6 +512,60 @@ function bindPostDelete(post, auth) {
       window.location.href = "/";
     } catch (error) {
       setPostMessage(error.message, "error");
+    }
+  });
+}
+
+function getShareUrl(postId) {
+  return `${window.location.origin}/post-detail.html?id=${postId}`;
+}
+
+function fallbackCopyText(text) {
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.setAttribute("readonly", "");
+  textarea.style.position = "fixed";
+  textarea.style.top = "-9999px";
+  document.body.appendChild(textarea);
+  textarea.select();
+
+  try {
+    return document.execCommand("copy");
+  } finally {
+    document.body.removeChild(textarea);
+  }
+}
+
+async function copyText(text) {
+  if (navigator.clipboard?.writeText) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch (error) {
+      return fallbackCopyText(text);
+    }
+  }
+
+  return fallbackCopyText(text);
+}
+
+function bindShareButton(post) {
+  const shareButton = document.querySelector("#share-post-button");
+
+  if (!shareButton) {
+    return;
+  }
+
+  shareButton.addEventListener("click", async () => {
+    shareButton.disabled = true;
+
+    try {
+      const copied = await copyText(getShareUrl(post.id));
+      setPostMessage(copied ? "게시글 링크가 복사되었습니다." : "링크 복사에 실패했습니다.", copied ? "success" : "error");
+    } catch (error) {
+      setPostMessage("링크 복사에 실패했습니다.", "error");
+    } finally {
+      shareButton.disabled = false;
     }
   });
 }

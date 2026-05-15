@@ -108,6 +108,37 @@ function logout(req, res) {
   return res.json({ message: "Logout completed." });
 }
 
+function formatActivityPost(post) {
+  return {
+    id: post.id,
+    title: post.title,
+    category: post.category,
+    createdAt: post.createdAt,
+    updatedAt: post.updatedAt,
+    viewCount: post.viewCount,
+    commentCount: post._count.comments,
+    likeCount: post._count.likes,
+    dislikeCount: post._count.dislikes,
+  };
+}
+
+function formatActivityReaction(reaction) {
+  return {
+    id: reaction.id,
+    createdAt: reaction.createdAt,
+    post: {
+      id: reaction.post.id,
+      title: reaction.post.title,
+      category: reaction.post.category,
+      createdAt: reaction.post.createdAt,
+      author: {
+        id: reaction.post.author.id,
+        nickname: reaction.post.author.nickname,
+      },
+    },
+  };
+}
+
 async function deleteMe(req, res) {
   const userId = req.user.id;
 
@@ -135,6 +166,108 @@ async function deleteMe(req, res) {
 
   clearAuthCookie(res);
   return res.json({ message: "Account deleted." });
+}
+
+async function activity(req, res) {
+  const userId = req.user.id;
+
+  const [user, posts, comments, likes, dislikes] = await Promise.all([
+    prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        nickname: true,
+        createdAt: true,
+      },
+    }),
+    prisma.post.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        title: true,
+        category: true,
+        createdAt: true,
+        updatedAt: true,
+        viewCount: true,
+        _count: {
+          select: {
+            comments: true,
+            likes: true,
+            dislikes: true,
+          },
+        },
+      },
+    }),
+    prisma.comment.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        content: true,
+        createdAt: true,
+        post: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+      },
+    }),
+    prisma.like.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        createdAt: true,
+        post: {
+          select: {
+            id: true,
+            title: true,
+            category: true,
+            createdAt: true,
+            author: {
+              select: {
+                id: true,
+                nickname: true,
+              },
+            },
+          },
+        },
+      },
+    }),
+    prisma.dislike.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        createdAt: true,
+        post: {
+          select: {
+            id: true,
+            title: true,
+            category: true,
+            createdAt: true,
+            author: {
+              select: {
+                id: true,
+                nickname: true,
+              },
+            },
+          },
+        },
+      },
+    }),
+  ]);
+
+  return res.json({
+    user,
+    posts: posts.map(formatActivityPost),
+    comments,
+    likes: likes.map(formatActivityReaction),
+    dislikes: dislikes.map(formatActivityReaction),
+  });
 }
 
 async function me(req, res) {
@@ -189,5 +322,6 @@ module.exports = {
   login,
   logout,
   deleteMe,
+  activity,
   me,
 };

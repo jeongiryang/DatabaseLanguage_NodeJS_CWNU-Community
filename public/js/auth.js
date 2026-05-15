@@ -52,11 +52,33 @@ function getAccountDeleteButton() {
   return accountDeleteButton;
 }
 
+function getMyPageLink() {
+  const navLinks = document.querySelector(".nav-links");
+
+  if (!navLinks) {
+    return null;
+  }
+
+  let myPageLink = document.querySelector("#mypage-link");
+
+  if (!myPageLink) {
+    myPageLink = document.createElement("a");
+    myPageLink.id = "mypage-link";
+    myPageLink.href = "/mypage.html";
+    myPageLink.textContent = "마이페이지";
+    myPageLink.hidden = true;
+    navLinks.appendChild(myPageLink);
+  }
+
+  return myPageLink;
+}
+
 function setAuthLinks(result) {
   const statusElement = document.querySelector("#auth-status");
   const loginLink = document.querySelector('[data-auth-link="login"]');
   const registerLink = document.querySelector('[data-auth-link="register"]');
   const logoutButton = document.querySelector("#logout-button");
+  const myPageLink = getMyPageLink();
   const accountDeleteButton = getAccountDeleteButton();
   const authOnlyElements = document.querySelectorAll("[data-requires-auth]");
 
@@ -64,6 +86,7 @@ function setAuthLinks(result) {
     if (statusElement) statusElement.textContent = `${result.user.nickname} 님`;
     if (loginLink) loginLink.hidden = true;
     if (registerLink) registerLink.hidden = true;
+    if (myPageLink) myPageLink.hidden = false;
     if (logoutButton) logoutButton.hidden = false;
     if (accountDeleteButton) accountDeleteButton.hidden = false;
     authOnlyElements.forEach((element) => {
@@ -75,6 +98,7 @@ function setAuthLinks(result) {
   if (statusElement) statusElement.textContent = "로그인 전";
   if (loginLink) loginLink.hidden = false;
   if (registerLink) registerLink.hidden = false;
+  if (myPageLink) myPageLink.hidden = true;
   if (logoutButton) logoutButton.hidden = true;
   if (accountDeleteButton) accountDeleteButton.hidden = true;
   authOnlyElements.forEach((element) => {

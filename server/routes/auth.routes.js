@@ -19,6 +19,8 @@ router.post("/logout", authController.logout);
 
 router.delete("/me", requireAuth, asyncHandler(authController.deleteMe));
 
+router.get("/me/activity", requireAuth, asyncHandler(authController.activity));
+
 router.get("/me", asyncHandler(authController.me));
 
 module.exports = router;

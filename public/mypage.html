@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>마이페이지 - CWNU Community</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="/">CWNU Community</a>
+    <nav class="nav-links" aria-label="Main navigation">
+      <span class="auth-status" id="auth-status">로그인 상태 확인 중</span>
+      <a href="/">목록</a>
+      <a class="button-link" data-requires-auth href="/post-write.html">글쓰기</a>
+      <button class="link-button" type="button" id="logout-button" hidden>로그아웃</button>
+    </nav>
+  </header>
+
+  <main class="page">
+    <section class="page-title">
+      <h1>마이페이지</h1>
+      <p>내 게시글, 댓글, 좋아요와 싫어요 활동을 확인합니다.</p>
+    </section>
+
+    <p class="form-message" id="mypage-message" role="status">활동 정보를 불러오는 중입니다.</p>
+
+    <section class="panel" id="profile-panel" hidden>
+      <h2>내 정보</h2>
+      <dl class="profile-list">
+        <div>
+          <dt>닉네임</dt>
+          <dd id="profile-nickname"></dd>
+        </div>
+        <div>
+          <dt>이메일</dt>
+          <dd id="profile-email"></dd>
+        </div>
+        <div>
+          <dt>가입일</dt>
+          <dd id="profile-created-at"></dd>
+        </div>
+      </dl>
+    </section>
+
+    <section class="panel" id="my-posts-panel" hidden>
+      <h2>내가 작성한 게시글</h2>
+      <div class="responsive-table">
+        <table class="post-table">
+          <thead>
+            <tr>
+              <th>제목</th>
+              <th>카테고리</th>
+              <th>등록일</th>
+              <th>수정일</th>
+              <th>조회수</th>
+              <th>댓글</th>
+              <th>좋아요</th>
+              <th>싫어요</th>
+            </tr>
+          </thead>
+          <tbody id="my-posts"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel" id="my-comments-panel" hidden>
+      <h2>내가 작성한 댓글</h2>
+      <div class="activity-list" id="my-comments"></div>
+    </section>
+
+    <section class="panel" id="my-likes-panel" hidden>
+      <h2>내가 좋아요 누른 게시글</h2>
+      <div class="activity-list" id="my-likes"></div>
+    </section>
+
+    <section class="panel" id="my-dislikes-panel" hidden>
+      <h2>내가 싫어요 누른 게시글</h2>
+      <div class="activity-list" id="my-dislikes"></div>
+    </section>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/mypage.js"></script>
+</body>
+</html>
