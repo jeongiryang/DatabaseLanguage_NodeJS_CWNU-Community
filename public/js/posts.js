@@ -71,6 +71,8 @@ function clearLikeUi() {
   const likeStatus = document.querySelector("#like-status");
   const dislikeButton = document.querySelector("#dislike-button");
   const dislikeStatus = document.querySelector("#dislike-status");
+  const bookmarkButton = document.querySelector("#bookmark-button");
+  const bookmarkStatus = document.querySelector("#bookmark-status");
 
   if (likeButton) {
     likeButton.hidden = true;
@@ -86,6 +88,14 @@ function clearLikeUi() {
 
   if (dislikeStatus) {
     dislikeStatus.textContent = "";
+  }
+
+  if (bookmarkButton) {
+    bookmarkButton.hidden = true;
+  }
+
+  if (bookmarkStatus) {
+    bookmarkStatus.textContent = "";
   }
 }
 
@@ -218,6 +228,28 @@ function updatePostMeta(post, commentCount = post.commentCount) {
     : `등록일 ${formatDate(post.createdAt)}`;
 
   metaElement.textContent = `작성자 ${post.author.nickname} | ${dates} | 조회수 ${post.viewCount} | 댓글 ${commentCount} | 좋아요 ${post.likeCount} | 싫어요 ${post.dislikeCount || 0}`;
+}
+
+function updateBookmarkUi(post, auth) {
+  const bookmarkButton = document.querySelector("#bookmark-button");
+  const bookmarkStatus = document.querySelector("#bookmark-status");
+
+  if (bookmarkStatus) {
+    bookmarkStatus.textContent = `북마크 ${post.bookmarkCount || 0}개`;
+  }
+
+  if (!bookmarkButton) {
+    return;
+  }
+
+  if (!auth.authenticated) {
+    bookmarkButton.hidden = true;
+    return;
+  }
+
+  bookmarkButton.hidden = false;
+  bookmarkButton.textContent = post.bookmarked ? "북마크 취소" : "북마크";
+  bookmarkButton.dataset.bookmarked = post.bookmarked ? "true" : "false";
 }
 
 function updateLikeUi(post, auth) {
@@ -521,6 +553,7 @@ async function loadPostDetail() {
     bindShareButton(post);
     bindPostDelete(post, auth);
     bindPostEditButton(post, auth);
+    bindBookmarkButton(post, auth);
     bindLikeButton(post, auth);
     bindDislikeButton(post, auth);
     bindCommentForm(post.id, auth);
@@ -650,6 +683,38 @@ function bindLikeButton(post, auth) {
       setPostMessage(error.message, "error");
     } finally {
       likeButton.disabled = false;
+    }
+  });
+}
+
+function bindBookmarkButton(post, auth) {
+  const bookmarkButton = document.querySelector("#bookmark-button");
+
+  updateBookmarkUi(post, auth);
+
+  if (!bookmarkButton || !auth.authenticated) {
+    return;
+  }
+
+  bookmarkButton.addEventListener("click", async () => {
+    const bookmarked = bookmarkButton.dataset.bookmarked === "true";
+    bookmarkButton.disabled = true;
+
+    try {
+      const result = await api.request(`/api/posts/${post.id}/bookmark`, {
+        method: bookmarked ? "DELETE" : "POST",
+      });
+
+      currentDetailPost = {
+        ...currentDetailPost,
+        bookmarked: result.bookmarked,
+        bookmarkCount: result.bookmarkCount,
+      };
+      updateBookmarkUi(currentDetailPost, auth);
+    } catch (error) {
+      setPostMessage(error.message, "error");
+    } finally {
+      bookmarkButton.disabled = false;
     }
   });
 }

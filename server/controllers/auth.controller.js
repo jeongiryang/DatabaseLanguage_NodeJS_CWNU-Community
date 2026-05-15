@@ -163,6 +163,7 @@ function formatActivityPost(post) {
     commentCount: post._count.comments,
     likeCount: post._count.likes,
     dislikeCount: post._count.dislikes,
+    bookmarkCount: post._count.bookmarks,
   };
 }
 
@@ -203,6 +204,10 @@ async function deleteMe(req, res) {
       where: { userId },
     });
 
+    await tx.bookmark.deleteMany({
+      where: { userId },
+    });
+
     await tx.user.delete({
       where: { id: userId },
     });
@@ -215,7 +220,7 @@ async function deleteMe(req, res) {
 async function activity(req, res) {
   const userId = req.user.id;
 
-  const [user, posts, comments, likes, dislikes] = await Promise.all([
+  const [user, posts, comments, likes, dislikes, bookmarks] = await Promise.all([
     prisma.user.findUnique({
       where: { id: userId },
       select: {
@@ -240,6 +245,7 @@ async function activity(req, res) {
             comments: true,
             likes: true,
             dislikes: true,
+            bookmarks: true,
           },
         },
       },
@@ -303,6 +309,28 @@ async function activity(req, res) {
         },
       },
     }),
+    prisma.bookmark.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        createdAt: true,
+        post: {
+          select: {
+            id: true,
+            title: true,
+            category: true,
+            createdAt: true,
+            author: {
+              select: {
+                id: true,
+                nickname: true,
+              },
+            },
+          },
+        },
+      },
+    }),
   ]);
 
   return res.json({
@@ -311,6 +339,7 @@ async function activity(req, res) {
     comments,
     likes: likes.map(formatActivityReaction),
     dislikes: dislikes.map(formatActivityReaction),
+    bookmarks: bookmarks.map(formatActivityReaction),
   });
 }
 

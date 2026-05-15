@@ -280,6 +280,40 @@ function renderReactions(selector, panelSelector, reactions, emptyMessage, dateL
   showPanel(panelSelector);
 }
 
+function renderBookmarks(bookmarks) {
+  const container = document.querySelector("#my-bookmarks");
+
+  if (!container) {
+    return;
+  }
+
+  container.innerHTML = "";
+
+  if (bookmarks.length === 0) {
+    container.textContent = "북마크한 게시글이 없습니다.";
+    showPanel("#my-bookmarks-panel");
+    return;
+  }
+
+  bookmarks.forEach((bookmark) => {
+    const item = document.createElement("article");
+    const title = document.createElement("p");
+    const meta = document.createElement("p");
+    const category = createCategoryChip(bookmark.post.category);
+    const link = makePostLink(bookmark.post);
+
+    item.className = "activity-item";
+    title.className = "activity-title";
+    title.append(category, link);
+    meta.className = "meta";
+    meta.textContent = `작성자 ${bookmark.post.author.nickname} | 등록일 ${formatDate(bookmark.post.createdAt)} | 북마크 ${formatDate(bookmark.createdAt)}`;
+    item.append(title, meta);
+    container.appendChild(item);
+  });
+
+  showPanel("#my-bookmarks-panel");
+}
+
 async function loadMyPage() {
   try {
     const activity = await api.request("/api/auth/me/activity");
@@ -290,6 +324,7 @@ async function loadMyPage() {
     renderComments(activity.comments);
     renderReactions("#my-likes", "#my-likes-panel", activity.likes, "좋아요 누른 게시글이 없습니다.", "좋아요");
     renderReactions("#my-dislikes", "#my-dislikes-panel", activity.dislikes, "싫어요 누른 게시글이 없습니다.", "싫어요");
+    renderBookmarks(activity.bookmarks || []);
     setMyPageMessage("");
     activateMyPageTab("profile-panel");
   } catch (error) {
