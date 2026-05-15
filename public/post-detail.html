@@ -30,7 +30,12 @@
 
     <section class="panel">
       <h2>댓글</h2>
-      <div id="comment-list">댓글 기능은 다음 단계에서 구현 예정입니다.</div>
+      <p class="form-message" id="comment-auth-message" role="status"></p>
+      <form class="comment-form" id="comment-form" hidden>
+        <textarea name="content" rows="4" placeholder="댓글을 입력하세요" required></textarea>
+        <button type="submit">댓글 작성</button>
+      </form>
+      <div class="comment-list" id="comment-list">댓글을 불러오는 중입니다.</div>
     </section>
   </main>
 

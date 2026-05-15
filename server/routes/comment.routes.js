@@ -1,17 +1,20 @@
 const express = require("express");
 
+const commentController = require("../controllers/comment.controller");
+const { requireAuth } = require("../middlewares/auth.middleware");
+
 const router = express.Router();
 
-router.get("/posts/:postId/comments", (req, res) => {
-  res.status(501).json({ message: "Comment list API is not implemented yet." });
-});
+function asyncHandler(handler) {
+  return (req, res, next) => {
+    Promise.resolve(handler(req, res, next)).catch(next);
+  };
+}
 
-router.post("/posts/:postId/comments", (req, res) => {
-  res.status(501).json({ message: "Comment create API is not implemented yet." });
-});
+router.get("/posts/:postId/comments", asyncHandler(commentController.listComments));
 
-router.delete("/comments/:id", (req, res) => {
-  res.status(501).json({ message: "Comment delete API is not implemented yet." });
-});
+router.post("/posts/:postId/comments", requireAuth, asyncHandler(commentController.createComment));
+
+router.delete("/comments/:id", requireAuth, asyncHandler(commentController.deleteComment));
 
 module.exports = router;

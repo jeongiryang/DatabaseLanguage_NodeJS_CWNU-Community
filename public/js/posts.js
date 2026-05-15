@@ -4,6 +4,9 @@ const postState = {
   sort: "latest",
 };
 
+let currentDetailPost = null;
+let currentDetailAuth = { authenticated: false, user: null };
+
 function setPostMessage(message, type = "info") {
   const messageElement = document.querySelector("#post-message");
 
@@ -13,6 +16,32 @@ function setPostMessage(message, type = "info") {
 
   messageElement.textContent = message;
   messageElement.dataset.type = type;
+}
+
+function setCommentMessage(message, type = "info") {
+  const messageElement = document.querySelector("#comment-auth-message");
+
+  if (!messageElement) {
+    return;
+  }
+
+  messageElement.textContent = message;
+  messageElement.dataset.type = type;
+}
+
+function clearCommentUi() {
+  const commentForm = document.querySelector("#comment-form");
+  const commentList = document.querySelector("#comment-list");
+
+  if (commentForm) {
+    commentForm.hidden = true;
+  }
+
+  if (commentList) {
+    commentList.textContent = "";
+  }
+
+  setCommentMessage("");
 }
 
 function formatDate(dateValue) {
@@ -28,6 +57,16 @@ function formatDate(dateValue) {
 function getPostIdFromQuery() {
   const postId = Number.parseInt(new URLSearchParams(window.location.search).get("id"), 10);
   return Number.isInteger(postId) && postId > 0 ? postId : null;
+}
+
+function updatePostMeta(post, commentCount = post.commentCount) {
+  const metaElement = document.querySelector("#post-meta");
+
+  if (!metaElement) {
+    return;
+  }
+
+  metaElement.textContent = `작성자 ${post.author.nickname} | 등록일 ${formatDate(post.createdAt)} | 조회수 ${post.viewCount} | 댓글 ${commentCount} | 좋아요 ${post.likeCount}`;
 }
 
 function renderPostRows(posts) {
@@ -205,10 +244,9 @@ function bindPostWriteForm() {
 
 async function loadPostDetail() {
   const titleElement = document.querySelector("#post-title");
-  const metaElement = document.querySelector("#post-meta");
   const contentElement = document.querySelector("#post-content");
 
-  if (!titleElement || !metaElement || !contentElement) {
+  if (!titleElement || !contentElement) {
     return;
   }
 
@@ -216,6 +254,7 @@ async function loadPostDetail() {
 
   if (!postId) {
     titleElement.textContent = "잘못된 게시글 주소입니다.";
+    clearCommentUi();
     return;
   }
 
@@ -225,14 +264,18 @@ async function loadPostDetail() {
       api.request("/api/auth/me"),
     ]);
 
+    currentDetailPost = post;
+    currentDetailAuth = auth;
     titleElement.textContent = post.title;
-    metaElement.textContent = `작성자 ${post.author.nickname} | 등록일 ${formatDate(post.createdAt)} | 조회수 ${post.viewCount} | 댓글 ${post.commentCount} | 좋아요 ${post.likeCount}`;
+    updatePostMeta(post);
     contentElement.textContent = post.content;
     bindPostDelete(post, auth);
+    bindCommentForm(post.id, auth);
+    await loadComments(post.id, auth);
   } catch (error) {
     titleElement.textContent = error.message;
-    metaElement.textContent = "";
     contentElement.textContent = "";
+    clearCommentUi();
   }
 }
 
@@ -264,6 +307,126 @@ function bindPostDelete(post, auth) {
       setPostMessage(error.message, "error");
     }
   });
+}
+
+function bindCommentForm(postId, auth) {
+  const commentForm = document.querySelector("#comment-form");
+
+  if (!commentForm) {
+    return;
+  }
+
+  if (!auth.authenticated) {
+    commentForm.hidden = true;
+    setCommentMessage("댓글을 작성하려면 로그인하세요.");
+    return;
+  }
+
+  commentForm.hidden = false;
+  setCommentMessage("");
+
+  commentForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const contentInput = commentForm.elements.content;
+    const content = contentInput.value.trim();
+
+    if (!content) {
+      setCommentMessage("댓글 내용을 입력하세요.", "error");
+      return;
+    }
+
+    try {
+      await api.request(`/api/posts/${postId}/comments`, {
+        method: "POST",
+        body: JSON.stringify({ content }),
+      });
+      contentInput.value = "";
+      setCommentMessage("댓글이 등록되었습니다.", "success");
+      await loadComments(postId, auth);
+    } catch (error) {
+      setCommentMessage(error.message, "error");
+    }
+  });
+}
+
+async function loadComments(postId, auth = currentDetailAuth) {
+  const commentList = document.querySelector("#comment-list");
+
+  if (!commentList) {
+    return;
+  }
+
+  commentList.textContent = "댓글을 불러오는 중입니다.";
+
+  try {
+    const result = await api.request(`/api/posts/${postId}/comments`);
+    renderComments(result.comments, auth);
+
+    if (currentDetailPost) {
+      updatePostMeta(currentDetailPost, result.comments.length);
+    }
+  } catch (error) {
+    commentList.textContent = error.message;
+  }
+}
+
+function renderComments(comments, auth) {
+  const commentList = document.querySelector("#comment-list");
+
+  if (!commentList) {
+    return;
+  }
+
+  commentList.innerHTML = "";
+
+  if (comments.length === 0) {
+    commentList.textContent = "아직 댓글이 없습니다.";
+    return;
+  }
+
+  comments.forEach((comment) => {
+    const item = document.createElement("article");
+    const header = document.createElement("div");
+    const author = document.createElement("strong");
+    const date = document.createElement("span");
+    const content = document.createElement("p");
+
+    item.className = "comment-item";
+    header.className = "comment-header";
+    author.textContent = comment.author.nickname;
+    date.textContent = formatDate(comment.createdAt);
+    content.textContent = comment.content;
+
+    header.append(author, date);
+
+    if (auth.authenticated && auth.user.id === comment.author.id) {
+      const deleteButton = document.createElement("button");
+      deleteButton.type = "button";
+      deleteButton.className = "link-button";
+      deleteButton.textContent = "삭제";
+      deleteButton.addEventListener("click", () => deleteComment(comment.id));
+      header.appendChild(deleteButton);
+    }
+
+    item.append(header, content);
+    commentList.appendChild(item);
+  });
+}
+
+async function deleteComment(commentId) {
+  if (!confirm("댓글을 삭제하시겠습니까?")) {
+    return;
+  }
+
+  try {
+    await api.request(`/api/comments/${commentId}`, {
+      method: "DELETE",
+    });
+    setCommentMessage("댓글이 삭제되었습니다.", "success");
+    await loadComments(currentDetailPost.id, currentDetailAuth);
+  } catch (error) {
+    setCommentMessage(error.message, "error");
+  }
 }
 
 document.addEventListener("DOMContentLoaded", () => {

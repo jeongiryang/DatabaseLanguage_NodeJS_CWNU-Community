@@ -12,6 +12,10 @@
   box-sizing: border-box;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 body {
   margin: 0;
   background: var(--bg);
@@ -210,6 +214,34 @@ textarea {
   display: grid;
   gap: 12px;
   margin-bottom: 20px;
+}
+
+.comment-list {
+  display: grid;
+  gap: 12px;
+}
+
+.comment-item {
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+}
+
+.comment-header {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.comment-header span {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.comment-item p {
+  margin: 0;
+  white-space: pre-wrap;
 }
 
 @media (max-width: 640px) {
