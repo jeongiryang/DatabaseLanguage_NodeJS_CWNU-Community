@@ -14,14 +14,14 @@
       <a data-auth-link="login" href="/login.html">로그인</a>
       <a data-auth-link="register" href="/register.html">회원가입</a>
       <button class="link-button" type="button" id="logout-button" hidden>로그아웃</button>
-      <a class="button-link" href="/post-write.html">글쓰기</a>
+      <a class="button-link" data-requires-auth href="/post-write.html">글쓰기</a>
     </nav>
   </header>
 
   <main class="page">
     <section class="page-title">
       <h1>학내 커뮤니티 게시판</h1>
-      <p>게시글 목록, 페이징, 정렬 기능이 이 화면에 연결될 예정입니다.</p>
+      <p>창원대학교 구성원을 위한 커뮤니티 게시판입니다.</p>
     </section>
 
     <section class="toolbar" aria-label="Post list controls">
@@ -58,10 +58,11 @@
         </thead>
         <tbody id="post-list">
           <tr>
-            <td colspan="5">게시글 API 구현 후 목록이 표시됩니다.</td>
+            <td colspan="5">게시글 목록을 불러오는 중입니다.</td>
           </tr>
         </tbody>
       </table>
+      <div class="pagination" id="pagination" aria-label="Post pagination"></div>
     </section>
   </main>
 

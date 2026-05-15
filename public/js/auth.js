@@ -13,33 +13,44 @@ function getFormPayload(form) {
   return Object.fromEntries(new FormData(form).entries());
 }
 
-async function refreshAuthStatus() {
+function setAuthLinks(result) {
   const statusElement = document.querySelector("#auth-status");
   const loginLink = document.querySelector('[data-auth-link="login"]');
   const registerLink = document.querySelector('[data-auth-link="register"]');
   const logoutButton = document.querySelector("#logout-button");
+  const authOnlyElements = document.querySelectorAll("[data-requires-auth]");
 
-  if (!statusElement) {
+  if (result.authenticated) {
+    if (statusElement) statusElement.textContent = `${result.user.nickname} 님`;
+    if (loginLink) loginLink.hidden = true;
+    if (registerLink) registerLink.hidden = true;
+    if (logoutButton) logoutButton.hidden = false;
+    authOnlyElements.forEach((element) => {
+      element.hidden = false;
+    });
     return;
   }
 
+  if (statusElement) statusElement.textContent = "로그인 전";
+  if (loginLink) loginLink.hidden = false;
+  if (registerLink) registerLink.hidden = false;
+  if (logoutButton) logoutButton.hidden = true;
+  authOnlyElements.forEach((element) => {
+    element.hidden = true;
+  });
+}
+
+async function refreshAuthStatus() {
   try {
     const result = await api.request("/api/auth/me");
-
-    if (result.authenticated) {
-      statusElement.textContent = `${result.user.nickname} 님`;
-      if (loginLink) loginLink.hidden = true;
-      if (registerLink) registerLink.hidden = true;
-      if (logoutButton) logoutButton.hidden = false;
-      return;
-    }
-
-    statusElement.textContent = "로그인 전";
-    if (loginLink) loginLink.hidden = false;
-    if (registerLink) registerLink.hidden = false;
-    if (logoutButton) logoutButton.hidden = true;
+    window.currentAuth = result;
+    setAuthLinks(result);
+    return result;
   } catch (error) {
-    statusElement.textContent = "로그인 상태 확인 실패";
+    const statusElement = document.querySelector("#auth-status");
+    if (statusElement) statusElement.textContent = "로그인 상태 확인 실패";
+    window.currentAuth = { authenticated: false, user: null };
+    return window.currentAuth;
   }
 }
 
@@ -82,6 +93,9 @@ async function handleLogout() {
     });
 
     await refreshAuthStatus();
+    if (window.location.pathname === "/post-write.html") {
+      window.location.href = "/login.html";
+    }
   } catch (error) {
     alert(error.message);
   }

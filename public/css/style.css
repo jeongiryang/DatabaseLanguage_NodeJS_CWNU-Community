@@ -173,6 +173,28 @@ textarea {
   text-align: left;
 }
 
+.post-table a {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.post-table a:hover {
+  text-decoration: underline;
+}
+
+.pagination {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 18px;
+}
+
+.pagination button:disabled {
+  background: #c4cad4;
+  cursor: not-allowed;
+}
+
 .content-block {
   margin: 24px 0;
   min-height: 160px;

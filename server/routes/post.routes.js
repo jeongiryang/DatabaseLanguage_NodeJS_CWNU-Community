@@ -1,21 +1,22 @@
 const express = require("express");
 
+const postController = require("../controllers/post.controller");
+const { requireAuth } = require("../middlewares/auth.middleware");
+
 const router = express.Router();
 
-router.get("/", (req, res) => {
-  res.status(501).json({ message: "Post list API is not implemented yet." });
-});
+function asyncHandler(handler) {
+  return (req, res, next) => {
+    Promise.resolve(handler(req, res, next)).catch(next);
+  };
+}
 
-router.get("/:id", (req, res) => {
-  res.status(501).json({ message: "Post detail API is not implemented yet." });
-});
+router.get("/", asyncHandler(postController.listPosts));
 
-router.post("/", (req, res) => {
-  res.status(501).json({ message: "Post create API is not implemented yet." });
-});
+router.get("/:id", asyncHandler(postController.getPost));
 
-router.delete("/:id", (req, res) => {
-  res.status(501).json({ message: "Post delete API is not implemented yet." });
-});
+router.post("/", requireAuth, asyncHandler(postController.createPost));
+
+router.delete("/:id", requireAuth, asyncHandler(postController.deletePost));
 
 module.exports = router;

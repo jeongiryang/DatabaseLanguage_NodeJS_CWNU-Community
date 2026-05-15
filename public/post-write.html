@@ -9,23 +9,29 @@
 <body>
   <header class="site-header">
     <a class="brand" href="/">CWNU Community</a>
+    <nav class="nav-links" aria-label="Main navigation">
+      <span class="auth-status" id="auth-status">로그인 상태 확인 중</span>
+      <a href="/">목록</a>
+      <button class="link-button" type="button" id="logout-button" hidden>로그아웃</button>
+    </nav>
   </header>
 
   <main class="page">
     <section class="page-title">
       <h1>게시글 작성</h1>
-      <p>로그인 인증이 필요한 게시글 작성 API가 연결될 예정입니다.</p>
+      <p>로그인한 사용자만 게시글을 작성할 수 있습니다.</p>
     </section>
 
     <form class="form-panel" id="post-write-form">
       <label>
         제목
-        <input type="text" name="title" required>
+        <input type="text" name="title" maxlength="120" required>
       </label>
       <label>
         내용
         <textarea name="content" rows="10" required></textarea>
       </label>
+      <p class="form-message" id="post-message" role="status"></p>
       <button type="submit">등록</button>
     </form>
   </main>

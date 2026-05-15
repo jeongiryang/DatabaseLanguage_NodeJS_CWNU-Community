@@ -36,7 +36,7 @@ app.use("/api", (req, res) => {
 });
 
 app.use((err, req, res, next) => {
-  console.error(err.message);
+  console.error("Unhandled API error:", err.name || "Error");
   res.status(500).json({
     message: "Internal server error.",
   });
