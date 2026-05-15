@@ -165,6 +165,19 @@ textarea {
   padding: 10px 12px;
 }
 
+.password-toggle {
+  justify-self: start;
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--primary);
+  padding: 8px 12px;
+}
+
+.password-toggle:hover {
+  background: var(--bg);
+  color: var(--primary-dark);
+}
+
 .post-table {
   width: 100%;
   border-collapse: collapse;

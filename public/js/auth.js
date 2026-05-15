@@ -13,6 +13,23 @@ function getFormPayload(form) {
   return Object.fromEntries(new FormData(form).entries());
 }
 
+function bindPasswordToggles() {
+  document.querySelectorAll("[data-password-toggle]").forEach((button) => {
+    const label = button.closest("label");
+    const passwordInput = label?.querySelector('input[type="password"], input[type="text"][name="password"]');
+
+    if (!passwordInput) {
+      return;
+    }
+
+    button.addEventListener("click", () => {
+      const isHidden = passwordInput.type === "password";
+      passwordInput.type = isHidden ? "text" : "password";
+      button.textContent = isHidden ? "비밀번호 숨기기" : "비밀번호 보기";
+    });
+  });
+}
+
 function getAccountDeleteButton() {
   const navLinks = document.querySelector(".nav-links");
 
@@ -151,6 +168,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const loginForm = document.querySelector("#login-form");
   const registerForm = document.querySelector("#register-form");
   const logoutButton = document.querySelector("#logout-button");
+
+  bindPasswordToggles();
 
   if (loginForm) {
     loginForm.addEventListener("submit", (event) => {
