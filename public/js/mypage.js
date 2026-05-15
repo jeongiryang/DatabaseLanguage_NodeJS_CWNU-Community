@@ -89,7 +89,55 @@ function renderProfile(user) {
   document.querySelector("#profile-nickname").textContent = user.nickname;
   document.querySelector("#profile-email").textContent = user.email;
   document.querySelector("#profile-created-at").textContent = formatDate(user.createdAt);
+
+  const nicknameInput = document.querySelector("#nickname-input");
+  if (nicknameInput) {
+    nicknameInput.value = user.nickname;
+  }
+
   showPanel("#profile-panel");
+}
+
+async function handleNicknameUpdate(form) {
+  const nickname = form.elements.nickname.value.trim();
+
+  if (!nickname) {
+    setMyPageMessage("닉네임을 입력하세요.", "error");
+    return;
+  }
+
+  if (nickname.length < 2 || nickname.length > 20) {
+    setMyPageMessage("닉네임은 2자 이상 20자 이하로 입력하세요.", "error");
+    return;
+  }
+
+  try {
+    const result = await api.request("/api/auth/me", {
+      method: "PATCH",
+      body: JSON.stringify({ nickname }),
+    });
+
+    renderProfile(result.user);
+    if (typeof window.refreshAuthStatus === "function") {
+      await window.refreshAuthStatus();
+    }
+    setMyPageMessage("닉네임이 변경되었습니다.", "success");
+  } catch (error) {
+    setMyPageMessage(error.message, "error");
+  }
+}
+
+function bindNicknameForm() {
+  const form = document.querySelector("#nickname-form");
+
+  if (!form) {
+    return;
+  }
+
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    handleNicknameUpdate(form);
+  });
 }
 
 function renderMyPosts(posts) {
@@ -255,5 +303,6 @@ async function loadMyPage() {
 document.addEventListener("DOMContentLoaded", () => {
   bindMyPageTabs();
   bindMyPostCategoryFilter();
+  bindNicknameForm();
   loadMyPage();
 });

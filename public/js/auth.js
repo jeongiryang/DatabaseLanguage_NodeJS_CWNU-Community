@@ -120,6 +120,8 @@ async function refreshAuthStatus() {
   }
 }
 
+window.refreshAuthStatus = refreshAuthStatus;
+
 async function handleRegister(form) {
   setMessage("회원가입 처리 중입니다.");
 

@@ -573,6 +573,14 @@ textarea {
   font-weight: 800;
 }
 
+.nickname-form {
+  align-items: end;
+  display: grid;
+  grid-template-columns: minmax(220px, 320px) auto;
+  gap: 10px;
+  margin-top: 16px;
+}
+
 .activity-list {
   display: grid;
   gap: 12px;
@@ -628,6 +636,7 @@ textarea {
   .toolbar,
   .toolbar form,
   .board-shortcuts,
+  .nickname-form,
   .profile-list {
     grid-template-columns: 1fr;
   }

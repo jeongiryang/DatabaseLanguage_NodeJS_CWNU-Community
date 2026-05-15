@@ -108,6 +108,50 @@ function logout(req, res) {
   return res.json({ message: "Logout completed." });
 }
 
+async function updateMe(req, res) {
+  const nickname = normalizeNickname(req.body.nickname);
+
+  if (!nickname) {
+    return res.status(400).json({ message: "Nickname is required." });
+  }
+
+  if (nickname.length < 2 || nickname.length > 20) {
+    return res.status(400).json({ message: "Nickname must be between 2 and 20 characters." });
+  }
+
+  const existingUser = await prisma.user.findFirst({
+    where: {
+      nickname,
+      NOT: {
+        id: req.user.id,
+      },
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  if (existingUser) {
+    return res.status(409).json({ message: "Nickname is already in use." });
+  }
+
+  const user = await prisma.user.update({
+    where: { id: req.user.id },
+    data: { nickname },
+    select: {
+      id: true,
+      email: true,
+      nickname: true,
+      createdAt: true,
+    },
+  });
+
+  return res.json({
+    message: "Nickname updated.",
+    user,
+  });
+}
+
 function formatActivityPost(post) {
   return {
     id: post.id,
@@ -321,6 +365,7 @@ module.exports = {
   register,
   login,
   logout,
+  updateMe,
   deleteMe,
   activity,
   me,
