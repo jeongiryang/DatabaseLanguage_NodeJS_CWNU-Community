@@ -54,6 +54,13 @@ function createAnonymousBadge() {
   return badge;
 }
 
+function createReplyBadge() {
+  const badge = document.createElement("span");
+  badge.className = "reply-badge";
+  badge.textContent = "답글";
+  return badge;
+}
+
 function showPanel(selector) {
   const panel = document.querySelector(selector);
 
@@ -253,6 +260,10 @@ function renderComments(comments) {
     if (comment.isAnonymous) {
       content.append(" ");
       content.appendChild(createAnonymousBadge());
+    }
+    if (comment.parentId) {
+      content.append(" ");
+      content.appendChild(createReplyBadge());
     }
     link.href = `/post-detail.html?id=${comment.post.id}`;
     link.textContent = comment.post.title;

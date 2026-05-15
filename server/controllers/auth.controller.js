@@ -260,6 +260,7 @@ async function activity(req, res) {
         id: true,
         content: true,
         isAnonymous: true,
+        parentId: true,
         createdAt: true,
         post: {
           select: {

@@ -49,15 +49,19 @@ model Comment {
   id        Int      @id @default(autoincrement())
   postId    Int      @map("post_id")
   userId    Int      @map("user_id")
+  parentId  Int?     @map("parent_id")
   content   String
   isAnonymous Boolean @default(false) @map("is_anonymous")
   post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
   author    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parent    Comment? @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   Comment[] @relation("CommentReplies")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@index([postId])
   @@index([userId])
+  @@index([parentId])
   @@map("comments")
 }
 

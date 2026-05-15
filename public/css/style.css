@@ -423,7 +423,8 @@ textarea {
 
 .category-chip,
 .category-badge,
-.anonymous-badge {
+.anonymous-badge,
+.reply-badge {
   display: inline-block;
   border: 1px solid var(--line);
   border-radius: 999px;
@@ -444,6 +445,13 @@ textarea {
   background: #f3f4f6;
   border-color: #d1d5db;
   color: #4b5563;
+  margin-left: 6px;
+}
+
+.reply-badge {
+  background: #eef6ff;
+  border-color: #bfdcff;
+  color: #0b5cab;
   margin-left: 6px;
 }
 
@@ -564,6 +572,28 @@ textarea {
 .comment-item p {
   margin: 0;
   white-space: pre-wrap;
+}
+
+.reply-list {
+  display: grid;
+  gap: 10px;
+  margin: 12px 0 0 24px;
+  padding-left: 14px;
+  border-left: 3px solid var(--line);
+}
+
+.reply-item {
+  background: #ffffff;
+}
+
+.reply-form {
+  display: grid;
+  gap: 10px;
+  margin: 12px 0 0 24px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #ffffff;
 }
 
 .profile-list {

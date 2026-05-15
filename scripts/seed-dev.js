@@ -222,17 +222,41 @@ async function seedComments(tx, createdUsers, createdPosts) {
 
   for (const post of createdPosts) {
     const commentCount = randomInt(0, 5);
+    const topLevelComments = [];
 
     for (let index = 0; index < commentCount; index += 1) {
       const author = pick(createdUsers);
       const createdAt = makeCommentDate(post.createdAt, index);
 
-      await tx.comment.create({
+      const comment = await tx.comment.create({
         data: {
           postId: post.id,
           userId: author.id,
           content: pick(commentTemplates),
           isAnonymous: (post.id + index) % 4 === 0,
+          createdAt,
+          updatedAt: new Date(createdAt.getTime() + randomInt(0, 900)),
+        },
+      });
+
+      topLevelComments.push(comment);
+      count += 1;
+    }
+
+    const replyCount = topLevelComments.length > 0 ? randomInt(0, Math.min(2, topLevelComments.length)) : 0;
+
+    for (let index = 0; index < replyCount; index += 1) {
+      const parent = topLevelComments[index];
+      const author = pick(createdUsers);
+      const createdAt = makeCommentDate(parent.createdAt, index + 1);
+
+      await tx.comment.create({
+        data: {
+          postId: post.id,
+          userId: author.id,
+          parentId: parent.id,
+          content: pick(commentTemplates),
+          isAnonymous: (post.id + parent.id + index) % 3 === 0,
           createdAt,
           updatedAt: new Date(createdAt.getTime() + randomInt(0, 900)),
         },

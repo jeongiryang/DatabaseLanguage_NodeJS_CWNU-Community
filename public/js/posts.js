@@ -902,11 +902,15 @@ async function loadComments(postId, auth = currentDetailAuth) {
     renderComments(result.comments, auth);
 
     if (currentDetailPost) {
-      updatePostMeta(currentDetailPost, result.comments.length);
+      updatePostMeta(currentDetailPost, result.commentCount ?? countComments(result.comments));
     }
   } catch (error) {
     commentList.textContent = error.message;
   }
+}
+
+function countComments(comments) {
+  return comments.reduce((total, comment) => total + 1 + (comment.replies ? comment.replies.length : 0), 0);
 }
 
 function renderComments(comments, auth) {
@@ -924,35 +928,127 @@ function renderComments(comments, auth) {
   }
 
   comments.forEach((comment) => {
-    const item = document.createElement("article");
-    const header = document.createElement("div");
-    const author = document.createElement("strong");
-    const date = document.createElement("span");
-    const content = document.createElement("p");
-
-    item.className = "comment-item";
-    header.className = "comment-header";
-    author.textContent = getAuthorLabel(comment);
-    date.textContent = formatDate(comment.createdAt);
-    content.textContent = comment.content;
-
-    header.append(author, date);
-    if (comment.isAnonymous) {
-      header.appendChild(createAnonymousBadge());
-    }
-
-    if (auth.authenticated && auth.user.id === comment.author.id) {
-      const deleteButton = document.createElement("button");
-      deleteButton.type = "button";
-      deleteButton.className = "link-button danger-link";
-      deleteButton.textContent = "삭제";
-      deleteButton.addEventListener("click", () => deleteComment(comment.id));
-      header.appendChild(deleteButton);
-    }
-
-    item.append(header, content);
-    commentList.appendChild(item);
+    commentList.appendChild(createCommentElement(comment, auth));
   });
+}
+
+function createCommentElement(comment, auth, isReply = false) {
+  const item = document.createElement("article");
+  const header = document.createElement("div");
+  const author = document.createElement("strong");
+  const date = document.createElement("span");
+  const content = document.createElement("p");
+
+  item.className = isReply ? "comment-item reply-item" : "comment-item";
+  header.className = "comment-header";
+  author.textContent = getAuthorLabel(comment);
+  date.textContent = formatDate(comment.createdAt);
+  content.textContent = comment.content;
+
+  header.append(author, date);
+  if (comment.isAnonymous) {
+    header.appendChild(createAnonymousBadge());
+  }
+
+  if (isReply) {
+    const replyBadge = document.createElement("span");
+    replyBadge.className = "reply-badge";
+    replyBadge.textContent = "답글";
+    header.appendChild(replyBadge);
+  }
+
+  if (auth.authenticated && auth.user.id === comment.author.id) {
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.className = "link-button danger-link";
+    deleteButton.textContent = "삭제";
+    deleteButton.addEventListener("click", () => deleteComment(comment.id));
+    header.appendChild(deleteButton);
+  }
+
+  if (!isReply && auth.authenticated) {
+    const replyButton = document.createElement("button");
+    replyButton.type = "button";
+    replyButton.className = "link-button";
+    replyButton.textContent = "답글";
+    replyButton.addEventListener("click", () => toggleReplyForm(item, comment.id));
+    header.appendChild(replyButton);
+  }
+
+  item.append(header, content);
+
+  if (!isReply && comment.replies?.length > 0) {
+    const replies = document.createElement("div");
+    replies.className = "reply-list";
+    comment.replies.forEach((reply) => {
+      replies.appendChild(createCommentElement(reply, auth, true));
+    });
+    item.appendChild(replies);
+  }
+
+  return item;
+}
+
+function toggleReplyForm(parentElement, parentId) {
+  const existingForm = parentElement.querySelector(":scope > .reply-form");
+
+  if (existingForm) {
+    existingForm.remove();
+    return;
+  }
+
+  parentElement.appendChild(createReplyForm(parentId));
+}
+
+function createReplyForm(parentId) {
+  const form = document.createElement("form");
+  const textarea = document.createElement("textarea");
+  const label = document.createElement("label");
+  const checkbox = document.createElement("input");
+  const submitButton = document.createElement("button");
+
+  form.className = "reply-form";
+  textarea.name = "content";
+  textarea.rows = 3;
+  textarea.placeholder = "답글을 입력하세요.";
+  textarea.required = true;
+
+  checkbox.type = "checkbox";
+  checkbox.name = "isAnonymous";
+  checkbox.value = "true";
+  label.className = "checkbox-label";
+  label.append(checkbox, "익명으로 답글 작성");
+
+  submitButton.type = "submit";
+  submitButton.textContent = "답글 작성";
+
+  form.append(textarea, label, submitButton);
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const content = textarea.value.trim();
+
+    if (!content) {
+      setCommentMessage("답글 내용을 입력하세요.", "error");
+      return;
+    }
+
+    try {
+      await api.request(`/api/posts/${currentDetailPost.id}/comments`, {
+        method: "POST",
+        body: JSON.stringify({
+          content,
+          parentId,
+          isAnonymous: checkbox.checked,
+        }),
+      });
+      setCommentMessage("답글이 등록되었습니다.", "success");
+      await loadComments(currentDetailPost.id, currentDetailAuth);
+    } catch (error) {
+      setCommentMessage(error.message, "error");
+    }
+  });
+
+  return form;
 }
 
 async function deleteComment(commentId) {
