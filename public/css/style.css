@@ -14,6 +14,9 @@
   --danger-soft: #fff0f0;
   --success: #137333;
   --shadow: 0 10px 28px rgba(20, 48, 86, 0.08);
+  --shadow-hover: 0 14px 34px rgba(20, 48, 86, 0.14);
+  --motion-fast: 160ms ease;
+  --motion-base: 200ms ease;
 }
 
 * {
@@ -37,6 +40,7 @@ body {
 a {
   color: inherit;
   text-decoration: none;
+  transition: color var(--motion-fast), text-decoration-color var(--motion-fast);
 }
 
 .site-header {
@@ -86,12 +90,18 @@ a {
   color: #334155;
   font-weight: 700;
   padding: 8px 10px;
+  transition:
+    background-color var(--motion-fast),
+    color var(--motion-fast),
+    box-shadow var(--motion-fast),
+    transform var(--motion-fast);
 }
 
 .nav-links a:hover,
 .link-button:hover {
   background: var(--primary-soft);
   color: var(--primary-dark);
+  transform: translateY(-1px);
 }
 
 .button-link,
@@ -104,17 +114,24 @@ button {
   font: inherit;
   font-weight: 700;
   padding: 10px 14px;
-  transition: background-color 120ms ease, box-shadow 120ms ease, transform 120ms ease;
+  transition:
+    background-color var(--motion-fast),
+    border-color var(--motion-fast),
+    color var(--motion-fast),
+    box-shadow var(--motion-fast),
+    transform var(--motion-fast);
 }
 
 .button-link:hover,
 button:hover {
   background: var(--primary-dark);
-  box-shadow: 0 8px 18px rgba(21, 91, 181, 0.18);
+  box-shadow: 0 10px 22px rgba(21, 91, 181, 0.22);
+  transform: translateY(-1px);
 }
 
 button:active,
 .button-link:active {
+  box-shadow: 0 4px 12px rgba(21, 91, 181, 0.16);
   transform: translateY(1px);
 }
 
@@ -122,6 +139,11 @@ button:disabled {
   background: #b9c4d3;
   box-shadow: none;
   cursor: not-allowed;
+}
+
+button:disabled:hover {
+  box-shadow: none;
+  transform: none;
 }
 
 .link-button {
@@ -140,6 +162,7 @@ button:disabled {
 #delete-post-button:hover {
   background: var(--danger-soft);
   color: #9f2424;
+  box-shadow: 0 8px 16px rgba(199, 53, 53, 0.16);
 }
 
 #delete-post-button {
@@ -150,6 +173,7 @@ button:disabled {
 #delete-post-button:hover {
   background: #9f2424;
   color: #ffffff;
+  box-shadow: 0 10px 22px rgba(199, 53, 53, 0.22);
 }
 
 .auth-status {
@@ -208,6 +232,16 @@ button:disabled {
   background: var(--surface);
   box-shadow: var(--shadow);
   padding: 16px;
+  transition:
+    border-color var(--motion-base),
+    box-shadow var(--motion-base),
+    transform var(--motion-base);
+}
+
+.shortcut-group:hover {
+  border-color: #c8d7eb;
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-1px);
 }
 
 .shortcut-group h2 {
@@ -229,6 +263,12 @@ button:disabled {
   color: #24364f;
   font-weight: 800;
   padding: 9px 13px;
+  transition:
+    background-color var(--motion-fast),
+    border-color var(--motion-fast),
+    color var(--motion-fast),
+    box-shadow var(--motion-fast),
+    transform var(--motion-fast);
 }
 
 .board-shortcut:hover,
@@ -236,6 +276,17 @@ button:disabled {
   background: var(--primary);
   border-color: var(--primary);
   color: #ffffff;
+}
+
+.board-shortcut:hover {
+  box-shadow: 0 8px 16px rgba(20, 48, 86, 0.13);
+  transform: translateY(-1px);
+}
+
+.board-shortcut.active {
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.45),
+    0 8px 18px rgba(21, 91, 181, 0.18);
 }
 
 .board-shortcut.hot {
@@ -251,6 +302,12 @@ button:disabled {
   color: #ffffff;
 }
 
+.board-shortcut.hot.active {
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.42),
+    0 8px 18px rgba(190, 18, 60, 0.2);
+}
+
 .board-shortcut.notice {
   background: #fff7e6;
   border-color: #ffd891;
@@ -264,6 +321,12 @@ button:disabled {
   color: #ffffff;
 }
 
+.board-shortcut.notice.active {
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.42),
+    0 8px 18px rgba(217, 119, 6, 0.2);
+}
+
 .toolbar,
 .panel,
 .form-panel {
@@ -271,6 +334,18 @@ button:disabled {
   border: 1px solid var(--line);
   border-radius: 8px;
   box-shadow: var(--shadow);
+  transition:
+    border-color var(--motion-base),
+    box-shadow var(--motion-base),
+    transform var(--motion-base);
+}
+
+.toolbar:hover,
+.panel:hover,
+.form-panel:hover {
+  border-color: #c8d7eb;
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-1px);
 }
 
 .toolbar {
@@ -402,6 +477,7 @@ textarea {
 
 .post-table td {
   background: #ffffff;
+  transition: background-color var(--motion-fast);
 }
 
 .post-table tbody tr:hover td {
@@ -411,9 +487,12 @@ textarea {
 .post-table a {
   color: var(--primary);
   font-weight: 800;
+  text-decoration-color: transparent;
+  text-underline-offset: 3px;
 }
 
 .post-table a:hover {
+  color: var(--primary-dark);
   text-decoration: underline;
 }
 
@@ -436,6 +515,19 @@ textarea {
   line-height: 1;
   padding: 6px 9px;
   white-space: nowrap;
+  transition:
+    border-color var(--motion-fast),
+    box-shadow var(--motion-fast),
+    transform var(--motion-fast);
+}
+
+.category-chip:hover,
+.category-badge:hover,
+.anonymous-badge:hover,
+.reply-badge:hover,
+.edited-badge:hover {
+  box-shadow: 0 6px 14px rgba(20, 48, 86, 0.12);
+  transform: translateY(-1px);
 }
 
 .category-badge {
@@ -558,6 +650,17 @@ textarea {
   border-radius: 8px;
   background: var(--surface-soft);
   padding: 14px;
+  transition:
+    border-color var(--motion-base),
+    box-shadow var(--motion-base),
+    transform var(--motion-base);
+}
+
+.comment-item:hover,
+.activity-item:hover {
+  border-color: #c8d7eb;
+  box-shadow: 0 10px 24px rgba(20, 48, 86, 0.1);
+  transform: translateY(-1px);
 }
 
 .comment-header {
@@ -637,6 +740,16 @@ textarea {
   border-radius: 8px;
   background: var(--surface-soft);
   padding: 14px;
+  transition:
+    border-color var(--motion-base),
+    box-shadow var(--motion-base),
+    transform var(--motion-base);
+}
+
+.profile-list div:hover {
+  border-color: #c8d7eb;
+  box-shadow: 0 10px 24px rgba(20, 48, 86, 0.1);
+  transform: translateY(-1px);
 }
 
 .profile-list dt {
@@ -702,6 +815,13 @@ textarea {
 .activity-item a {
   color: var(--primary);
   font-weight: 800;
+  text-decoration-color: transparent;
+  text-underline-offset: 3px;
+}
+
+.activity-item a:hover {
+  color: var(--primary-dark);
+  text-decoration: underline;
 }
 
 @media (max-width: 840px) {
@@ -742,5 +862,36 @@ textarea {
 
   .post-table {
     font-size: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .button-link:hover,
+  button:hover,
+  .nav-links a:hover,
+  .link-button:hover,
+  .board-shortcut:hover,
+  .shortcut-group:hover,
+  .toolbar:hover,
+  .panel:hover,
+  .form-panel:hover,
+  .comment-item:hover,
+  .activity-item:hover,
+  .profile-list div:hover,
+  .category-chip:hover,
+  .category-badge:hover,
+  .anonymous-badge:hover,
+  .reply-badge:hover,
+  .edited-badge:hover {
+    transform: none;
   }
 }
