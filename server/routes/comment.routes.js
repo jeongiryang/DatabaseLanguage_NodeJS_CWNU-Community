@@ -15,6 +15,8 @@ router.get("/posts/:postId/comments", asyncHandler(commentController.listComment
 
 router.post("/posts/:postId/comments", requireAuth, asyncHandler(commentController.createComment));
 
+router.put("/comments/:id", requireAuth, asyncHandler(commentController.updateComment));
+
 router.delete("/comments/:id", requireAuth, asyncHandler(commentController.deleteComment));
 
 module.exports = router;

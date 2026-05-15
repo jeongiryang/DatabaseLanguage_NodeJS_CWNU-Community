@@ -184,8 +184,56 @@ async function deleteComment(req, res) {
   return res.json({ message: "Comment deleted." });
 }
 
+async function updateComment(req, res) {
+  const commentId = parseId(req.params.id);
+  const content = typeof req.body.content === "string" ? req.body.content.trim() : "";
+
+  if (!commentId) {
+    return res.status(400).json({ message: "Invalid comment id." });
+  }
+
+  if (!content) {
+    return res.status(400).json({ message: "Comment content is required." });
+  }
+
+  const existingComment = await prisma.comment.findUnique({
+    where: { id: commentId },
+    select: {
+      id: true,
+      userId: true,
+    },
+  });
+
+  if (!existingComment) {
+    return res.status(404).json({ message: "Comment not found." });
+  }
+
+  if (existingComment.userId !== req.user.id) {
+    return res.status(403).json({ message: "Only the comment author can update this comment." });
+  }
+
+  const comment = await prisma.comment.update({
+    where: { id: commentId },
+    data: { content },
+    include: {
+      author: {
+        select: {
+          id: true,
+          nickname: true,
+        },
+      },
+    },
+  });
+
+  return res.json({
+    message: "Comment updated.",
+    comment: formatComment(comment),
+  });
+}
+
 module.exports = {
   listComments,
   createComment,
+  updateComment,
   deleteComment,
 };

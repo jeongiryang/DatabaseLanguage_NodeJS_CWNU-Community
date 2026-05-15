@@ -424,7 +424,8 @@ textarea {
 .category-chip,
 .category-badge,
 .anonymous-badge,
-.reply-badge {
+.reply-badge,
+.edited-badge {
   display: inline-block;
   border: 1px solid var(--line);
   border-radius: 999px;
@@ -452,6 +453,13 @@ textarea {
   background: #eef6ff;
   border-color: #bfdcff;
   color: #0b5cab;
+  margin-left: 6px;
+}
+
+.edited-badge {
+  background: #f4f0ff;
+  border-color: #d8ccff;
+  color: #5b35a8;
   margin-left: 6px;
 }
 
@@ -594,6 +602,27 @@ textarea {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #ffffff;
+}
+
+.comment-edit-form {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.inline-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.edited-meta {
+  margin-top: 8px !important;
+  font-size: 13px;
 }
 
 .profile-list {

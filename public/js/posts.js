@@ -128,6 +128,10 @@ function formatUpdatedAt(createdAtValue, updatedAtValue) {
   return isEdited ? formatDate(updatedAtValue) : "-";
 }
 
+function isEdited(createdAtValue, updatedAtValue) {
+  return Math.abs(new Date(updatedAtValue).getTime() - new Date(createdAtValue).getTime()) > 1000;
+}
+
 function getPostIdFromQuery() {
   const postId = Number.parseInt(new URLSearchParams(window.location.search).get("id"), 10);
   return Number.isInteger(postId) && postId > 0 ? postId : null;
@@ -958,6 +962,13 @@ function createCommentElement(comment, auth, isReply = false) {
   }
 
   if (auth.authenticated && auth.user.id === comment.author.id) {
+    const editButton = document.createElement("button");
+    editButton.type = "button";
+    editButton.className = "link-button";
+    editButton.textContent = "수정";
+    editButton.addEventListener("click", () => showCommentEditForm(item, comment, isReply));
+    header.appendChild(editButton);
+
     const deleteButton = document.createElement("button");
     deleteButton.type = "button";
     deleteButton.className = "link-button danger-link";
@@ -977,6 +988,13 @@ function createCommentElement(comment, auth, isReply = false) {
 
   item.append(header, content);
 
+  if (isEdited(comment.createdAt, comment.updatedAt)) {
+    const edited = document.createElement("p");
+    edited.className = "meta edited-meta";
+    edited.textContent = `수정일 ${formatDate(comment.updatedAt)}`;
+    item.appendChild(edited);
+  }
+
   if (!isReply && comment.replies?.length > 0) {
     const replies = document.createElement("div");
     replies.className = "reply-list";
@@ -987,6 +1005,63 @@ function createCommentElement(comment, auth, isReply = false) {
   }
 
   return item;
+}
+
+function showCommentEditForm(item, comment, isReply) {
+  const existingForm = item.querySelector(":scope > .comment-edit-form");
+
+  if (existingForm) {
+    existingForm.remove();
+    return;
+  }
+
+  item.appendChild(createCommentEditForm(comment, isReply));
+}
+
+function createCommentEditForm(comment, isReply) {
+  const form = document.createElement("form");
+  const textarea = document.createElement("textarea");
+  const actions = document.createElement("div");
+  const saveButton = document.createElement("button");
+  const cancelButton = document.createElement("button");
+
+  form.className = "comment-edit-form";
+  textarea.name = "content";
+  textarea.rows = isReply ? 3 : 4;
+  textarea.value = comment.content;
+  textarea.required = true;
+
+  actions.className = "inline-actions";
+  saveButton.type = "submit";
+  saveButton.textContent = "저장";
+  cancelButton.type = "button";
+  cancelButton.textContent = "취소";
+  cancelButton.addEventListener("click", () => form.remove());
+  actions.append(saveButton, cancelButton);
+
+  form.append(textarea, actions);
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const content = textarea.value.trim();
+
+    if (!content) {
+      setCommentMessage("댓글 내용을 입력하세요.", "error");
+      return;
+    }
+
+    try {
+      await api.request(`/api/comments/${comment.id}`, {
+        method: "PUT",
+        body: JSON.stringify({ content }),
+      });
+      setCommentMessage("댓글이 수정되었습니다.", "success");
+      await loadComments(currentDetailPost.id, currentDetailAuth);
+    } catch (error) {
+      setCommentMessage(error.message, "error");
+    }
+  });
+
+  return form;
 }
 
 function toggleReplyForm(parentElement, parentId) {

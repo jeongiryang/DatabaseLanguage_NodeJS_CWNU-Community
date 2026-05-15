@@ -31,6 +31,10 @@ function formatUpdatedAt(createdAtValue, updatedAtValue) {
   return isEdited ? formatDate(updatedAtValue) : "-";
 }
 
+function isEdited(createdAtValue, updatedAtValue) {
+  return Math.abs(new Date(updatedAtValue).getTime() - new Date(createdAtValue).getTime()) > 1000;
+}
+
 function getCategoryLabel(category) {
   return CATEGORY_LABELS[category] || CATEGORY_LABELS.free;
 }
@@ -58,6 +62,13 @@ function createReplyBadge() {
   const badge = document.createElement("span");
   badge.className = "reply-badge";
   badge.textContent = "답글";
+  return badge;
+}
+
+function createEditedBadge() {
+  const badge = document.createElement("span");
+  badge.className = "edited-badge";
+  badge.textContent = "수정됨";
   return badge;
 }
 
@@ -264,6 +275,10 @@ function renderComments(comments) {
     if (comment.parentId) {
       content.append(" ");
       content.appendChild(createReplyBadge());
+    }
+    if (isEdited(comment.createdAt, comment.updatedAt)) {
+      content.append(" ");
+      content.appendChild(createEditedBadge());
     }
     link.href = `/post-detail.html?id=${comment.post.id}`;
     link.textContent = comment.post.title;
