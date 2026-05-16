@@ -447,6 +447,8 @@ http://localhost:3000
 
 #### 7-2. seed 데이터
 
+> 주의: `npm run db:seed:dev -- --confirm`은 현재 연결된 DB의 기존 데이터를 삭제하고 개발용 더미 데이터를 다시 생성합니다. 운영 DB에 연결된 `.env` 상태에서는 실행하지 않아야 함!
+
 | 항목 | 내용 |
 |---|---|
 | 실행 명령 | `npm run db:seed:dev -- --confirm` |
