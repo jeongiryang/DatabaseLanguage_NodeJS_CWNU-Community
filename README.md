@@ -40,7 +40,7 @@
 
 ### 미리보기 - CWNU Community
 
-| ![메인 게시판](docs/screenshots/99-final/main-board.png) |
+| ![메인 게시판](docs/screenshots/99-final/main-board-preview.gif) |
 |:--:|
 | **▲ 메인 게시판: 전체글, 인기글, 공지사항, 카테고리 바로가기** |
 
@@ -48,11 +48,11 @@
 |:--:|:--:|
 | **▲ 게시글 상세 화면** | **▲ 댓글과 1단계 답글** |
 
-| ![마이페이지](docs/screenshots/99-final/mypage.png) | ![다크모드](docs/screenshots/99-final/dark-mode.png) |
+| ![마이페이지](docs/screenshots/99-final/mypage-preview.gif) | ![다크모드](docs/screenshots/99-final/dark-mode.png) |
 |:--:|:--:|
 | **▲ 마이페이지** | **▲ 다크모드 화면** |
 
-| ![도움말 투어](docs/screenshots/99-final/help-tour.png) |
+| ![도움말 투어](docs/screenshots/99-final/help-tour-preview.gif) |
 |:--:|
 | **▲ 메인 페이지 사용 가이드 투어** |
 
