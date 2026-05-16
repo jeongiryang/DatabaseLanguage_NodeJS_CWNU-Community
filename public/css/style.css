@@ -43,6 +43,11 @@ html[data-theme="dark"] {
   box-sizing: border-box;
 }
 
+html {
+  width: 100%;
+  overflow-x: hidden;
+}
+
 [hidden] {
   display: none !important;
 }
@@ -55,6 +60,7 @@ body {
   color: var(--text);
   font-family: Arial, "Noto Sans KR", sans-serif;
   line-height: 1.5;
+  overflow-x: hidden;
 }
 
 html[data-theme="dark"] body {
@@ -91,10 +97,12 @@ html[data-theme="dark"] .site-header {
 }
 
 .brand {
+  flex: 0 0 auto;
   color: var(--primary-dark);
   font-size: 21px;
   font-weight: 800;
   letter-spacing: 0;
+  white-space: nowrap;
 }
 
 html[data-theme="dark"] .brand {
@@ -133,6 +141,18 @@ html[data-theme="dark"] .brand {
     transform var(--motion-fast);
 }
 
+.portal-link {
+  border: 1px solid #b8d2f4;
+  background: #f5f9ff;
+  color: var(--primary-dark) !important;
+}
+
+.portal-link:hover {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  color: var(--primary-dark) !important;
+}
+
 .theme-toggle {
   border: 1px solid var(--line-strong);
   background: var(--surface-soft);
@@ -149,6 +169,18 @@ html[data-theme="dark"] .brand {
 html[data-theme="dark"] .nav-links a,
 html[data-theme="dark"] .link-button {
   color: #d5dfef;
+}
+
+html[data-theme="dark"] .portal-link {
+  background: #1e3151;
+  border-color: #54729a;
+  color: #dbeafe !important;
+}
+
+html[data-theme="dark"] .portal-link:hover {
+  background: #263b5d;
+  border-color: #7aa7e8;
+  color: #ffffff !important;
 }
 
 html[data-theme="dark"] .nav-links a:hover,
@@ -644,6 +676,7 @@ textarea:focus {
 
 textarea {
   resize: vertical;
+  max-width: 100%;
 }
 
 .password-toggle {
@@ -891,6 +924,7 @@ html[data-theme="dark"] .category-badge[data-category="lost"] {
   font-size: 16px;
   padding: 22px 0;
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 html[data-theme="dark"] .content-block {
@@ -1208,6 +1242,7 @@ html[data-theme="dark"] .reply-item {
 .comment-item p {
   margin: 0;
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .reply-list {
@@ -1341,6 +1376,7 @@ html[data-theme="dark"] .mypage-tabs button {
 
 .activity-item p {
   margin: 0 0 6px;
+  overflow-wrap: anywhere;
 }
 
 .activity-title {
@@ -1390,6 +1426,34 @@ html[data-theme="dark"] .mypage-tabs button {
   justify-content: center;
   flex-wrap: wrap;
   gap: 10px;
+}
+
+.footer-portal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  box-shadow: 0 8px 18px rgba(20, 48, 86, 0.08);
+  color: var(--primary-dark);
+  font-weight: 800;
+  padding: 7px 12px;
+  transition:
+    background-color var(--motion-fast),
+    border-color var(--motion-fast),
+    color var(--motion-fast),
+    box-shadow var(--motion-fast),
+    transform var(--motion-fast);
+}
+
+.footer-portal:hover {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  color: var(--primary-dark);
+  box-shadow: 0 12px 24px rgba(21, 91, 181, 0.16);
+  transform: translateY(-2px);
 }
 
 .footer-github {
@@ -1471,6 +1535,18 @@ html[data-theme="dark"] .footer-github {
   background: #1d2a42;
   border-color: #455d7d;
   color: #dbeafe;
+}
+
+html[data-theme="dark"] .footer-portal {
+  background: #1d2a42;
+  border-color: #455d7d;
+  color: #dbeafe;
+}
+
+html[data-theme="dark"] .footer-portal:hover {
+  background: #263b5d;
+  border-color: #6c9add;
+  color: #ffffff;
 }
 
 html[data-theme="dark"] .footer-github:hover {
@@ -1626,6 +1702,199 @@ html[data-theme="dark"] .guide-actions .guide-secondary:hover {
   }
 }
 
+@media (max-width: 768px) {
+  .site-header {
+    gap: 12px;
+    padding: 14px 12px;
+  }
+
+  .brand {
+    max-width: 100%;
+    font-size: 19px;
+  }
+
+  .nav-links {
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .nav-links > * {
+    max-width: 100%;
+  }
+
+  .nav-links a,
+  .link-button {
+    flex: 1 1 auto;
+    min-height: 38px;
+    text-align: center;
+  }
+
+  .auth-status {
+    flex: 1 0 100%;
+  }
+
+  .page {
+    width: min(100% - 20px, 1180px);
+    margin: 20px auto;
+  }
+
+  .page-title {
+    margin-bottom: 16px;
+  }
+
+  .page-title h1 {
+    overflow-wrap: anywhere;
+  }
+
+  .current-board,
+  .help-button {
+    margin-top: 10px;
+  }
+
+  .shortcut-links {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .board-shortcut {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    text-align: center;
+  }
+
+  .toolbar label,
+  .toolbar form label {
+    min-width: 0;
+  }
+
+  .toolbar form button {
+    width: 100%;
+  }
+
+  .panel,
+  .form-panel,
+  .toolbar,
+  .shortcut-group {
+    padding: 16px;
+  }
+
+  .post-table {
+    min-width: 760px;
+    font-size: 13px;
+  }
+
+  .post-table th,
+  .post-table td {
+    padding: 10px 8px;
+  }
+
+  .post-table td:first-child {
+    max-width: 230px;
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+
+  .actions {
+    align-items: stretch;
+  }
+
+  .actions button {
+    flex: 1 1 calc(50% - 8px);
+  }
+
+  .actions .meta {
+    justify-content: center;
+  }
+
+  .reply-list,
+  .reply-form {
+    margin-left: 8px;
+    padding-left: 10px;
+  }
+
+  .comment-edit-form {
+    padding: 10px;
+  }
+
+  .inline-actions button,
+  .comment-form button,
+  .reply-form button,
+  .comment-edit-form button {
+    flex: 1 1 auto;
+  }
+
+  .nickname-form,
+  .profile-list {
+    grid-template-columns: 1fr;
+  }
+
+  .inline-filter {
+    max-width: none;
+  }
+
+  .mypage-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  .mypage-tabs button {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  .site-footer {
+    width: min(100% - 20px, 1180px);
+    padding-bottom: 24px;
+  }
+
+  .footer-meta {
+    align-items: center;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .brand {
+    font-size: 18px;
+  }
+
+  .nav-links a,
+  .link-button,
+  button {
+    font-size: 14px;
+    padding: 8px 10px;
+  }
+
+  .shortcut-links {
+    grid-template-columns: 1fr;
+  }
+
+  .actions button {
+    flex-basis: 100%;
+  }
+
+  .pagination {
+    flex-wrap: wrap;
+  }
+
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+
+  .post-table {
+    min-width: 700px;
+  }
+
+  .footer-meta {
+    flex-direction: column;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -1657,6 +1926,7 @@ html[data-theme="dark"] .guide-actions .guide-secondary:hover {
   }
 
   .footer-github:hover,
+  .footer-portal:hover,
   .footer-github:hover svg,
   .footer-github:hover::after,
   .footer-github:focus-visible svg,
