@@ -1426,7 +1426,102 @@ await prisma.$transaction(async (tx) => {
 
 ---
 
-## 18. 결론
+## 18. 모바일 뷰포트 최적화
+
+### 기능 설명
+
+모바일 환경에서 주요 화면이 화면 밖으로 밀리거나 깨지지 않도록 반응형 레이아웃을 적용함. 헤더, 게시판 바로가기, 검색/정렬/표시 개수, 게시글 목록 테이블, 상세 화면, 댓글/답글, 폼, 마이페이지, footer를 모바일 기준으로 보완함.
+
+### 동작 방식
+
+- CSS media query를 사용해 화면 폭이 좁을 때 padding, grid, flex-wrap, table scroll, button layout을 조정함.
+- 게시글 목록 테이블은 가로 스크롤을 허용해 모바일에서 전체 레이아웃이 깨지지 않도록 구성함.
+- 헤더와 footer는 버튼이 겹치지 않도록 줄바꿈과 간격을 조정함.
+- 마이페이지 탭은 모바일에서 가로 스크롤이 가능하도록 처리함.
+- 다크모드에서도 모바일 색상과 버튼 시인성을 유지함.
+
+### 관련 API 또는 DB
+
+- 별도 API 없음
+- 별도 DB 없음
+- CSS 기반 UI/UX 개선
+
+### 관련 코드
+
+관련 파일: `public/css/style.css`
+
+```css
+@media (max-width: 768px) {
+  .site-header {
+    gap: 12px;
+    padding: 14px 12px;
+  }
+
+  .nav-links {
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .nav-links a,
+  .link-button {
+    flex: 1 1 auto;
+    min-height: 38px;
+    text-align: center;
+  }
+}
+```
+
+관련 파일: `public/css/style.css`
+
+```css
+@media (max-width: 768px) {
+  .shortcut-links {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .post-table {
+    min-width: 760px;
+    font-size: 13px;
+  }
+
+  .mypage-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+}
+```
+
+### 관련 화면
+
+- `public/index.html`
+- `public/post-detail.html`
+- `public/post-write.html`
+- `public/login.html`
+- `public/register.html`
+- `public/mypage.html`
+
+| ![모바일 메인 게시판](./screenshots/99-final/mobile-main-board.png) | ![모바일 목록 화면](./screenshots/99-final/mobile-board-list.png) |
+|:--:|:--:|
+| **▲ 모바일 메인 게시판과 게시판 바로가기** | **▲ 모바일 필터와 게시글 목록** |
+
+| ![모바일 마이페이지](./screenshots/99-final/mobile-mypage.png) | ![모바일 다크모드](./screenshots/99-final/mobile-dark-mode.png) |
+|:--:|:--:|
+| **▲ 모바일 마이페이지** | **▲ 모바일 다크모드** |
+
+### 검증 내용
+
+- Chrome DevTools 모바일 뷰포트에서 메인, 목록, 상세, 로그인/회원가입, 글쓰기/수정, 마이페이지 화면 확인.
+- 게시판 바로가기 버튼이 모바일에서 2열 또는 1열로 자연스럽게 배치되는지 확인.
+- 검색/정렬/표시 개수 영역이 모바일에서 화면 밖으로 밀리지 않는지 확인.
+- 게시글 목록 테이블이 모바일에서 가로 스크롤로 표시되는지 확인.
+- footer와 Smart Portal/GitHub 링크가 겹치지 않는지 확인.
+- 모바일 다크모드에서 텍스트와 버튼 시인성 확인.
+
+---
+
+## 19. 결론
 
 ### 기능 설명
 

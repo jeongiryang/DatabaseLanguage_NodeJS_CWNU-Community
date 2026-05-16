@@ -56,6 +56,16 @@
 |:--:|
 | **▲ 메인 페이지 사용 가이드 투어** |
 
+### 모바일 뷰포트
+
+| ![모바일 메인 게시판](docs/screenshots/99-final/mobile-main-board.png) | ![모바일 목록 화면](docs/screenshots/99-final/mobile-board-list.png) |
+|:--:|:--:|
+| **▲ 모바일 메인 게시판과 게시판 바로가기** | **▲ 모바일 필터와 게시글 목록** |
+
+| ![모바일 마이페이지](docs/screenshots/99-final/mobile-mypage.png) | ![모바일 다크모드](docs/screenshots/99-final/mobile-dark-mode.png) |
+|:--:|:--:|
+| **▲ 모바일 마이페이지** | **▲ 모바일 다크모드** |
+
 ---
 
 ## 목차
@@ -294,7 +304,7 @@ PostgreSQL
 | 게시판 | 공지사항/인기글/카테고리 | Smart Portal 연계 URL 지원 |
 | 댓글 | 답글/수정/익명 | 1단계 답글, 답글의 답글 제한, 익명 댓글/답글 |
 | 반응 | 싫어요/북마크 | 좋아요와 싫어요 상호 전환, 게시글 저장 |
-| UX | 다크모드/도움말/hover/footer | 사용자 편의성과 제출 문서 완성도 강화 |
+| UX | 다크모드/도움말/hover/footer/모바일 최적화 | 사용자 편의성과 제출 문서 완성도 강화, 모바일 뷰포트에서 주요 화면이 깨지지 않도록 반응형 레이아웃 적용 |
 | 데이터 | seed-dev | 테스트용 사용자, 게시글, 댓글, 반응 데이터 자동 생성 |
 
 #### 게시판 URL 구조
@@ -678,3 +688,13 @@ COOKIE_SECURE=true
 | ![다크모드](docs/screenshots/99-final/dark-mode.png) | ![도움말 투어](docs/screenshots/99-final/help-tour.png) |
 |:--:|:--:|
 | **▲ 다크모드 화면** | **▲ 도움말 투어 화면** |
+
+#### 모바일 최적화
+
+| ![모바일 메인 게시판](docs/screenshots/99-final/mobile-main-board.png) | ![모바일 목록 화면](docs/screenshots/99-final/mobile-board-list.png) |
+|:--:|:--:|
+| **▲ 모바일 게시판 바로가기** | **▲ 모바일 필터와 게시글 목록** |
+
+| ![모바일 마이페이지](docs/screenshots/99-final/mobile-mypage.png) | ![모바일 다크모드](docs/screenshots/99-final/mobile-dark-mode.png) |
+|:--:|:--:|
+| **▲ 모바일 마이페이지 화면** | **▲ 모바일 다크모드 화면** |
