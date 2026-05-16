@@ -228,6 +228,7 @@ html[data-theme="dark"] .brand-name {
     linear-gradient(135deg, #ffffff, #eef6ff);
   box-shadow: 0 8px 18px rgba(20, 48, 86, 0.08);
   color: var(--primary-dark) !important;
+  white-space: nowrap;
 }
 
 .portal-link:hover {
@@ -1552,6 +1553,7 @@ html[data-theme="dark"] .mypage-tabs button {
   color: var(--primary-dark);
   font-weight: 800;
   padding: 7px 12px;
+  white-space: nowrap;
   transition:
     background-color var(--motion-fast),
     border-color var(--motion-fast),
