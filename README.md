@@ -1,6 +1,6 @@
 # 데이터베이스개론 과제: CWNU Community 게시판 시스템
 
-![Version](https://img.shields.io/badge/Version-v1.0.0-155bb5)
+[![Version](https://img.shields.io/badge/Version-v1.0.0-155bb5)](https://github.com/jeongiryang/DatabaseLanguage_NodeJS_CWNU-Community/releases)
 ![Node.js](https://img.shields.io/badge/Node.js-Express-339933)
 ![DBMS](https://img.shields.io/badge/DBMS-PostgreSQL-4169E1)
 ![ORM](https://img.shields.io/badge/ORM-Prisma-2D3748)
