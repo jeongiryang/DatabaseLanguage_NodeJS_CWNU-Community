@@ -1541,6 +1541,20 @@ html[data-theme="dark"] .mypage-tabs button {
   gap: 10px;
 }
 
+.footer-links {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.footer-links span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
 .footer-portal {
   display: inline-flex;
   align-items: center;
@@ -1974,6 +1988,10 @@ html[data-theme="dark"] .guide-actions .guide-secondary:hover {
     align-items: center;
     gap: 8px;
   }
+
+  .footer-links {
+    gap: 7px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -2025,6 +2043,10 @@ html[data-theme="dark"] .guide-actions .guide-secondary:hover {
   }
 
   .footer-meta {
+    flex-direction: column;
+  }
+
+  .footer-links {
     flex-direction: column;
   }
 }
