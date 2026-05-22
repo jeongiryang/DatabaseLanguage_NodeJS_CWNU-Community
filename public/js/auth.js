@@ -155,6 +155,77 @@ function showConfirmModal({
 
 window.showConfirmModal = showConfirmModal;
 
+function createLoadingMarkup(message = "불러오는 중입니다.") {
+  const wrapper = document.createElement("span");
+  const spinner = document.createElement("span");
+  const text = document.createElement("span");
+
+  wrapper.className = "loading-inline";
+  spinner.className = "loading-spinner";
+  spinner.setAttribute("aria-hidden", "true");
+  text.textContent = message;
+
+  wrapper.append(spinner, text);
+  return wrapper;
+}
+
+function setLoadingMessage(target, message = "불러오는 중입니다.") {
+  const element = typeof target === "string" ? document.querySelector(target) : target;
+
+  if (!element) {
+    return;
+  }
+
+  element.innerHTML = "";
+  if (element.dataset) {
+    element.dataset.type = "info";
+  }
+  element.appendChild(createLoadingMarkup(message));
+}
+
+function setButtonLoading(button, isLoading, loadingText = "처리 중...") {
+  if (!button) {
+    return;
+  }
+
+  if (isLoading) {
+    if (!button.dataset.loadingOriginalText) {
+      button.dataset.loadingOriginalText = button.textContent;
+      button.dataset.loadingWasDisabled = String(button.disabled);
+    }
+
+    button.disabled = true;
+    button.classList.add("is-loading");
+    button.innerHTML = "";
+
+    const spinner = document.createElement("span");
+    const text = document.createElement("span");
+
+    spinner.className = "button-spinner";
+    spinner.setAttribute("aria-hidden", "true");
+    text.textContent = loadingText;
+    button.append(spinner, text);
+    return;
+  }
+
+  const originalText = button.dataset.loadingOriginalText;
+  const wasDisabled = button.dataset.loadingWasDisabled === "true";
+
+  button.classList.remove("is-loading");
+  button.disabled = wasDisabled;
+
+  if (originalText) {
+    button.textContent = originalText;
+  }
+
+  delete button.dataset.loadingOriginalText;
+  delete button.dataset.loadingWasDisabled;
+}
+
+window.createLoadingMarkup = createLoadingMarkup;
+window.setLoadingMessage = setLoadingMessage;
+window.setButtonLoading = setButtonLoading;
+
 function getStoredTheme() {
   try {
     return localStorage.getItem(THEME_STORAGE_KEY);
@@ -349,6 +420,9 @@ async function refreshAuthStatus() {
 window.refreshAuthStatus = refreshAuthStatus;
 
 async function handleRegister(form) {
+  const submitButton = form.querySelector('button[type="submit"]');
+
+  setButtonLoading(submitButton, true, "가입 중...");
   setMessage("회원가입 처리 중입니다.");
 
   try {
@@ -361,10 +435,15 @@ async function handleRegister(form) {
     window.location.href = "/";
   } catch (error) {
     setMessage(error.message, "error");
+  } finally {
+    setButtonLoading(submitButton, false);
   }
 }
 
 async function handleLogin(form) {
+  const submitButton = form.querySelector('button[type="submit"]');
+
+  setButtonLoading(submitButton, true, "로그인 중...");
   setMessage("로그인 처리 중입니다.");
 
   try {
@@ -377,6 +456,8 @@ async function handleLogin(form) {
     window.location.href = "/";
   } catch (error) {
     setMessage(error.message, "error");
+  } finally {
+    setButtonLoading(submitButton, false);
   }
 }
 

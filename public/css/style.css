@@ -801,6 +801,61 @@ html[data-theme="dark"] .shortcut-group {
   color: var(--danger);
 }
 
+.loading-inline,
+.is-loading {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.loading-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.loading-spinner,
+.button-spinner {
+  flex: 0 0 auto;
+  width: 1em;
+  height: 1em;
+  border: 2px solid color-mix(in srgb, currentColor 24%, transparent);
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: loading-spin 720ms linear infinite;
+}
+
+.loading-spinner {
+  color: var(--primary);
+}
+
+.button-spinner {
+  color: currentColor;
+}
+
+button.is-loading,
+.button-link.is-loading,
+.link-button.is-loading {
+  cursor: wait;
+  opacity: 0.86;
+}
+
+button.is-loading:hover,
+.button-link.is-loading:hover,
+.link-button.is-loading:hover {
+  transform: none;
+}
+
+@keyframes loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 label {
   display: grid;
   gap: 8px;
@@ -3063,6 +3118,11 @@ html[data-theme="dark"] .guide-actions .guide-secondary:hover {
 
   .modal-overlay,
   .confirm-modal {
+    animation: none;
+  }
+
+  .loading-spinner,
+  .button-spinner {
     animation: none;
   }
 }

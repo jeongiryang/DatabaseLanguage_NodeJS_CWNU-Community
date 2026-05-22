@@ -126,6 +126,21 @@ function setText(selector, value) {
   }
 }
 
+function setLocalLoadingMessage(selector, message) {
+  const element = document.querySelector(selector);
+
+  if (!element) {
+    return;
+  }
+
+  if (typeof window.setLoadingMessage === "function") {
+    window.setLoadingMessage(element, message);
+    return;
+  }
+
+  element.textContent = message;
+}
+
 function createActivityEmpty(message) {
   const empty = document.createElement("p");
   empty.className = "activity-empty";
@@ -243,6 +258,7 @@ function renderProfile(user) {
 
 async function handleNicknameUpdate(form) {
   const nickname = form.elements.nickname.value.trim();
+  const submitButton = form.querySelector('button[type="submit"]');
 
   if (!nickname) {
     setMyPageMessage("닉네임을 입력하세요.", "error");
@@ -255,6 +271,7 @@ async function handleNicknameUpdate(form) {
   }
 
   try {
+    window.setButtonLoading?.(submitButton, true, "변경 중...");
     const result = await api.request("/api/auth/me", {
       method: "PATCH",
       body: JSON.stringify({ nickname }),
@@ -267,6 +284,8 @@ async function handleNicknameUpdate(form) {
     setMyPageMessage("닉네임이 변경되었습니다.", "success");
   } catch (error) {
     setMyPageMessage(error.message, "error");
+  } finally {
+    window.setButtonLoading?.(submitButton, false);
   }
 }
 
@@ -478,6 +497,9 @@ function renderBookmarks(bookmarks) {
 }
 
 async function loadMyPage() {
+  setLocalLoadingMessage("#mypage-message", "활동 정보를 불러오는 중입니다.");
+  setLocalLoadingMessage("#recent-activity-list", "최근 활동을 불러오는 중입니다.");
+
   try {
     const activity = await api.request("/api/auth/me/activity");
     const normalizedActivity = {
