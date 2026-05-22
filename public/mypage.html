@@ -53,22 +53,27 @@
         <article class="activity-stat-card">
           <span class="activity-stat-label">작성 글</span>
           <strong id="stat-posts">0</strong>
+          <span class="activity-stat-helper">직접 작성한 게시글</span>
         </article>
         <article class="activity-stat-card">
           <span class="activity-stat-label">댓글/답글</span>
           <strong id="stat-comments">0</strong>
+          <span class="activity-stat-helper">참여한 대화</span>
         </article>
         <article class="activity-stat-card">
           <span class="activity-stat-label">좋아요</span>
           <strong id="stat-likes">0</strong>
+          <span class="activity-stat-helper">공감한 게시글</span>
         </article>
         <article class="activity-stat-card">
           <span class="activity-stat-label">싫어요</span>
           <strong id="stat-dislikes">0</strong>
+          <span class="activity-stat-helper">비추천한 게시글</span>
         </article>
         <article class="activity-stat-card">
           <span class="activity-stat-label">북마크</span>
           <strong id="stat-bookmarks">0</strong>
+          <span class="activity-stat-helper">저장한 게시글</span>
         </article>
       </section>
 
@@ -76,13 +81,34 @@
         <div class="recent-activity-header">
           <div>
             <p class="dashboard-eyebrow">최근 활동</p>
-            <h2 id="recent-activity-title">최근 활동 요약</h2>
+            <h2 id="recent-activity-title">최근 활동 타임라인</h2>
           </div>
           <span class="recent-activity-count" id="recent-activity-count">0개</span>
         </div>
         <div class="recent-activity-list" id="recent-activity-list">
           <p class="activity-empty">활동 정보를 불러오는 중입니다.</p>
         </div>
+      </section>
+
+      <section class="activity-visual-section" aria-label="활동 시각화 요약">
+        <article class="activity-insight-card">
+          <div class="activity-insight-header">
+            <p class="dashboard-eyebrow">활동 분포</p>
+            <h2>많이 활동한 게시판</h2>
+          </div>
+          <div class="activity-category-summary" id="activity-category-summary">
+            <p class="activity-empty">활동 정보를 불러오는 중입니다.</p>
+          </div>
+        </article>
+        <article class="activity-insight-card">
+          <div class="activity-insight-header">
+            <p class="dashboard-eyebrow">활동 유형</p>
+            <h2>활동 요약</h2>
+          </div>
+          <div class="activity-type-summary" id="activity-type-summary">
+            <p class="activity-empty">활동 정보를 불러오는 중입니다.</p>
+          </div>
+        </article>
       </section>
     </section>
 
