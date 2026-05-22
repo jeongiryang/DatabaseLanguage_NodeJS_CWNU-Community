@@ -568,6 +568,51 @@ html[data-theme="dark"] .shortcut-group h2 {
   color: var(--primary-dark);
 }
 
+.floating-write-button {
+  position: fixed;
+  right: max(18px, env(safe-area-inset-right));
+  bottom: calc(82px + env(safe-area-inset-bottom));
+  z-index: 900;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  min-width: 118px;
+  min-height: 52px;
+  border: 1px solid color-mix(in srgb, var(--primary) 74%, var(--line));
+  border-radius: var(--radius-pill);
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  box-shadow: var(--shadow-primary);
+  color: var(--color-on-primary);
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: 0;
+  padding: 13px 18px;
+}
+
+.floating-write-button:hover,
+.floating-write-button:focus-visible {
+  border-color: color-mix(in srgb, var(--primary-hover) 80%, var(--color-on-primary));
+  background: linear-gradient(135deg, var(--primary-hover), var(--primary));
+  box-shadow: 0 16px 34px color-mix(in srgb, var(--primary) 34%, transparent);
+  color: var(--color-on-primary);
+  transform: translateY(-2px);
+}
+
+.floating-write-button:active {
+  transform: translateY(0);
+}
+
+.floating-write-button.is-loading {
+  cursor: wait;
+  opacity: 0.9;
+}
+
+html[data-theme="dark"] .floating-write-button {
+  border-color: color-mix(in srgb, var(--primary) 64%, var(--line-strong));
+  background: linear-gradient(135deg, var(--primary), color-mix(in srgb, var(--primary-soft) 70%, #020617));
+  color: var(--color-on-primary);
+}
+
 html[data-theme="dark"] .current-board {
   background: var(--surface-raised);
   border-color: var(--color-primary-border);
@@ -3813,6 +3858,10 @@ html[data-theme="dark"] .guide-actions .guide-secondary:hover {
     display: grid;
     grid-template-columns: 1fr 1fr;
   }
+
+  .floating-write-button {
+    display: inline-flex;
+  }
 }
 
 @media (max-width: 480px) {
@@ -3839,6 +3888,14 @@ html[data-theme="dark"] .guide-actions .guide-secondary:hover {
   button {
     font-size: 14px;
     padding: 8px 10px;
+  }
+
+  .floating-write-button {
+    right: max(14px, env(safe-area-inset-right));
+    bottom: calc(76px + env(safe-area-inset-bottom));
+    min-width: 108px;
+    min-height: 48px;
+    padding: 12px 15px;
   }
 
   .shortcut-links {
@@ -3979,7 +4036,8 @@ html[data-theme="dark"] .guide-actions .guide-secondary:hover {
   .category-badge:hover,
   .anonymous-badge:hover,
   .reply-badge:hover,
-  .edited-badge:hover {
+  .edited-badge:hover,
+  .floating-write-button:hover {
     transform: none;
   }
 

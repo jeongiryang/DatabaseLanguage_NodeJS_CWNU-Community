@@ -1420,6 +1420,51 @@ function bindPostListControls() {
   }
 }
 
+async function getCurrentAuthForFloatingWrite() {
+  if (typeof window.refreshAuthStatus === "function") {
+    return window.refreshAuthStatus();
+  }
+
+  return window.currentAuth || { authenticated: false, user: null };
+}
+
+function bindFloatingWriteButton() {
+  const floatingWriteButton = document.querySelector("#floating-write-button");
+
+  if (!floatingWriteButton) {
+    return;
+  }
+
+  floatingWriteButton.addEventListener("click", async () => {
+    if (floatingWriteButton.disabled) {
+      return;
+    }
+
+    setPendingButton(floatingWriteButton, true, "확인 중...");
+
+    try {
+      const auth = await getCurrentAuthForFloatingWrite();
+
+      if (auth.authenticated) {
+        window.location.href = "/post-write.html";
+        return;
+      }
+
+      window.showToast?.("로그인 후 글을 작성할 수 있습니다.", "warning");
+      window.setTimeout(() => {
+        window.location.href = "/login.html";
+      }, 650);
+    } catch (error) {
+      window.showToast?.("로그인 상태를 확인하지 못했습니다. 로그인 화면으로 이동합니다.", "warning");
+      window.setTimeout(() => {
+        window.location.href = "/login.html";
+      }, 650);
+    } finally {
+      setPendingButton(floatingWriteButton, false);
+    }
+  });
+}
+
 function getPostWriteSnapshot(form) {
   return {
     category: form.elements.category?.value || "free",
@@ -2900,6 +2945,7 @@ document.addEventListener("DOMContentLoaded", () => {
   renderFilterSummary();
   applyViewMode();
   bindGuideTour();
+  bindFloatingWriteButton();
   bindPostWriteForm();
   initializePostWriteExperience();
   loadDashboardSections();
