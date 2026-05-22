@@ -192,10 +192,12 @@ function setButtonLoading(button, isLoading, loadingText = "처리 중...") {
     if (!button.dataset.loadingOriginalText) {
       button.dataset.loadingOriginalText = button.textContent;
       button.dataset.loadingWasDisabled = String(button.disabled);
+      button.dataset.loadingOriginalAriaBusy = button.getAttribute("aria-busy") || "";
     }
 
     button.disabled = true;
     button.classList.add("is-loading");
+    button.setAttribute("aria-busy", "true");
     button.innerHTML = "";
 
     const spinner = document.createElement("span");
@@ -210,9 +212,15 @@ function setButtonLoading(button, isLoading, loadingText = "처리 중...") {
 
   const originalText = button.dataset.loadingOriginalText;
   const wasDisabled = button.dataset.loadingWasDisabled === "true";
+  const originalAriaBusy = button.dataset.loadingOriginalAriaBusy;
 
   button.classList.remove("is-loading");
   button.disabled = wasDisabled;
+  if (originalAriaBusy) {
+    button.setAttribute("aria-busy", originalAriaBusy);
+  } else {
+    button.removeAttribute("aria-busy");
+  }
 
   if (originalText) {
     button.textContent = originalText;
@@ -220,6 +228,7 @@ function setButtonLoading(button, isLoading, loadingText = "처리 중...") {
 
   delete button.dataset.loadingOriginalText;
   delete button.dataset.loadingWasDisabled;
+  delete button.dataset.loadingOriginalAriaBusy;
 }
 
 window.createLoadingMarkup = createLoadingMarkup;

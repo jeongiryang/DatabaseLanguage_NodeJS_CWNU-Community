@@ -39,6 +39,16 @@ const SORT_LABELS = {
 
 const VIEW_MODE_STORAGE_KEY = "cwnu.community.viewMode";
 const VIEW_MODES = ["table", "card"];
+const ALLOWED_PAGE_SIZES = [10, 20, 30, 40, 50];
+
+function normalizePageSize(value) {
+  const parsedValue = Number.parseInt(value, 10);
+  return ALLOWED_PAGE_SIZES.includes(parsedValue) ? parsedValue : 10;
+}
+
+function normalizeSort(value) {
+  return Object.prototype.hasOwnProperty.call(SORT_LABELS, value) ? value : "latest";
+}
 
 function setLoadingContent(target, message) {
   const element = typeof target === "string" ? document.querySelector(target) : target;
@@ -296,6 +306,7 @@ function applyViewMode() {
     const isActive = button.dataset.viewMode === normalizedMode;
     button.classList.toggle("is-active", isActive);
     button.setAttribute("aria-pressed", String(isActive));
+    button.setAttribute("aria-label", `${button.textContent.trim()}${isActive ? " 선택됨" : ""}`);
   });
 }
 
@@ -779,7 +790,7 @@ function bindPostListControls() {
   if (pageSizeSelect) {
     pageSizeSelect.addEventListener("change", () => {
       postState.page = 1;
-      postState.pageSize = Number.parseInt(pageSizeSelect.value, 10);
+      postState.pageSize = normalizePageSize(pageSizeSelect.value);
       loadPostList();
     });
   }
@@ -787,7 +798,7 @@ function bindPostListControls() {
   if (sortSelect) {
     sortSelect.addEventListener("change", () => {
       postState.page = 1;
-      postState.sort = sortSelect.value;
+      postState.sort = normalizeSort(sortSelect.value);
       loadPostList();
     });
   }
