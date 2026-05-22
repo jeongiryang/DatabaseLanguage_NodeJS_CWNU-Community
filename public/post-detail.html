@@ -66,6 +66,30 @@
       </form>
       <div class="comment-list" id="comment-list">댓글을 불러오는 중입니다.</div>
     </section>
+
+    <section class="panel detail-recommendations" id="detail-recommendations" aria-labelledby="detail-recommendations-title">
+      <div class="preview-panel-header">
+        <div>
+          <p class="dashboard-eyebrow">Discover</p>
+          <h2 id="detail-recommendations-title">함께 볼 만한 게시글</h2>
+        </div>
+        <p class="meta">같은 카테고리, 인기글, 최근 본 글을 기준으로 추천합니다.</p>
+      </div>
+      <div class="recommendation-grid">
+        <article class="preview-panel preview-panel-compact">
+          <h3>같은 카테고리</h3>
+          <div class="preview-list" id="related-posts-list" aria-live="polite"></div>
+        </article>
+        <article class="preview-panel preview-panel-compact">
+          <h3>다른 인기글</h3>
+          <div class="preview-list" id="detail-hot-posts-list" aria-live="polite"></div>
+        </article>
+        <article class="preview-panel preview-panel-compact">
+          <h3>최근 본 게시글</h3>
+          <div class="preview-list" id="detail-recent-viewed-list" aria-live="polite"></div>
+        </article>
+      </div>
+    </section>
   </main>
 
   <footer class="site-footer">

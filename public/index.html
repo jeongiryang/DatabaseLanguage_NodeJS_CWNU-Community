@@ -23,33 +23,122 @@
   </header>
 
   <main class="page">
-    <section class="page-title">
-      <h1>학내 커뮤니티 게시판</h1>
-      <p>창원대학교 구성원을 위한 커뮤니티 게시판입니다.</p>
-      <p class="current-board" id="current-board-name">전체글</p>
-      <button class="help-button" type="button" id="guide-start-button">도움말</button>
+    <section class="community-hero" aria-labelledby="community-hero-title">
+      <div class="community-hero-copy">
+        <p class="dashboard-eyebrow">CWNU Community Dashboard</p>
+        <h1 id="community-hero-title">학내 커뮤니티 게시판</h1>
+        <p>게시글, 댓글, 반응, 북마크를 한 화면에서 탐색할 수 있는 창원대학교 커뮤니티 공간입니다.</p>
+        <div class="hero-actions">
+          <p class="current-board" id="current-board-name">전체글</p>
+          <button class="help-button" type="button" id="guide-start-button">도움말</button>
+        </div>
+      </div>
+      <div class="community-metrics" aria-label="커뮤니티 요약">
+        <article class="metric-card">
+          <span class="metric-label">전체 게시글</span>
+          <strong id="dashboard-total-posts">-</strong>
+          <span class="metric-helper">현재 DB 기준</span>
+        </article>
+        <article class="metric-card">
+          <span class="metric-label">인기글 후보</span>
+          <strong id="dashboard-hot-posts">-</strong>
+          <span class="metric-helper">조회·댓글·좋아요 반영</span>
+        </article>
+        <article class="metric-card">
+          <span class="metric-label">공지사항</span>
+          <strong id="dashboard-notice-posts">-</strong>
+          <span class="metric-helper">게시판 운영 안내</span>
+        </article>
+        <article class="metric-card">
+          <span class="metric-label">최근 댓글 흐름</span>
+          <strong id="dashboard-comment-count">-</strong>
+          <span class="metric-helper">최근글 댓글 합계</span>
+        </article>
+      </div>
     </section>
 
     <section class="board-shortcuts" aria-label="게시판 바로가기">
       <div class="shortcut-group shortcut-group-primary">
         <h2>주요 게시판</h2>
         <div class="shortcut-links">
-          <a class="board-shortcut hot" href="/?board=hot" data-board-link="hot">인기글</a>
-          <a class="board-shortcut notice" href="/?board=notice" data-board-link="notice">공지사항</a>
-          <a class="board-shortcut" href="/" data-board-link="all">전체글</a>
+          <a class="board-shortcut shortcut-card hot" href="/?board=hot" data-board-link="hot">
+            <span class="shortcut-title">인기글</span>
+            <span class="shortcut-desc">조회수와 반응이 높은 글</span>
+          </a>
+          <a class="board-shortcut shortcut-card notice" href="/?board=notice" data-board-link="notice">
+            <span class="shortcut-title">공지사항</span>
+            <span class="shortcut-desc">서비스 안내와 운영 공지</span>
+          </a>
+          <a class="board-shortcut shortcut-card" href="/" data-board-link="all">
+            <span class="shortcut-title">전체글</span>
+            <span class="shortcut-desc">모든 게시판 글 모아보기</span>
+          </a>
         </div>
       </div>
       <div class="shortcut-group">
         <h2>커뮤니티 게시판</h2>
         <div class="shortcut-links">
-          <a class="board-shortcut" href="/?category=free" data-category-link="free">자유게시판</a>
-          <a class="board-shortcut" href="/?category=study" data-category-link="study">공부이야기</a>
-          <a class="board-shortcut" href="/?category=question" data-category-link="question">질문게시판</a>
-          <a class="board-shortcut" href="/?category=info" data-category-link="info">정보공유</a>
-          <a class="board-shortcut" href="/?category=market" data-category-link="market">중고장터</a>
-          <a class="board-shortcut" href="/?category=lost" data-category-link="lost">분실물</a>
+          <a class="board-shortcut shortcut-card" href="/?category=free" data-category-link="free">
+            <span class="shortcut-title">자유게시판</span>
+            <span class="shortcut-desc">캠퍼스 일상과 자유로운 이야기</span>
+          </a>
+          <a class="board-shortcut shortcut-card" href="/?category=study" data-category-link="study">
+            <span class="shortcut-title">공부이야기</span>
+            <span class="shortcut-desc">시험, 과제, 공부 루틴 공유</span>
+          </a>
+          <a class="board-shortcut shortcut-card" href="/?category=question" data-category-link="question">
+            <span class="shortcut-title">질문게시판</span>
+            <span class="shortcut-desc">수업, 과제, 오류 질문</span>
+          </a>
+          <a class="board-shortcut shortcut-card" href="/?category=info" data-category-link="info">
+            <span class="shortcut-title">정보공유</span>
+            <span class="shortcut-desc">학교, 수업, 생활 정보 공유</span>
+          </a>
+          <a class="board-shortcut shortcut-card" href="/?category=market" data-category-link="market">
+            <span class="shortcut-title">중고장터</span>
+            <span class="shortcut-desc">전공책과 물품 거래</span>
+          </a>
+          <a class="board-shortcut shortcut-card" href="/?category=lost" data-category-link="lost">
+            <span class="shortcut-title">분실물</span>
+            <span class="shortcut-desc">잃어버린 물건 찾기</span>
+          </a>
         </div>
       </div>
+    </section>
+
+    <section class="dashboard-preview-grid" aria-label="커뮤니티 주요 글 미리보기">
+      <article class="preview-panel">
+        <div class="preview-panel-header">
+          <p class="dashboard-eyebrow">Hot</p>
+          <h2>인기글 TOP 3</h2>
+        </div>
+        <div class="preview-list" id="hot-preview-list" aria-live="polite"></div>
+      </article>
+      <article class="preview-panel">
+        <div class="preview-panel-header">
+          <p class="dashboard-eyebrow">Notice</p>
+          <h2>공지사항</h2>
+        </div>
+        <div class="preview-list" id="notice-preview-list" aria-live="polite"></div>
+      </article>
+      <article class="preview-panel">
+        <div class="preview-panel-header">
+          <p class="dashboard-eyebrow">Latest</p>
+          <h2>최근글</h2>
+        </div>
+        <div class="preview-list" id="latest-preview-list" aria-live="polite"></div>
+      </article>
+    </section>
+
+    <section class="panel recent-viewed-panel" aria-labelledby="recent-viewed-title">
+      <div class="preview-panel-header">
+        <div>
+          <p class="dashboard-eyebrow">History</p>
+          <h2 id="recent-viewed-title">최근 본 게시글</h2>
+        </div>
+        <p class="meta">브라우저에 저장된 최근 열람 글입니다.</p>
+      </div>
+      <div class="preview-list preview-list-compact" id="recent-viewed-list" aria-live="polite"></div>
     </section>
 
     <section class="toolbar" aria-label="Post list controls">
