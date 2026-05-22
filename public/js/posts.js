@@ -729,7 +729,20 @@ function bindPostDelete(post, auth) {
   }
 
   deleteButton.addEventListener("click", async () => {
-    if (!confirm("게시글을 삭제하시겠습니까?")) {
+    if (typeof window.showConfirmModal !== "function") {
+      setPostMessage("확인 창을 준비하지 못했습니다.", "error");
+      return;
+    }
+
+    const confirmed = await window.showConfirmModal({
+      title: "게시글 삭제",
+      message: "게시글을 삭제하면 연결된 댓글, 답글, 좋아요, 싫어요, 북마크도 함께 삭제됩니다.",
+      confirmText: "삭제",
+      cancelText: "취소",
+      variant: "danger",
+    });
+
+    if (!confirmed) {
       return;
     }
 
@@ -1263,7 +1276,20 @@ function createReplyForm(parentId) {
 }
 
 async function deleteComment(commentId) {
-  if (!confirm("댓글을 삭제하시겠습니까?")) {
+  if (typeof window.showConfirmModal !== "function") {
+    setCommentMessage("확인 창을 준비하지 못했습니다.", "error");
+    return;
+  }
+
+  const confirmed = await window.showConfirmModal({
+    title: "댓글 삭제",
+    message: "댓글 또는 답글을 삭제하시겠습니까? 부모 댓글을 삭제하면 연결된 답글도 함께 사라질 수 있습니다.",
+    confirmText: "삭제",
+    cancelText: "취소",
+    variant: "danger",
+  });
+
+  if (!confirmed) {
     return;
   }
 
