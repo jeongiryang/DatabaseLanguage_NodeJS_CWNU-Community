@@ -41,8 +41,10 @@ const VIEW_MODE_STORAGE_KEY = "cwnu.community.viewMode";
 const VIEW_MODES = ["table", "card"];
 const ALLOWED_PAGE_SIZES = [10, 20, 30, 40, 50];
 const RECENT_POSTS_STORAGE_KEY = "cwnu.community.recentPosts";
+const RECENT_SEARCHES_STORAGE_KEY = "cwnu.community.recentSearches";
 const PREVIEW_POST_LIMIT = 3;
 const RECENT_POST_LIMIT = 5;
+const RECENT_SEARCH_LIMIT = 5;
 const POST_DRAFT_STORAGE_KEY = "cwnu.community.postDraft";
 const WRITE_COUNTER_LIMITS = {
   title: 80,
@@ -279,6 +281,88 @@ function getCurrentSortLabel() {
   return SORT_LABELS[postState.sort] || SORT_LABELS.latest;
 }
 
+function normalizeSearchTerm(value) {
+  return String(value || "").trim();
+}
+
+function readRecentSearches() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(RECENT_SEARCHES_STORAGE_KEY) || "[]");
+    return Array.isArray(parsed) ? parsed.filter((term) => typeof term === "string") : [];
+  } catch (error) {
+    return [];
+  }
+}
+
+function writeRecentSearches(searches) {
+  try {
+    localStorage.setItem(RECENT_SEARCHES_STORAGE_KEY, JSON.stringify(searches));
+  } catch (error) {
+    // Recent searches are optional and should not block list rendering.
+  }
+}
+
+function saveRecentSearch(term) {
+  const normalizedTerm = normalizeSearchTerm(term);
+
+  if (!normalizedTerm) {
+    return;
+  }
+
+  const lowerTerm = normalizedTerm.toLocaleLowerCase();
+  const nextSearches = [
+    normalizedTerm,
+    ...readRecentSearches().filter((item) => item.toLocaleLowerCase() !== lowerTerm),
+  ].slice(0, RECENT_SEARCH_LIMIT);
+
+  writeRecentSearches(nextSearches);
+}
+
+function removeAllRecentSearches() {
+  writeRecentSearches([]);
+}
+
+function appendHighlightedText(target, text, keyword) {
+  const value = String(text || "");
+  const searchTerm = normalizeSearchTerm(keyword);
+
+  target.textContent = "";
+
+  if (!searchTerm) {
+    target.textContent = value;
+    return;
+  }
+
+  const lowerValue = value.toLocaleLowerCase();
+  const lowerSearchTerm = searchTerm.toLocaleLowerCase();
+  let currentIndex = 0;
+  let matchIndex = lowerValue.indexOf(lowerSearchTerm);
+
+  if (matchIndex === -1) {
+    target.textContent = value;
+    return;
+  }
+
+  while (matchIndex !== -1) {
+    if (matchIndex > currentIndex) {
+      target.appendChild(document.createTextNode(value.slice(currentIndex, matchIndex)));
+    }
+
+    const highlight = document.createElement("mark");
+    const endIndex = matchIndex + searchTerm.length;
+    highlight.className = "search-highlight";
+    highlight.textContent = value.slice(matchIndex, endIndex);
+    target.appendChild(highlight);
+
+    currentIndex = endIndex;
+    matchIndex = lowerValue.indexOf(lowerSearchTerm, currentIndex);
+  }
+
+  if (currentIndex < value.length) {
+    target.appendChild(document.createTextNode(value.slice(currentIndex)));
+  }
+}
+
 function createFilterChip(text, modifier = "") {
   const chip = document.createElement("span");
   chip.className = `filter-chip ${modifier}`.trim();
@@ -313,15 +397,139 @@ function renderResultSummary(posts = [], pagination = null) {
   }
 
   const totalCount = pagination?.totalCount ?? posts.length;
-  const boardLabel = getCurrentBoardLabel();
   const pageText = pagination?.totalPages > 1 ? ` · ${pagination.page}/${pagination.totalPages}페이지` : "";
 
   if (postState.q) {
-    summary.textContent = `"${postState.q}" 검색 결과 ${totalCount}건${pageText}`;
+    summary.textContent =
+      totalCount === 0 ? `"${postState.q}" 검색 결과가 없습니다.` : `"${postState.q}" 검색 결과 ${totalCount}건${pageText}`;
     return;
   }
 
-  summary.textContent = `${boardLabel} 게시글 ${totalCount}건 표시 중${pageText}`;
+  summary.textContent = totalCount === 0 ? "표시할 게시글이 없습니다." : `${totalCount}건 표시 중${pageText}`;
+}
+
+function updatePostListUrl() {
+  if (!document.querySelector("#post-list")) {
+    return;
+  }
+
+  const query = new URLSearchParams();
+
+  if (postState.board !== "all") {
+    query.set("board", postState.board);
+  } else if (postState.category !== "all") {
+    query.set("category", postState.category);
+  }
+
+  if (postState.q) {
+    query.set("q", postState.q);
+  }
+
+  if (postState.sort !== "latest") {
+    query.set("sort", postState.sort);
+  }
+
+  if (postState.pageSize !== 10) {
+    query.set("pageSize", String(postState.pageSize));
+  }
+
+  if (postState.page > 1) {
+    query.set("page", String(postState.page));
+  }
+
+  const nextUrl = query.toString() ? `/?${query.toString()}` : "/";
+  window.history.replaceState({}, "", nextUrl);
+}
+
+function updateSearchClearButton() {
+  const searchInput = document.querySelector("#post-search");
+  const clearButton = document.querySelector("#search-input-clear");
+
+  if (!searchInput || !clearButton) {
+    return;
+  }
+
+  const hasSearchTerm = Boolean(normalizeSearchTerm(searchInput.value));
+  clearButton.hidden = !hasSearchTerm;
+  clearButton.disabled = !hasSearchTerm;
+}
+
+function renderRecentSearches() {
+  const container = document.querySelector("#recent-searches");
+
+  if (!container) {
+    return;
+  }
+
+  const recentSearches = readRecentSearches();
+  container.innerHTML = "";
+  container.hidden = recentSearches.length === 0;
+
+  if (!recentSearches.length) {
+    return;
+  }
+
+  const label = document.createElement("span");
+  label.className = "recent-search-label";
+  label.textContent = "최근 검색";
+  container.appendChild(label);
+
+  recentSearches.forEach((term) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "recent-search-chip";
+    button.textContent = term;
+    button.addEventListener("click", () => {
+      executeSearch(term);
+    });
+    container.appendChild(button);
+  });
+
+  const clearButton = document.createElement("button");
+  clearButton.type = "button";
+  clearButton.className = "recent-search-clear";
+  clearButton.textContent = "전체 삭제";
+  clearButton.addEventListener("click", () => {
+    removeAllRecentSearches();
+    renderRecentSearches();
+  });
+  container.appendChild(clearButton);
+}
+
+function executeSearch(term) {
+  const searchInput = document.querySelector("#post-search");
+  const normalizedTerm = normalizeSearchTerm(term);
+
+  postState.page = 1;
+  postState.q = normalizedTerm;
+
+  if (searchInput) {
+    searchInput.value = normalizedTerm;
+  }
+
+  if (normalizedTerm) {
+    saveRecentSearch(normalizedTerm);
+  }
+
+  updateSearchClearButton();
+  renderRecentSearches();
+  updatePostListUrl();
+  loadPostList();
+}
+
+function clearSearchTerm() {
+  const searchInput = document.querySelector("#post-search");
+
+  postState.page = 1;
+  postState.q = "";
+
+  if (searchInput) {
+    searchInput.value = "";
+  }
+
+  updateSearchClearButton();
+  updatePostListUrl();
+  loadPostList();
 }
 
 function isMobileViewport() {
@@ -628,6 +836,12 @@ function initializeCategoryFilterFromQuery() {
   const query = new URLSearchParams(window.location.search);
   const categoryFromQuery = query.get("category") || "all";
   const boardFromQuery = query.get("board") || "all";
+  const pageFromQuery = Number.parseInt(query.get("page"), 10);
+
+  postState.q = normalizeSearchTerm(query.get("q"));
+  postState.sort = normalizeSort(query.get("sort") || "latest");
+  postState.pageSize = normalizePageSize(query.get("pageSize"));
+  postState.page = Number.isInteger(pageFromQuery) && pageFromQuery > 0 ? pageFromQuery : 1;
 
   if (ALLOWED_BOARDS.includes(boardFromQuery)) {
     postState.board = boardFromQuery;
@@ -833,7 +1047,7 @@ function renderPostRows(posts) {
     const dislikeCell = document.createElement("td");
 
     titleLink.href = getPostDetailUrl(post.id);
-    titleLink.textContent = post.title;
+    appendHighlightedText(titleLink, post.title, postState.q);
     titleCell.appendChild(titleLink);
     categoryCell.appendChild(createCategoryChip(post.category));
     authorCell.textContent = getAuthorLabel(post);
@@ -972,7 +1186,7 @@ function createPostCard(post) {
 
   title.className = "post-card-title";
   titleLink.href = detailUrl;
-  titleLink.textContent = post.title;
+  appendHighlightedText(titleLink, post.title, postState.q);
   title.appendChild(titleLink);
 
   meta.className = "post-card-meta";
@@ -1054,6 +1268,7 @@ function renderPagination(pagination) {
   previousButton.disabled = pagination.page <= 1;
   previousButton.addEventListener("click", () => {
     postState.page -= 1;
+    updatePostListUrl();
     loadPostList();
   });
 
@@ -1064,6 +1279,7 @@ function renderPagination(pagination) {
   nextButton.disabled = pagination.page >= pagination.totalPages;
   nextButton.addEventListener("click", () => {
     postState.page += 1;
+    updatePostListUrl();
     loadPostList();
   });
 
@@ -1135,12 +1351,28 @@ function bindPostListControls() {
   const searchForm = document.querySelector("#post-search-form");
   const searchInput = document.querySelector("#post-search");
   const searchClearButton = document.querySelector("#post-search-clear");
+  const searchInputClearButton = document.querySelector("#search-input-clear");
   const viewModeToggle = document.querySelector("#view-mode-toggle");
+
+  if (pageSizeSelect) {
+    pageSizeSelect.value = String(postState.pageSize);
+  }
+
+  if (sortSelect) {
+    sortSelect.value = postState.sort;
+  }
+
+  if (searchInput) {
+    searchInput.value = postState.q;
+    updateSearchClearButton();
+    renderRecentSearches();
+  }
 
   if (pageSizeSelect) {
     pageSizeSelect.addEventListener("change", () => {
       postState.page = 1;
       postState.pageSize = normalizePageSize(pageSizeSelect.value);
+      updatePostListUrl();
       loadPostList();
     });
   }
@@ -1149,6 +1381,7 @@ function bindPostListControls() {
     sortSelect.addEventListener("change", () => {
       postState.page = 1;
       postState.sort = normalizeSort(sortSelect.value);
+      updatePostListUrl();
       loadPostList();
     });
   }
@@ -1156,10 +1389,14 @@ function bindPostListControls() {
   if (searchForm && searchInput) {
     searchForm.addEventListener("submit", (event) => {
       event.preventDefault();
-      postState.page = 1;
-      postState.q = searchInput.value.trim();
-      loadPostList();
+      executeSearch(searchInput.value);
     });
+
+    searchInput.addEventListener("input", updateSearchClearButton);
+  }
+
+  if (searchInputClearButton) {
+    searchInputClearButton.addEventListener("click", clearSearchTerm);
   }
 
   if (searchClearButton && searchInput) {
