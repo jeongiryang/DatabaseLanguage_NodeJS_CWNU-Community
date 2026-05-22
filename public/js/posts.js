@@ -32,6 +32,10 @@ let currentDetailAuth = { authenticated: false, user: null };
 function setPostMessage(message, type = "info") {
   const messageElement = document.querySelector("#post-message");
 
+  if (message && typeof window.showToast === "function") {
+    window.showToast(message, type);
+  }
+
   if (!messageElement) {
     return;
   }
@@ -42,6 +46,10 @@ function setPostMessage(message, type = "info") {
 
 function setCommentMessage(message, type = "info") {
   const messageElement = document.querySelector("#comment-auth-message");
+
+  if (message && typeof window.showToast === "function") {
+    window.showToast(message, type);
+  }
 
   if (!messageElement) {
     return;
@@ -620,6 +628,7 @@ function bindPostDelete(post, auth) {
       await api.request(`/api/posts/${post.id}`, {
         method: "DELETE",
       });
+      setPostMessage("게시글이 삭제되었습니다.", "success");
       window.location.href = "/";
     } catch (error) {
       setPostMessage(error.message, "error");
@@ -709,6 +718,7 @@ function bindLikeButton(post, auth) {
       updatePostMeta(currentDetailPost);
       updateLikeUi(currentDetailPost, auth);
       updateDislikeUi(currentDetailPost, auth);
+      window.showToast?.(result.liked ? "좋아요를 눌렀습니다." : "좋아요를 취소했습니다.", "success");
     } catch (error) {
       setPostMessage(error.message, "error");
     } finally {
@@ -741,6 +751,7 @@ function bindBookmarkButton(post, auth) {
         bookmarkCount: result.bookmarkCount,
       };
       updateBookmarkUi(currentDetailPost, auth);
+      window.showToast?.(result.bookmarked ? "북마크에 저장했습니다." : "북마크를 취소했습니다.", "success");
     } catch (error) {
       setPostMessage(error.message, "error");
     } finally {
@@ -777,6 +788,7 @@ function bindDislikeButton(post, auth) {
       updatePostMeta(currentDetailPost);
       updateLikeUi(currentDetailPost, auth);
       updateDislikeUi(currentDetailPost, auth);
+      window.showToast?.(result.disliked ? "싫어요를 눌렀습니다." : "싫어요를 취소했습니다.", "success");
     } catch (error) {
       setPostMessage(error.message, "error");
     } finally {

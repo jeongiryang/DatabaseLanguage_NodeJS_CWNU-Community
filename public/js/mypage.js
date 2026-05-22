@@ -99,6 +99,10 @@ function bindMyPageTabs() {
 function setMyPageMessage(message, type = "info") {
   const messageElement = document.querySelector("#mypage-message");
 
+  if (message && typeof window.showToast === "function") {
+    window.showToast(message, type);
+  }
+
   if (!messageElement) {
     return;
   }

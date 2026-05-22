@@ -1,4 +1,64 @@
 const THEME_STORAGE_KEY = "cwnu-community-theme";
+const TOAST_DEFAULT_DURATION = 3600;
+
+function getToastContainer() {
+  let container = document.querySelector("#toast-container");
+
+  if (!container) {
+    container = document.createElement("div");
+    container.id = "toast-container";
+    container.className = "toast-container";
+    container.setAttribute("aria-live", "polite");
+    container.setAttribute("aria-atomic", "false");
+    document.body.appendChild(container);
+  }
+
+  return container;
+}
+
+function showToast(message, type = "info", options = {}) {
+  if (!message || !document.body) {
+    return null;
+  }
+
+  const normalizedType = ["success", "error", "info", "warning"].includes(type) ? type : "info";
+  const duration = Number.isFinite(options.duration) ? options.duration : TOAST_DEFAULT_DURATION;
+  const container = getToastContainer();
+  const toast = document.createElement("div");
+  const content = document.createElement("span");
+  const closeButton = document.createElement("button");
+
+  toast.className = `toast toast-${normalizedType}`;
+  toast.setAttribute("role", normalizedType === "error" ? "alert" : "status");
+  content.className = "toast-message";
+  content.textContent = message;
+  closeButton.className = "toast-close";
+  closeButton.type = "button";
+  closeButton.setAttribute("aria-label", "알림 닫기");
+  closeButton.textContent = "×";
+
+  const removeToast = () => {
+    toast.classList.add("is-hiding");
+    window.setTimeout(() => {
+      toast.remove();
+      if (!container.children.length) {
+        container.remove();
+      }
+    }, 180);
+  };
+
+  closeButton.addEventListener("click", removeToast);
+  toast.append(content, closeButton);
+  container.appendChild(toast);
+
+  if (duration > 0) {
+    window.setTimeout(removeToast, duration);
+  }
+
+  return toast;
+}
+
+window.showToast = showToast;
 
 function getStoredTheme() {
   try {
@@ -67,6 +127,10 @@ initializeTheme();
 
 function setMessage(message, type = "info") {
   const messageElement = document.querySelector("#auth-message");
+
+  if (message) {
+    showToast(message, type);
+  }
 
   if (!messageElement) {
     return;
@@ -228,11 +292,12 @@ async function handleLogout() {
     });
 
     await refreshAuthStatus();
+    showToast("로그아웃되었습니다.", "success");
     if (window.location.pathname === "/post-write.html") {
       window.location.href = "/login.html";
     }
   } catch (error) {
-    alert(error.message);
+    showToast(error.message, "error");
   }
 }
 
@@ -251,9 +316,10 @@ async function handleDeleteAccount() {
     });
 
     await refreshAuthStatus();
+    showToast("회원 탈퇴가 완료되었습니다.", "success");
     window.location.href = "/";
   } catch (error) {
-    alert(error.message);
+    showToast(error.message, "error");
   }
 }
 
