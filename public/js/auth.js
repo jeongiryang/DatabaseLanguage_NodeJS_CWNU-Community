@@ -60,56 +60,6 @@ function showToast(message, type = "info", options = {}) {
 
 window.showToast = showToast;
 
-function createStatePanel({
-  type = "empty",
-  icon = "",
-  title = "",
-  description = "",
-  actionLabel = "",
-  onAction = null,
-} = {}) {
-  const normalizedType = ["loading", "empty", "error", "info"].includes(type) ? type : "empty";
-  const panel = document.createElement("div");
-  const iconElement = document.createElement("span");
-  const titleElement = document.createElement("strong");
-  const descriptionElement = document.createElement("p");
-
-  panel.className = `state-panel state-${normalizedType}`;
-  panel.setAttribute("role", normalizedType === "error" ? "alert" : "status");
-
-  if (icon) {
-    iconElement.className = "state-icon";
-    iconElement.setAttribute("aria-hidden", "true");
-    iconElement.textContent = icon;
-    panel.appendChild(iconElement);
-  }
-
-  if (title) {
-    titleElement.className = "state-title";
-    titleElement.textContent = title;
-    panel.appendChild(titleElement);
-  }
-
-  if (description) {
-    descriptionElement.className = "state-description";
-    descriptionElement.textContent = description;
-    panel.appendChild(descriptionElement);
-  }
-
-  if (actionLabel && typeof onAction === "function") {
-    const actionButton = document.createElement("button");
-    actionButton.type = "button";
-    actionButton.className = "state-action";
-    actionButton.textContent = actionLabel;
-    actionButton.addEventListener("click", onAction);
-    panel.appendChild(actionButton);
-  }
-
-  return panel;
-}
-
-window.createStatePanel = createStatePanel;
-
 function getStoredTheme() {
   try {
     return localStorage.getItem(THEME_STORAGE_KEY);
