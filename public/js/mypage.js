@@ -141,6 +141,48 @@ function setLocalLoadingMessage(selector, message) {
   element.textContent = message;
 }
 
+function createLocalSkeletonLine(className = "skeleton-line", width = "") {
+  const line = document.createElement("span");
+  line.className = `skeleton ${className}`;
+
+  if (width) {
+    line.style.setProperty("--skeleton-width", width);
+  }
+
+  return line;
+}
+
+function renderMyPageSkeleton() {
+  const nickname = document.querySelector("#dashboard-nickname");
+  const email = document.querySelector("#dashboard-email");
+  const createdAt = document.querySelector("#dashboard-created-at");
+  const status = document.querySelector("#dashboard-status");
+  const recentList = document.querySelector("#recent-activity-list");
+
+  nickname?.replaceChildren(createLocalSkeletonLine("skeleton-title", "62%"));
+  email?.replaceChildren(createLocalSkeletonLine("skeleton-meta", "72%"));
+  createdAt?.replaceChildren(createLocalSkeletonLine("skeleton-meta", "88px"));
+  status?.replaceChildren(createLocalSkeletonLine("skeleton-meta", "72px"));
+
+  ["#stat-posts", "#stat-comments", "#stat-likes", "#stat-dislikes", "#stat-bookmarks"].forEach((selector) => {
+    document.querySelector(selector)?.replaceChildren(createLocalSkeletonLine("skeleton-counter", "48px"));
+  });
+
+  if (recentList) {
+    recentList.innerHTML = "";
+    Array.from({ length: 3 }).forEach((_, index) => {
+      const item = document.createElement("div");
+      item.className = "recent-activity-item skeleton-card";
+      item.setAttribute("aria-hidden", "true");
+      item.append(
+        createLocalSkeletonLine("skeleton-chip", "72px"),
+        createLocalSkeletonLine("skeleton-title", index === 0 ? "76%" : "64%")
+      );
+      recentList.appendChild(item);
+    });
+  }
+}
+
 function createActivityEmpty(message) {
   const empty = document.createElement("p");
   empty.className = "activity-empty";
@@ -498,7 +540,7 @@ function renderBookmarks(bookmarks) {
 
 async function loadMyPage() {
   setLocalLoadingMessage("#mypage-message", "활동 정보를 불러오는 중입니다.");
-  setLocalLoadingMessage("#recent-activity-list", "최근 활동을 불러오는 중입니다.");
+  renderMyPageSkeleton();
 
   try {
     const activity = await api.request("/api/auth/me/activity");

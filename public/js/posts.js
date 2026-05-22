@@ -427,6 +427,50 @@ function renderPreviewMessage(selector, message, isLoading = false) {
   container.appendChild(messageElement);
 }
 
+function createSkeletonLine(className = "skeleton-line", width = "") {
+  const line = document.createElement("span");
+  line.className = `skeleton ${className}`;
+
+  if (width) {
+    line.style.setProperty("--skeleton-width", width);
+  }
+
+  return line;
+}
+
+function renderPreviewSkeleton(selector, count = PREVIEW_POST_LIMIT) {
+  const container = document.querySelector(selector);
+
+  if (!container) {
+    return;
+  }
+
+  container.innerHTML = "";
+
+  Array.from({ length: count }).forEach((_, index) => {
+    const item = document.createElement("div");
+    item.className = "preview-item skeleton-preview-item";
+    item.setAttribute("aria-hidden", "true");
+    item.append(
+      createSkeletonLine("skeleton-title", index === 0 ? "82%" : "68%"),
+      createSkeletonLine("skeleton-meta", index === 1 ? "54%" : "46%")
+    );
+    container.appendChild(item);
+  });
+}
+
+function renderDashboardMetricSkeletons() {
+  ["#dashboard-total-posts", "#dashboard-hot-posts", "#dashboard-notice-posts", "#dashboard-comment-count"].forEach(
+    (selector) => {
+      const element = document.querySelector(selector);
+
+      if (element) {
+        element.replaceChildren(createSkeletonLine("skeleton-counter", "52px"));
+      }
+    }
+  );
+}
+
 function createPreviewItem(post) {
   const link = document.createElement("a");
   const title = document.createElement("strong");
@@ -532,9 +576,10 @@ async function loadDashboardSections() {
     return;
   }
 
-  renderPreviewMessage("#hot-preview-list", "인기글을 불러오는 중입니다.", true);
-  renderPreviewMessage("#notice-preview-list", "공지사항을 불러오는 중입니다.", true);
-  renderPreviewMessage("#latest-preview-list", "최근글을 불러오는 중입니다.", true);
+  renderDashboardMetricSkeletons();
+  renderPreviewSkeleton("#hot-preview-list");
+  renderPreviewSkeleton("#notice-preview-list");
+  renderPreviewSkeleton("#latest-preview-list");
   renderRecentViewedList("#recent-viewed-list");
 
   const previewQueries = {
@@ -625,6 +670,7 @@ function updatePostCategoryUi(post) {
   }
 
   categoryElement.hidden = false;
+  categoryElement.classList.remove("skeleton", "skeleton-chip");
   categoryElement.textContent = getCategoryLabel(post.category);
   categoryElement.dataset.category = post.category || "free";
 }
@@ -834,6 +880,71 @@ function renderPostCardMessage(message, isLoading = false) {
   cardList.appendChild(messageElement);
 }
 
+function renderPostTableSkeleton(rowCount = 5) {
+  const postList = document.querySelector("#post-list");
+
+  if (!postList) {
+    return;
+  }
+
+  postList.innerHTML = "";
+
+  Array.from({ length: rowCount }).forEach((_, rowIndex) => {
+    const row = document.createElement("tr");
+    row.className = "skeleton-row";
+    row.setAttribute("aria-hidden", "true");
+
+    ["76%", "70px", "78px", "92px", "72px", "44px", "44px", "44px", "44px"].forEach((width, cellIndex) => {
+      const cell = document.createElement("td");
+      cell.appendChild(createSkeletonLine(cellIndex === 0 ? "skeleton-title" : "skeleton-meta", width));
+      row.appendChild(cell);
+    });
+
+    if (rowIndex > 2) {
+      row.classList.add("is-optional");
+    }
+
+    postList.appendChild(row);
+  });
+}
+
+function createPostCardSkeleton(index = 0) {
+  const card = document.createElement("article");
+  const header = document.createElement("div");
+  const stats = document.createElement("div");
+
+  card.className = "post-card skeleton-card";
+  card.setAttribute("aria-hidden", "true");
+  header.className = "post-card-header";
+  stats.className = "post-card-stats";
+  header.append(createSkeletonLine("skeleton-chip", "82px"), createSkeletonLine("skeleton-meta", "58px"));
+  stats.append(
+    createSkeletonLine("skeleton-pill", "58px"),
+    createSkeletonLine("skeleton-pill", "58px"),
+    createSkeletonLine("skeleton-pill", "68px")
+  );
+  card.append(
+    header,
+    createSkeletonLine("skeleton-title", index % 2 === 0 ? "86%" : "72%"),
+    createSkeletonLine("skeleton-meta", "62%"),
+    stats
+  );
+  return card;
+}
+
+function renderPostCardSkeletons(count = 4) {
+  const cardList = document.querySelector("#post-card-list");
+
+  if (!cardList) {
+    return;
+  }
+
+  cardList.innerHTML = "";
+  Array.from({ length: count }).forEach((_, index) => {
+    cardList.appendChild(createPostCardSkeleton(index));
+  });
+}
+
 function createPostCard(post) {
   const card = document.createElement("article");
   const header = document.createElement("div");
@@ -970,16 +1081,8 @@ async function loadPostList() {
   setLoadingContent("#result-summary", "게시글 목록을 불러오는 중입니다.");
   applyViewMode();
 
-  postList.innerHTML = "";
-
-  const loadingRow = document.createElement("tr");
-  const loadingCell = document.createElement("td");
-
-  loadingCell.colSpan = 9;
-  setLoadingContent(loadingCell, "게시글 목록을 불러오는 중입니다.");
-  loadingRow.appendChild(loadingCell);
-  postList.appendChild(loadingRow);
-  renderPostCardMessage("게시글 목록을 불러오는 중입니다.", true);
+  renderPostTableSkeleton();
+  renderPostCardSkeletons();
 
   try {
     const query = new URLSearchParams({
@@ -1506,6 +1609,55 @@ function bindPostWriteForm() {
   });
 }
 
+function renderPostDetailSkeleton() {
+  const categoryElement = document.querySelector("#post-category");
+  const titleElement = document.querySelector("#post-title");
+  const metaElement = document.querySelector("#post-meta");
+  const contentElement = document.querySelector("#post-content");
+  const actionsElement = document.querySelector(".post-detail-actions");
+
+  if (categoryElement) {
+    categoryElement.hidden = false;
+    categoryElement.textContent = "";
+    categoryElement.replaceChildren(createSkeletonLine("skeleton-chip", "86px"));
+  }
+
+  if (titleElement) {
+    titleElement.replaceChildren(createSkeletonLine("skeleton-title skeleton-title-lg", "72%"));
+  }
+
+  if (metaElement) {
+    metaElement.replaceChildren(createSkeletonLine("skeleton-meta", "58%"));
+  }
+
+  if (contentElement) {
+    contentElement.replaceChildren(
+      createSkeletonLine("skeleton-text", "96%"),
+      createSkeletonLine("skeleton-text", "92%"),
+      createSkeletonLine("skeleton-text", "78%"),
+      createSkeletonLine("skeleton-block", "100%")
+    );
+  }
+
+  if (actionsElement) {
+    let actionsSkeleton = actionsElement.querySelector("[data-detail-actions-skeleton]");
+
+    if (!actionsSkeleton) {
+      actionsSkeleton = document.createElement("div");
+      actionsSkeleton.className = "skeleton-actions-row";
+      actionsSkeleton.dataset.detailActionsSkeleton = "true";
+      actionsSkeleton.append(
+        createSkeletonLine("skeleton-pill", "82px"),
+        createSkeletonLine("skeleton-pill", "82px"),
+        createSkeletonLine("skeleton-pill", "98px")
+      );
+      actionsElement.appendChild(actionsSkeleton);
+    }
+
+    actionsElement.classList.add("is-skeleton");
+  }
+}
+
 async function loadPostDetail() {
   const titleElement = document.querySelector("#post-title");
   const contentElement = document.querySelector("#post-content");
@@ -1524,6 +1676,8 @@ async function loadPostDetail() {
     return;
   }
 
+  renderPostDetailSkeleton();
+
   try {
     const [{ post }, auth] = await Promise.all([
       api.request(`/api/posts/${postId}`),
@@ -1536,6 +1690,9 @@ async function loadPostDetail() {
     updatePostCategoryUi(post);
     updatePostMeta(post);
     contentElement.textContent = post.content;
+    const actionsElement = document.querySelector(".post-detail-actions");
+    actionsElement?.classList.remove("is-skeleton");
+    actionsElement?.querySelector("[data-detail-actions-skeleton]")?.remove();
     bindShareButton(post);
     bindPostDelete(post, auth);
     bindPostEditButton(post, auth);
@@ -1549,6 +1706,9 @@ async function loadPostDetail() {
   } catch (error) {
     titleElement.textContent = error.message;
     contentElement.textContent = "";
+    const actionsElement = document.querySelector(".post-detail-actions");
+    actionsElement?.classList.remove("is-skeleton");
+    actionsElement?.querySelector("[data-detail-actions-skeleton]")?.remove();
     clearPostCategoryUi();
     clearCommentUi();
     clearLikeUi();
@@ -1575,8 +1735,8 @@ async function loadDetailRecommendations(post) {
     return;
   }
 
-  renderPreviewMessage("#related-posts-list", "관련 게시글을 불러오는 중입니다.", true);
-  renderPreviewMessage("#detail-hot-posts-list", "인기글을 불러오는 중입니다.", true);
+  renderPreviewSkeleton("#related-posts-list");
+  renderPreviewSkeleton("#detail-hot-posts-list");
   renderRecentViewedList("#detail-recent-viewed-list", post.id);
 
   const [relatedResult, hotResult] = await Promise.allSettled([
