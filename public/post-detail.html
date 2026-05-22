@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
+  <div class="reading-progress" id="reading-progress" aria-hidden="true"><span></span></div>
   <header class="site-header">
     <a class="brand" href="/" aria-label="CWNU Community home">
       <span class="brand-mark" aria-hidden="true"></span>
@@ -22,7 +23,7 @@
   </header>
 
   <main class="page">
-    <article class="panel post-detail-card">
+    <article class="panel post-detail-card" id="post-detail-top">
       <header class="post-detail-header">
         <p class="category-badge" id="post-category" hidden></p>
         <h1 class="post-detail-title" id="post-title">게시글을 불러오는 중입니다.</h1>
@@ -38,6 +39,9 @@
           <button type="button" id="dislike-button" hidden>👎 싫어요</button>
           <span class="meta" id="dislike-status"></span>
         </div>
+        <div class="detail-jump-actions" aria-label="읽기 이동">
+          <button type="button" class="comment-jump-button" id="comment-jump-button">댓글 보기</button>
+        </div>
         <div class="owner-actions" aria-label="게시글 공유 및 관리">
           <button type="button" id="share-post-button">🔗 공유</button>
           <button type="button" id="edit-post-button" hidden>✏️ 수정</button>
@@ -47,7 +51,7 @@
       <p class="form-message" id="post-message" role="status"></p>
     </article>
 
-    <section class="panel comment-panel">
+    <section class="panel comment-panel" id="comments-section" tabindex="-1">
       <div class="comment-panel-header">
         <div>
           <p class="dashboard-eyebrow">댓글</p>
@@ -91,6 +95,8 @@
       </div>
     </section>
   </main>
+
+  <button type="button" class="back-to-top-button" id="back-to-top-button" hidden>↑ 맨 위</button>
 
   <footer class="site-footer">
     <p class="footer-title">컴퓨터공학과 | 데이터베이스개론 과제: CWNU Community 게시판 시스템</p>
