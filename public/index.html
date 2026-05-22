@@ -84,12 +84,12 @@
 
     <section class="panel post-list-panel">
       <div class="list-summary-bar">
-        <div id="filter-summary" class="filter-summary" aria-label="현재 필터 상태"></div>
+        <div id="filter-summary" class="filter-summary" aria-label="현재 필터 상태" aria-live="polite"></div>
         <div class="list-summary-actions">
           <p id="result-summary" class="result-summary" role="status">게시글 목록을 불러오는 중입니다.</p>
-          <div id="view-mode-toggle" class="view-mode-toggle" aria-label="게시글 보기 방식">
-            <button class="view-mode-button" type="button" data-view-mode="table">표 보기</button>
-            <button class="view-mode-button" type="button" data-view-mode="card">카드 보기</button>
+          <div id="view-mode-toggle" class="view-mode-toggle" role="group" aria-label="게시글 보기 방식">
+            <button class="view-mode-button" type="button" data-view-mode="table" aria-controls="post-list post-card-list">표 보기</button>
+            <button class="view-mode-button" type="button" data-view-mode="card" aria-controls="post-list post-card-list">카드 보기</button>
           </div>
         </div>
       </div>

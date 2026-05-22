@@ -778,6 +778,7 @@ html[data-theme="dark"] .shortcut-group {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  min-width: 0;
 }
 
 .filter-chip {
@@ -791,6 +792,8 @@ html[data-theme="dark"] .shortcut-group {
   font-size: 13px;
   font-weight: 800;
   line-height: 1;
+  max-width: 100%;
+  overflow-wrap: anywhere;
   padding: 7px 10px;
 }
 
@@ -807,6 +810,7 @@ html[data-theme="dark"] .shortcut-group {
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 12px;
+  min-width: 0;
 }
 
 .result-summary {
@@ -819,6 +823,7 @@ html[data-theme="dark"] .shortcut-group {
 .view-mode-toggle {
   display: inline-flex;
   gap: 6px;
+  max-width: 100%;
   border: 1px solid var(--line);
   border-radius: var(--radius-pill);
   background: var(--surface-soft);
@@ -842,6 +847,11 @@ html[data-theme="dark"] .shortcut-group {
   box-shadow: none;
   color: var(--primary-dark);
   transform: none;
+}
+
+.view-mode-button:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--primary) 26%, transparent);
+  outline-offset: 2px;
 }
 
 .view-mode-button.is-active {
@@ -1206,6 +1216,7 @@ html[data-theme="dark"] .post-card-stat {
 }
 
 .post-card-empty {
+  grid-column: 1 / -1;
   margin: 0;
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
