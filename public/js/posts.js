@@ -393,6 +393,112 @@ function renderPostRows(posts) {
   });
 }
 
+function renderPostCardMessage(message) {
+  const cardList = document.querySelector("#post-card-list");
+
+  if (!cardList) {
+    return;
+  }
+
+  cardList.innerHTML = "";
+
+  const messageElement = document.createElement("p");
+  messageElement.className = "post-card-empty";
+  messageElement.textContent = message;
+  cardList.appendChild(messageElement);
+}
+
+function createPostCard(post) {
+  const card = document.createElement("article");
+  const header = document.createElement("div");
+  const title = document.createElement("h3");
+  const titleLink = document.createElement("a");
+  const meta = document.createElement("div");
+  const dateMeta = document.createElement("p");
+  const stats = document.createElement("div");
+  const detailUrl = `/post-detail.html?id=${post.id}`;
+  const updatedAt = formatUpdatedAt(post.createdAt, post.updatedAt);
+
+  card.className = "post-card";
+  card.tabIndex = 0;
+  card.setAttribute("role", "link");
+  card.setAttribute("aria-label", `${post.title} 상세 보기`);
+
+  header.className = "post-card-header";
+  header.appendChild(createCategoryChip(post.category));
+  if (updatedAt !== "-") {
+    const updatedBadge = document.createElement("span");
+    updatedBadge.className = "edited-badge";
+    updatedBadge.textContent = "수정됨";
+    header.appendChild(updatedBadge);
+  }
+
+  title.className = "post-card-title";
+  titleLink.href = detailUrl;
+  titleLink.textContent = post.title;
+  title.appendChild(titleLink);
+
+  meta.className = "post-card-meta";
+  meta.textContent = `작성자 ${getAuthorLabel(post)} · 등록일 ${formatDate(post.createdAt)}`;
+  if (updatedAt !== "-") {
+    dateMeta.className = "post-card-meta";
+    dateMeta.textContent = `수정일 ${updatedAt}`;
+  }
+
+  stats.className = "post-card-stats";
+  [
+    ["조회", post.viewCount],
+    ["댓글", post.commentCount],
+    ["좋아요", post.likeCount],
+    ["싫어요", post.dislikeCount || 0],
+  ].forEach(([label, value]) => {
+    const stat = document.createElement("span");
+    stat.className = "post-card-stat";
+    stat.textContent = `${label} ${value}`;
+    stats.appendChild(stat);
+  });
+
+  card.append(header, title, meta);
+  if (updatedAt !== "-") {
+    card.appendChild(dateMeta);
+  }
+  card.appendChild(stats);
+
+  card.addEventListener("click", (event) => {
+    if (!(event.target instanceof Element) || !event.target.closest("a")) {
+      window.location.href = detailUrl;
+    }
+  });
+
+  card.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      window.location.href = detailUrl;
+    }
+  });
+
+  return card;
+}
+
+function renderPostCards(posts) {
+  const cardList = document.querySelector("#post-card-list");
+
+  if (!cardList) {
+    return;
+  }
+
+  cardList.innerHTML = "";
+
+  if (posts.length === 0) {
+    renderPostCardMessage(postState.q ? "검색 결과가 없습니다." : "등록된 게시글이 없습니다.");
+    return;
+  }
+
+  posts.forEach((post) => {
+    cardList.appendChild(createPostCard(post));
+  });
+}
+
 function renderPagination(pagination) {
   const paginationElement = document.querySelector("#pagination");
 
@@ -435,6 +541,7 @@ async function loadPostList() {
   }
 
   postList.innerHTML = '<tr><td colspan="9">게시글 목록을 불러오는 중입니다.</td></tr>';
+  renderPostCardMessage("게시글 목록을 불러오는 중입니다.");
 
   try {
     const query = new URLSearchParams({
@@ -460,6 +567,7 @@ async function loadPostList() {
     const result = await api.request(`/api/posts?${query.toString()}`);
 
     renderPostRows(result.posts);
+    renderPostCards(result.posts);
     renderPagination(result.pagination);
   } catch (error) {
     postList.innerHTML = "";
@@ -469,6 +577,7 @@ async function loadPostList() {
     cell.textContent = error.message;
     row.appendChild(cell);
     postList.appendChild(row);
+    renderPostCardMessage(error.message);
   }
 }
 
