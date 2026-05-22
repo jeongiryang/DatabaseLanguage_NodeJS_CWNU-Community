@@ -26,7 +26,18 @@
       <p>로그인한 사용자만 게시글을 작성할 수 있습니다.</p>
     </section>
 
-    <form class="form-panel" id="post-write-form">
+    <form class="form-panel write-panel" id="post-write-form">
+      <div class="write-tabs" role="tablist" aria-label="작성 화면 전환">
+        <button class="write-tab is-active" type="button" id="write-tab-edit" data-write-tab="edit" role="tab" aria-selected="true">작성</button>
+        <button class="write-tab" type="button" id="write-tab-preview" data-write-tab="preview" role="tab" aria-selected="false" aria-controls="write-preview-panel">미리보기</button>
+      </div>
+      <section class="write-guide-card" aria-labelledby="write-guide-title">
+        <div>
+          <p class="section-eyebrow">Writing Guide</p>
+          <h2 id="write-guide-title">카테고리별 작성 가이드</h2>
+        </div>
+        <ul class="write-guide-list" id="write-guide-list"></ul>
+      </section>
       <label>
         카테고리
         <select name="category" required>
@@ -51,6 +62,22 @@
         <input type="checkbox" name="isAnonymous" value="true">
         익명으로 작성
       </label>
+      <section class="preview-panel" id="write-preview-panel" data-write-panel="preview" role="tabpanel" aria-labelledby="write-tab-preview" hidden aria-live="polite">
+        <p class="section-eyebrow">Preview</p>
+        <div class="preview-shell">
+          <span class="category-chip preview-category" id="preview-category" data-category="free">자유게시판</span>
+          <h2 class="preview-title" id="preview-title">제목 미입력</h2>
+          <p class="preview-meta" id="preview-meta">작성자 미리보기</p>
+          <div class="preview-body" id="preview-body">미리볼 내용이 없습니다.</div>
+        </div>
+      </section>
+      <section class="draft-box" id="draft-box" aria-label="임시저장">
+        <p class="draft-status" id="draft-status">임시저장 대기 중</p>
+        <div class="draft-actions">
+          <button class="secondary" type="button" id="draft-load-button">임시저장 불러오기</button>
+          <button class="link-button danger-link" type="button" id="draft-clear-button">임시저장 삭제</button>
+        </div>
+      </section>
       <p class="form-message" id="post-message" role="status"></p>
       <button type="submit" id="post-submit-button">등록</button>
     </form>

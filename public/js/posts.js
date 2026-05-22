@@ -43,6 +43,60 @@ const ALLOWED_PAGE_SIZES = [10, 20, 30, 40, 50];
 const RECENT_POSTS_STORAGE_KEY = "cwnu.community.recentPosts";
 const PREVIEW_POST_LIMIT = 3;
 const RECENT_POST_LIMIT = 5;
+const POST_DRAFT_STORAGE_KEY = "cwnu.community.postDraft";
+const WRITE_COUNTER_LIMITS = {
+  title: 80,
+  content: 3000,
+};
+const CATEGORY_WRITE_GUIDES = {
+  notice: {
+    heading: "공지사항 작성 가이드",
+    titlePlaceholder: "예: 5월 24일 서버 점검 안내",
+    contentPlaceholder: "점검 시간, 대상, 영향 범위를 간결하게 작성해주세요.",
+    tips: ["중요한 안내는 간결하고 명확하게 작성", "점검 시간, 대상, 영향 범위를 함께 포함"],
+  },
+  free: {
+    heading: "자유게시판 작성 가이드",
+    titlePlaceholder: "예: 오늘 학식 메뉴 추천받아요",
+    contentPlaceholder: "캠퍼스 일상, 잡담, 자유로운 이야기를 작성해주세요.",
+    tips: ["캠퍼스 일상과 자유로운 이야기 작성", "개인정보와 비방 표현은 제외"],
+  },
+  study: {
+    heading: "공부이야기 작성 가이드",
+    titlePlaceholder: "예: 데이터베이스 정규화 공부 루틴 공유",
+    contentPlaceholder: "과목명, 공부 방법, 참고 자료, 시험 범위 등을 함께 작성해주세요.",
+    tips: ["과목명과 공부 주제를 먼저 정리", "참고 자료나 시험 범위를 함께 공유"],
+  },
+  question: {
+    heading: "질문게시판 작성 가이드",
+    titlePlaceholder: "예: Prisma migrate 오류 해결 방법 질문",
+    contentPlaceholder: "오류 상황, 시도한 방법, 에러 메시지, 원하는 결과를 함께 작성해주세요.",
+    tips: ["오류 상황과 시도한 방법을 구체적으로 작성", "에러 메시지는 필요한 범위만 포함"],
+  },
+  info: {
+    heading: "정보공유 작성 가이드",
+    titlePlaceholder: "예: 중앙도서관 주말 운영시간 정리",
+    contentPlaceholder: "운영시간, 위치, 링크, 일정처럼 확인 가능한 정보를 중심으로 작성해주세요.",
+    tips: ["확인 가능한 정보 중심으로 작성", "운영시간, 위치, 링크, 일정을 함께 정리"],
+  },
+  market: {
+    heading: "중고장터 작성 가이드",
+    titlePlaceholder: "예: 데이터베이스 전공책 판매합니다",
+    contentPlaceholder: "물품명, 가격, 상태, 거래 장소, 연락 방법을 포함해주세요.",
+    tips: ["물품명, 가격, 상태를 명확히 작성", "거래 장소와 연락 방법은 필요한 범위만 기재"],
+  },
+  lost: {
+    heading: "분실물 작성 가이드",
+    titlePlaceholder: "예: 공학관에서 검은색 우산을 찾습니다",
+    contentPlaceholder: "분실/습득 장소, 시간, 물건 특징, 보관 위치를 포함해주세요.",
+    tips: ["장소와 시간을 먼저 작성", "물건 특징과 보관 위치를 구체적으로 정리"],
+  },
+};
+
+let postWriteInitialSnapshot = null;
+let isPostWriteSubmitting = false;
+let draftSaveTimer = null;
+let isPostWriteExperienceBound = false;
 
 function normalizePageSize(value) {
   const parsedValue = Number.parseInt(value, 10);
@@ -1026,6 +1080,385 @@ function bindPostListControls() {
   }
 }
 
+function getPostWriteSnapshot(form) {
+  return {
+    category: form.elements.category?.value || "free",
+    title: form.elements.title?.value || "",
+    content: form.elements.content?.value || "",
+    isAnonymous: Boolean(form.elements.isAnonymous?.checked),
+  };
+}
+
+function arePostWriteSnapshotsEqual(left, right) {
+  if (!left || !right) {
+    return false;
+  }
+
+  return (
+    left.category === right.category &&
+    left.title === right.title &&
+    left.content === right.content &&
+    left.isAnonymous === right.isAnonymous
+  );
+}
+
+function getWriteCategoryGuide(category) {
+  return CATEGORY_WRITE_GUIDES[category] || CATEGORY_WRITE_GUIDES.free;
+}
+
+function ensureCharacterCounter(field, id) {
+  if (!field || document.querySelector(`#${id}`)) {
+    return;
+  }
+
+  const label = field.closest("label");
+
+  if (!label) {
+    return;
+  }
+
+  label.classList.add("write-field-label");
+  const counter = document.createElement("span");
+  counter.className = "character-counter";
+  counter.id = id;
+  counter.setAttribute("aria-live", "polite");
+  label.appendChild(counter);
+}
+
+function initializeWriteFieldAccessories(form) {
+  form.elements.category?.closest("label")?.classList.add("write-field-label");
+  form.elements.content?.closest("label")?.classList.add("write-field-label");
+  ensureCharacterCounter(form.elements.title, "title-counter");
+  ensureCharacterCounter(form.elements.content, "content-counter");
+}
+
+function updateCategoryGuide(form) {
+  const category = form.elements.category?.value || "free";
+  const guide = getWriteCategoryGuide(category);
+  const guideTitle = document.querySelector("#write-guide-title");
+  const guideList = document.querySelector("#write-guide-list");
+
+  if (form.elements.title) {
+    form.elements.title.placeholder = guide.titlePlaceholder;
+  }
+
+  if (form.elements.content) {
+    form.elements.content.placeholder = guide.contentPlaceholder;
+  }
+
+  if (guideTitle) {
+    guideTitle.textContent = guide.heading;
+  }
+
+  if (guideList) {
+    guideList.replaceChildren(
+      ...guide.tips.map((tip) => {
+        const item = document.createElement("li");
+        item.textContent = tip;
+        return item;
+      }),
+    );
+  }
+}
+
+function updateCharacterCounter(counterId, length, limit) {
+  const counter = document.querySelector(`#${counterId}`);
+
+  if (!counter) {
+    return;
+  }
+
+  counter.textContent = `${length} / ${limit} 권장`;
+  counter.classList.toggle("is-warning", length > limit);
+}
+
+function updateCharacterCounters(form) {
+  updateCharacterCounter("title-counter", form.elements.title?.value.length || 0, WRITE_COUNTER_LIMITS.title);
+  updateCharacterCounter("content-counter", form.elements.content?.value.length || 0, WRITE_COUNTER_LIMITS.content);
+}
+
+function updateWritePreview(form) {
+  const snapshot = getPostWriteSnapshot(form);
+  const previewCategory = document.querySelector("#preview-category");
+  const previewTitle = document.querySelector("#preview-title");
+  const previewMeta = document.querySelector("#preview-meta");
+  const previewBody = document.querySelector("#preview-body");
+
+  if (previewCategory) {
+    previewCategory.textContent = getCategoryLabel(snapshot.category);
+    previewCategory.dataset.category = snapshot.category;
+  }
+
+  if (previewTitle) {
+    previewTitle.textContent = snapshot.title.trim() || "제목 미입력";
+    previewTitle.classList.toggle("is-empty", !snapshot.title.trim());
+  }
+
+  if (previewMeta) {
+    previewMeta.textContent = snapshot.isAnonymous ? "익명 작성 미리보기" : "닉네임 표시 미리보기";
+  }
+
+  if (previewBody) {
+    previewBody.textContent = snapshot.content.trim() || "미리볼 내용이 없습니다.";
+    previewBody.classList.toggle("is-empty", !snapshot.content.trim());
+  }
+}
+
+function setWriteTab(mode) {
+  const normalizedMode = mode === "preview" ? "preview" : "edit";
+  const form = document.querySelector("#post-write-form");
+  const previewPanel = document.querySelector("#write-preview-panel");
+
+  document.querySelectorAll("[data-write-tab]").forEach((button) => {
+    const isActive = button.dataset.writeTab === normalizedMode;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-selected", String(isActive));
+  });
+
+  if (previewPanel) {
+    previewPanel.hidden = normalizedMode !== "preview";
+  }
+
+  if (form) {
+    form.classList.toggle("is-previewing", normalizedMode === "preview");
+
+    if (normalizedMode === "preview") {
+      updateWritePreview(form);
+    }
+  }
+}
+
+function readPostDraft() {
+  try {
+    const rawDraft = localStorage.getItem(POST_DRAFT_STORAGE_KEY);
+    return rawDraft ? JSON.parse(rawDraft) : null;
+  } catch (error) {
+    return null;
+  }
+}
+
+function clearPostDraft() {
+  try {
+    localStorage.removeItem(POST_DRAFT_STORAGE_KEY);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+function formatDraftTime(value) {
+  if (!value) {
+    return "";
+  }
+
+  const draftDate = new Date(value);
+
+  if (Number.isNaN(draftDate.getTime())) {
+    return "";
+  }
+
+  return draftDate.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" });
+}
+
+function setDraftStatus(message, type = "info") {
+  const status = document.querySelector("#draft-status");
+
+  if (!status) {
+    return;
+  }
+
+  status.textContent = message;
+  status.dataset.type = type;
+}
+
+function isPostEditMode() {
+  return Boolean(getPostIdFromQuery());
+}
+
+function updateDraftControls() {
+  const loadButton = document.querySelector("#draft-load-button");
+  const clearButton = document.querySelector("#draft-clear-button");
+  const draft = readPostDraft();
+  const isEditMode = isPostEditMode();
+
+  if (loadButton) {
+    loadButton.disabled = isEditMode || !draft;
+  }
+
+  if (clearButton) {
+    clearButton.disabled = isEditMode || !draft;
+  }
+
+  if (isEditMode) {
+    setDraftStatus("수정 모드에서는 새 글 임시저장을 사용하지 않습니다.");
+  } else if (draft?.updatedAt) {
+    setDraftStatus(`임시저장 있음 · ${formatDraftTime(draft.updatedAt)}`);
+  } else {
+    setDraftStatus("임시저장 대기 중");
+  }
+}
+
+function savePostDraft(form) {
+  if (isPostEditMode()) {
+    return;
+  }
+
+  const snapshot = getPostWriteSnapshot(form);
+  const hasContent = snapshot.title.trim() || snapshot.content.trim() || snapshot.category !== "free" || snapshot.isAnonymous;
+
+  if (!hasContent) {
+    clearPostDraft();
+    updateDraftControls();
+    return;
+  }
+
+  try {
+    const draft = {
+      ...snapshot,
+      updatedAt: new Date().toISOString(),
+    };
+    localStorage.setItem(POST_DRAFT_STORAGE_KEY, JSON.stringify(draft));
+    updateDraftControls();
+    setDraftStatus(`임시저장됨 · ${formatDraftTime(draft.updatedAt)}`, "success");
+  } catch (error) {
+    setDraftStatus("임시저장에 실패했습니다.", "error");
+  }
+}
+
+function schedulePostDraftSave(form) {
+  if (isPostEditMode()) {
+    return;
+  }
+
+  window.clearTimeout(draftSaveTimer);
+  draftSaveTimer = window.setTimeout(() => savePostDraft(form), 500);
+}
+
+function loadPostDraftIntoForm(form, draft) {
+  if (!draft) {
+    return;
+  }
+
+  if (form.elements.category && CATEGORY_WRITE_GUIDES[draft.category]) {
+    form.elements.category.value = draft.category;
+  }
+
+  if (form.elements.title) {
+    form.elements.title.value = draft.title || "";
+  }
+
+  if (form.elements.content) {
+    form.elements.content.value = draft.content || "";
+  }
+
+  if (form.elements.isAnonymous) {
+    form.elements.isAnonymous.checked = Boolean(draft.isAnonymous);
+  }
+
+  syncPostWriteExperience(form);
+  setDraftStatus(`임시저장을 불러왔습니다. · ${formatDraftTime(draft.updatedAt)}`, "success");
+}
+
+async function confirmDraftLoadIfNeeded(form) {
+  if (!hasPostWriteChanges(form)) {
+    return true;
+  }
+
+  if (typeof window.showConfirmModal === "function") {
+    return window.showConfirmModal({
+      title: "임시저장 불러오기",
+      message: "현재 작성 중인 내용이 임시저장 내용으로 바뀝니다. 계속할까요?",
+      confirmText: "불러오기",
+      cancelText: "취소",
+      variant: "default",
+    });
+  }
+
+  return window.confirm("현재 작성 중인 내용이 임시저장 내용으로 바뀝니다. 계속할까요?");
+}
+
+function bindDraftActions(form) {
+  const loadButton = document.querySelector("#draft-load-button");
+  const clearButton = document.querySelector("#draft-clear-button");
+
+  loadButton?.addEventListener("click", async () => {
+    const draft = readPostDraft();
+
+    if (!draft) {
+      setDraftStatus("불러올 임시저장이 없습니다.", "warning");
+      return;
+    }
+
+    const confirmed = await confirmDraftLoadIfNeeded(form);
+
+    if (confirmed) {
+      loadPostDraftIntoForm(form, draft);
+    }
+  });
+
+  clearButton?.addEventListener("click", () => {
+    if (clearPostDraft()) {
+      updateDraftControls();
+      setDraftStatus("임시저장을 삭제했습니다.", "success");
+    } else {
+      setDraftStatus("임시저장 삭제에 실패했습니다.", "error");
+    }
+  });
+}
+
+function syncPostWriteExperience(form, options = {}) {
+  updateCategoryGuide(form);
+  updateCharacterCounters(form);
+  updateWritePreview(form);
+  updateDraftControls();
+
+  if (options.resetInitial) {
+    postWriteInitialSnapshot = getPostWriteSnapshot(form);
+  }
+}
+
+function hasPostWriteChanges(form) {
+  return !arePostWriteSnapshotsEqual(postWriteInitialSnapshot, getPostWriteSnapshot(form));
+}
+
+function initializePostWriteExperience() {
+  const form = document.querySelector("#post-write-form");
+
+  if (!form || isPostWriteExperienceBound) {
+    return;
+  }
+
+  isPostWriteExperienceBound = true;
+  initializeWriteFieldAccessories(form);
+  postWriteInitialSnapshot = getPostWriteSnapshot(form);
+  syncPostWriteExperience(form);
+  setWriteTab("edit");
+  bindDraftActions(form);
+
+  form.addEventListener("input", () => {
+    syncPostWriteExperience(form);
+    schedulePostDraftSave(form);
+  });
+
+  form.addEventListener("change", () => {
+    syncPostWriteExperience(form);
+    schedulePostDraftSave(form);
+  });
+
+  document.querySelectorAll("[data-write-tab]").forEach((button) => {
+    button.addEventListener("click", () => setWriteTab(button.dataset.writeTab));
+  });
+
+  window.addEventListener("beforeunload", (event) => {
+    if (isPostWriteSubmitting || !hasPostWriteChanges(form)) {
+      return;
+    }
+
+    event.preventDefault();
+    event.returnValue = "";
+  });
+}
+
 async function ensureWriteAccess() {
   const form = document.querySelector("#post-write-form");
 
@@ -1433,6 +1866,7 @@ async function loadPostEditForm() {
     if (form.elements.isAnonymous) form.elements.isAnonymous.checked = Boolean(post.isAnonymous);
     form.elements.title.value = post.title;
     form.elements.content.value = post.content;
+    syncPostWriteExperience(form, { resetInitial: true });
   } catch (error) {
     setPostMessage(error.message, "error");
     disablePostForm(form);
@@ -1443,6 +1877,7 @@ async function handlePostCreate(form) {
   const postId = getPostIdFromQuery();
   const isEditMode = Boolean(postId);
   const submitButton = form.querySelector('button[type="submit"]');
+  isPostWriteSubmitting = true;
 
   setPendingButton(submitButton, true, isEditMode ? "수정 중..." : "등록 중...");
   setPostMessage(isEditMode ? "게시글 수정 중입니다." : "게시글 등록 중입니다.");
@@ -1456,11 +1891,18 @@ async function handlePostCreate(form) {
     });
 
     setPostMessage(isEditMode ? "게시글이 수정되었습니다." : "게시글이 등록되었습니다.", "success");
+    if (!isEditMode) {
+      clearPostDraft();
+    }
+    postWriteInitialSnapshot = getPostWriteSnapshot(form);
     window.location.href = `/post-detail.html?id=${result.post.id}`;
   } catch (error) {
+    isPostWriteSubmitting = false;
     setPostMessage(error.message, "error");
   } finally {
-    setPendingButton(submitButton, false);
+    if (!isPostWriteSubmitting) {
+      setPendingButton(submitButton, false);
+    }
   }
 }
 
@@ -2062,6 +2504,7 @@ document.addEventListener("DOMContentLoaded", () => {
   applyViewMode();
   bindGuideTour();
   bindPostWriteForm();
+  initializePostWriteExperience();
   loadDashboardSections();
   loadPostList();
   ensureWriteAccess();
