@@ -2117,9 +2117,16 @@ html[data-theme="dark"] .category-badge[data-category="lost"] {
 }
 
 .post-detail-meta {
+  display: grid;
+  gap: 10px;
+  margin-top: 2px;
+}
+
+.post-detail-meta-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  align-items: center;
+  gap: 8px 10px;
 }
 
 .post-detail-meta-item {
@@ -2136,6 +2143,18 @@ html[data-theme="dark"] .category-badge[data-category="lost"] {
   padding: 6px 10px;
 }
 
+.post-detail-meta-row.is-profile .post-detail-meta-item {
+  min-height: 0;
+  border-color: transparent;
+  background: transparent;
+  color: color-mix(in srgb, var(--text) 88%, var(--muted));
+  padding: 0;
+}
+
+.post-detail-meta-row.is-stats .post-detail-meta-item {
+  border-color: color-mix(in srgb, var(--primary) 18%, var(--line));
+}
+
 .post-detail-meta-item strong {
   color: var(--muted);
   font-weight: 900;
@@ -2146,18 +2165,14 @@ html[data-theme="dark"] .post-detail-meta-item {
   border-color: var(--line-strong);
 }
 
-.post-detail-meta-item.reading-time,
-.post-detail-meta-item.reading-count {
-  border-color: color-mix(in srgb, var(--primary) 24%, var(--line));
-  background: color-mix(in srgb, var(--primary-soft) 72%, var(--surface));
-  color: var(--primary-dark);
+html[data-theme="dark"] .post-detail-meta-row.is-profile .post-detail-meta-item {
+  background: transparent;
+  border-color: transparent;
+  color: color-mix(in srgb, var(--text) 88%, var(--muted));
 }
 
-html[data-theme="dark"] .post-detail-meta-item.reading-time,
-html[data-theme="dark"] .post-detail-meta-item.reading-count {
-  border-color: var(--color-primary-border);
-  background: color-mix(in srgb, var(--primary-soft) 78%, var(--surface));
-  color: #dbeafe;
+html[data-theme="dark"] .post-detail-meta-row.is-stats .post-detail-meta-item {
+  border-color: var(--line-strong);
 }
 
 .content-block,
@@ -4049,9 +4064,18 @@ html[data-theme="dark"] .guide-actions .guide-secondary:hover {
     grid-template-columns: 1fr;
   }
 
+  .post-detail-meta-row {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
   .post-detail-meta-item {
     justify-content: space-between;
     border-radius: var(--radius-md);
+  }
+
+  .post-detail-meta-row.is-profile .post-detail-meta-item {
+    justify-content: flex-start;
   }
 
   .post-detail-body {

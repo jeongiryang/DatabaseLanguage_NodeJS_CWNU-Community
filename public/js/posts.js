@@ -45,7 +45,6 @@ const RECENT_SEARCHES_STORAGE_KEY = "cwnu.community.recentSearches";
 const PREVIEW_POST_LIMIT = 3;
 const RECENT_POST_LIMIT = 5;
 const RECENT_SEARCH_LIMIT = 5;
-const READING_CHARS_PER_MINUTE = 600;
 const POST_DRAFT_STORAGE_KEY = "cwnu.community.postDraft";
 const WRITE_COUNTER_LIMITS = {
   title: 80,
@@ -911,12 +910,11 @@ function updatePostMeta(post, commentCount = post.commentCount) {
   const createdAt = new Date(post.createdAt);
   const updatedAt = new Date(post.updatedAt);
   const isEdited = Math.abs(updatedAt.getTime() - createdAt.getTime()) > 1000;
-  const readingStats = getReadingStats(post.content);
-  const metaItems = [
+  const profileItems = [
     { label: "작성자", value: getAuthorLabel(post) },
     { label: "등록일", value: formatDate(post.createdAt) },
-    { label: "예상 읽기", value: `${readingStats.minutes}분`, className: "reading-time" },
-    { label: "본문", value: `${readingStats.characterCount.toLocaleString("ko-KR")}자`, className: "reading-count" },
+  ];
+  const statItems = [
     { label: "조회수", value: post.viewCount },
     { label: "댓글", value: commentCount },
     { label: "좋아요", value: post.likeCount },
@@ -924,35 +922,36 @@ function updatePostMeta(post, commentCount = post.commentCount) {
   ];
 
   if (isEdited) {
-    metaItems.splice(2, 0, { label: "수정일", value: formatDate(post.updatedAt) });
+    profileItems.push({ label: "수정일", value: formatDate(post.updatedAt) });
   }
 
   metaElement.innerHTML = "";
-  metaItems.forEach(({ label, value, className }) => {
-    const item = document.createElement("span");
-    const labelElement = document.createElement("strong");
-    const valueElement = document.createElement("span");
-
-    item.className = className ? `post-detail-meta-item ${className}` : "post-detail-meta-item";
-    labelElement.textContent = label;
-    valueElement.textContent = value;
-    item.append(labelElement, valueElement);
-    metaElement.appendChild(item);
-  });
+  metaElement.append(
+    createPostMetaRow(profileItems, "is-profile"),
+    createPostMetaRow(statItems, "is-stats")
+  );
 
   updateCommentJumpButton(commentCount);
   window.requestAnimationFrame(updateReadingProgress);
 }
 
-function getReadingStats(content = "") {
-  const plainText = String(content || "").replace(/\s+/g, " ").trim();
-  const characterCount = plainText.replace(/\s/g, "").length;
-  const minutes = Math.max(1, Math.ceil(characterCount / READING_CHARS_PER_MINUTE));
+function createPostMetaRow(items, rowClassName) {
+  const row = document.createElement("span");
+  row.className = `post-detail-meta-row ${rowClassName}`;
 
-  return {
-    characterCount,
-    minutes,
-  };
+  items.forEach(({ label, value }) => {
+    const item = document.createElement("span");
+    const labelElement = document.createElement("strong");
+    const valueElement = document.createElement("span");
+
+    item.className = "post-detail-meta-item";
+    labelElement.textContent = label;
+    valueElement.textContent = value;
+    item.append(labelElement, valueElement);
+    row.appendChild(item);
+  });
+
+  return row;
 }
 
 function prefersReducedMotion() {
