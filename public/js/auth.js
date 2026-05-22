@@ -37,7 +37,13 @@ function showToast(message, type = "info", options = {}) {
   closeButton.setAttribute("aria-label", "알림 닫기");
   closeButton.textContent = "×";
 
+  let isRemoving = false;
   const removeToast = () => {
+    if (isRemoving) {
+      return;
+    }
+
+    isRemoving = true;
     toast.classList.add("is-hiding");
     window.setTimeout(() => {
       toast.remove();
@@ -117,7 +123,7 @@ function showConfirmModal({
       document.removeEventListener("keydown", handleKeydown);
       overlay.remove();
 
-      if (previousActiveElement instanceof HTMLElement) {
+      if (previousActiveElement instanceof HTMLElement && document.contains(previousActiveElement)) {
         previousActiveElement.focus();
       }
 
