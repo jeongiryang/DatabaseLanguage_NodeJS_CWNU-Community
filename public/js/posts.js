@@ -45,6 +45,7 @@ const RECENT_SEARCHES_STORAGE_KEY = "cwnu.community.recentSearches";
 const PREVIEW_POST_LIMIT = 3;
 const RECENT_POST_LIMIT = 5;
 const RECENT_SEARCH_LIMIT = 5;
+const READING_CHARS_PER_MINUTE = 600;
 const POST_DRAFT_STORAGE_KEY = "cwnu.community.postDraft";
 const WRITE_COUNTER_LIMITS = {
   title: 80,
@@ -99,6 +100,7 @@ let postWriteInitialSnapshot = null;
 let isPostWriteSubmitting = false;
 let draftSaveTimer = null;
 let isPostWriteExperienceBound = false;
+let isReadingUxBound = false;
 
 function normalizePageSize(value) {
   const parsedValue = Number.parseInt(value, 10);
@@ -909,31 +911,134 @@ function updatePostMeta(post, commentCount = post.commentCount) {
   const createdAt = new Date(post.createdAt);
   const updatedAt = new Date(post.updatedAt);
   const isEdited = Math.abs(updatedAt.getTime() - createdAt.getTime()) > 1000;
+  const readingStats = getReadingStats(post.content);
   const metaItems = [
-    ["작성자", getAuthorLabel(post)],
-    ["등록일", formatDate(post.createdAt)],
-    ["조회수", post.viewCount],
-    ["댓글", commentCount],
-    ["좋아요", post.likeCount],
-    ["싫어요", post.dislikeCount || 0],
+    { label: "작성자", value: getAuthorLabel(post) },
+    { label: "등록일", value: formatDate(post.createdAt) },
+    { label: "예상 읽기", value: `${readingStats.minutes}분`, className: "reading-time" },
+    { label: "본문", value: `${readingStats.characterCount.toLocaleString("ko-KR")}자`, className: "reading-count" },
+    { label: "조회수", value: post.viewCount },
+    { label: "댓글", value: commentCount },
+    { label: "좋아요", value: post.likeCount },
+    { label: "싫어요", value: post.dislikeCount || 0 },
   ];
 
   if (isEdited) {
-    metaItems.splice(2, 0, ["수정일", formatDate(post.updatedAt)]);
+    metaItems.splice(2, 0, { label: "수정일", value: formatDate(post.updatedAt) });
   }
 
   metaElement.innerHTML = "";
-  metaItems.forEach(([label, value]) => {
+  metaItems.forEach(({ label, value, className }) => {
     const item = document.createElement("span");
     const labelElement = document.createElement("strong");
     const valueElement = document.createElement("span");
 
-    item.className = "post-detail-meta-item";
+    item.className = className ? `post-detail-meta-item ${className}` : "post-detail-meta-item";
     labelElement.textContent = label;
     valueElement.textContent = value;
     item.append(labelElement, valueElement);
     metaElement.appendChild(item);
   });
+
+  updateCommentJumpButton(commentCount);
+  window.requestAnimationFrame(updateReadingProgress);
+}
+
+function getReadingStats(content = "") {
+  const plainText = String(content || "").replace(/\s+/g, " ").trim();
+  const characterCount = plainText.replace(/\s/g, "").length;
+  const minutes = Math.max(1, Math.ceil(characterCount / READING_CHARS_PER_MINUTE));
+
+  return {
+    characterCount,
+    minutes,
+  };
+}
+
+function prefersReducedMotion() {
+  return window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+}
+
+function scrollToReadingTarget(target) {
+  if (!target) {
+    return;
+  }
+
+  target.scrollIntoView({
+    behavior: prefersReducedMotion() ? "auto" : "smooth",
+    block: "start",
+  });
+
+  if (target.id === "comments-section") {
+    target.focus({ preventScroll: true });
+  }
+}
+
+function updateCommentJumpButton(commentCount = 0) {
+  const button = document.querySelector("#comment-jump-button");
+
+  if (!button) {
+    return;
+  }
+
+  const count = Number.isFinite(Number(commentCount)) ? Number(commentCount) : 0;
+  button.textContent = count > 0 ? `댓글 ${count}개 보기` : "댓글 보기";
+  button.setAttribute("aria-label", count > 0 ? `댓글 ${count}개 영역으로 이동` : "댓글 영역으로 이동");
+}
+
+function updateReadingProgress() {
+  const progress = document.querySelector("#reading-progress span");
+  const detail = document.querySelector("#post-detail-top");
+  const comments = document.querySelector("#comments-section");
+
+  if (!progress || !detail || !comments) {
+    return;
+  }
+
+  const start = detail.offsetTop;
+  const end = Math.max(comments.offsetTop - window.innerHeight * 0.35, start + 1);
+  const current = window.scrollY;
+  const ratio = Math.min(1, Math.max(0, (current - start) / (end - start)));
+
+  progress.style.transform = `scaleX(${ratio})`;
+}
+
+function updateBackToTopVisibility() {
+  const button = document.querySelector("#back-to-top-button");
+
+  if (!button) {
+    return;
+  }
+
+  const isVisible = window.scrollY > 420;
+  button.hidden = !isVisible;
+  button.classList.toggle("is-visible", isVisible);
+}
+
+function bindReadingUxControls() {
+  if (isReadingUxBound || !document.querySelector("#post-detail-top")) {
+    return;
+  }
+
+  const commentButton = document.querySelector("#comment-jump-button");
+  const backToTopButton = document.querySelector("#back-to-top-button");
+  const handleScroll = () => {
+    updateReadingProgress();
+    updateBackToTopVisibility();
+  };
+
+  commentButton?.addEventListener("click", () => {
+    scrollToReadingTarget(document.querySelector("#comments-section"));
+  });
+
+  backToTopButton?.addEventListener("click", () => {
+    scrollToReadingTarget(document.querySelector("#post-detail-top"));
+  });
+
+  window.addEventListener("scroll", handleScroll, { passive: true });
+  window.addEventListener("resize", handleScroll);
+  handleScroll();
+  isReadingUxBound = true;
 }
 
 function updateBookmarkUi(post, auth) {
@@ -2409,7 +2514,9 @@ async function loadComments(postId, auth = currentDetailAuth) {
     renderComments(result.comments, auth);
 
     if (currentDetailPost) {
-      updatePostMeta(currentDetailPost, result.commentCount ?? countComments(result.comments));
+      const commentCount = result.commentCount ?? countComments(result.comments);
+      updatePostMeta(currentDetailPost, commentCount);
+      updateCommentJumpButton(commentCount);
     }
   } catch (error) {
     commentList.textContent = error.message;
@@ -2946,6 +3053,7 @@ document.addEventListener("DOMContentLoaded", () => {
   applyViewMode();
   bindGuideTour();
   bindFloatingWriteButton();
+  bindReadingUxControls();
   bindPostWriteForm();
   initializePostWriteExperience();
   loadDashboardSections();
