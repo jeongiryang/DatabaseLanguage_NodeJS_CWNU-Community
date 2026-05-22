@@ -650,15 +650,27 @@ html[data-theme="dark"] .help-button:hover {
 .metric-card {
   display: grid;
   align-content: space-between;
+  gap: 8px;
   min-height: 114px;
   padding: 18px;
 }
 
+.metric-label {
+  color: color-mix(in srgb, var(--color-text-strong) 86%, var(--primary));
+  font-size: 14px;
+  letter-spacing: 0;
+}
+
 .metric-label,
 .metric-helper {
-  color: var(--muted);
-  font-size: 13px;
   font-weight: 800;
+}
+
+.metric-helper {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
 }
 
 .metric-card strong {
@@ -1485,9 +1497,9 @@ button.is-loading:hover,
   border-radius: var(--radius-pill);
   background: linear-gradient(
     90deg,
-    color-mix(in srgb, var(--surface-muted) 88%, var(--line)) 0%,
-    color-mix(in srgb, var(--surface-raised) 92%, var(--primary-soft)) 48%,
-    color-mix(in srgb, var(--surface-muted) 88%, var(--line)) 100%
+    color-mix(in srgb, var(--line-strong) 42%, var(--surface-muted)) 0%,
+    color-mix(in srgb, var(--primary-soft) 64%, var(--surface-raised)) 48%,
+    color-mix(in srgb, var(--line-strong) 42%, var(--surface-muted)) 100%
   );
   color: transparent;
 }
@@ -1495,10 +1507,17 @@ button.is-loading:hover,
 .skeleton::after {
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, transparent, color-mix(in srgb, #fff 42%, transparent), transparent);
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, #fff 64%, transparent), transparent);
   content: "";
   transform: translateX(-100%);
   animation: skeleton-shimmer 1.35s ease-in-out infinite;
+}
+
+.metric-card .skeleton,
+.preview-item .skeleton,
+.post-card.skeleton-card .skeleton,
+.skeleton-row .skeleton {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--line-strong) 36%, transparent);
 }
 
 .skeleton-title {
@@ -1537,14 +1556,19 @@ button.is-loading:hover,
 }
 
 .skeleton-card {
+  border-color: color-mix(in srgb, var(--line-strong) 76%, var(--primary-soft));
+  background: color-mix(in srgb, var(--surface) 86%, var(--surface-muted));
   pointer-events: none;
 }
 
 .skeleton-preview-item {
+  border-color: color-mix(in srgb, var(--line-strong) 70%, var(--primary-soft));
+  background: color-mix(in srgb, var(--surface) 84%, var(--surface-muted));
   cursor: default;
 }
 
 .skeleton-row td {
+  background: color-mix(in srgb, var(--surface-muted) 62%, var(--surface));
   vertical-align: middle;
 }
 
