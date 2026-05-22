@@ -225,7 +225,7 @@ function updatePostCategoryUi(post) {
   }
 
   categoryElement.hidden = false;
-  categoryElement.textContent = `[${getCategoryLabel(post.category)}]`;
+  categoryElement.textContent = getCategoryLabel(post.category);
   categoryElement.dataset.category = post.category || "free";
 }
 
@@ -249,11 +249,31 @@ function updatePostMeta(post, commentCount = post.commentCount) {
   const createdAt = new Date(post.createdAt);
   const updatedAt = new Date(post.updatedAt);
   const isEdited = Math.abs(updatedAt.getTime() - createdAt.getTime()) > 1000;
-  const dates = isEdited
-    ? `등록일 ${formatDate(post.createdAt)} | 수정일 ${formatDate(post.updatedAt)}`
-    : `등록일 ${formatDate(post.createdAt)}`;
+  const metaItems = [
+    ["작성자", getAuthorLabel(post)],
+    ["등록일", formatDate(post.createdAt)],
+    ["조회수", post.viewCount],
+    ["댓글", commentCount],
+    ["좋아요", post.likeCount],
+    ["싫어요", post.dislikeCount || 0],
+  ];
 
-  metaElement.textContent = `작성자 ${getAuthorLabel(post)} | ${dates} | 조회수 ${post.viewCount} | 댓글 ${commentCount} | 좋아요 ${post.likeCount} | 싫어요 ${post.dislikeCount || 0}`;
+  if (isEdited) {
+    metaItems.splice(2, 0, ["수정일", formatDate(post.updatedAt)]);
+  }
+
+  metaElement.innerHTML = "";
+  metaItems.forEach(([label, value]) => {
+    const item = document.createElement("span");
+    const labelElement = document.createElement("strong");
+    const valueElement = document.createElement("span");
+
+    item.className = "post-detail-meta-item";
+    labelElement.textContent = label;
+    valueElement.textContent = value;
+    item.append(labelElement, valueElement);
+    metaElement.appendChild(item);
+  });
 }
 
 function updateBookmarkUi(post, auth) {
@@ -1088,26 +1108,30 @@ function renderComments(comments, auth) {
 function createCommentElement(comment, auth, isReply = false) {
   const item = document.createElement("article");
   const header = document.createElement("div");
+  const identity = document.createElement("div");
+  const actions = document.createElement("div");
   const author = document.createElement("strong");
   const date = document.createElement("span");
   const content = document.createElement("p");
 
   item.className = isReply ? "comment-item reply-item" : "comment-item";
   header.className = "comment-header";
+  identity.className = "comment-identity";
+  actions.className = "comment-actions";
   author.textContent = getAuthorLabel(comment);
   date.textContent = formatDate(comment.createdAt);
   content.textContent = comment.content;
 
-  header.append(author, date);
+  identity.append(author, date);
   if (comment.isAnonymous) {
-    header.appendChild(createAnonymousBadge());
+    identity.appendChild(createAnonymousBadge());
   }
 
   if (isReply) {
     const replyBadge = document.createElement("span");
     replyBadge.className = "reply-badge";
     replyBadge.textContent = "답글";
-    header.appendChild(replyBadge);
+    identity.appendChild(replyBadge);
   }
 
   if (auth.authenticated && auth.user.id === comment.author.id) {
@@ -1116,14 +1140,14 @@ function createCommentElement(comment, auth, isReply = false) {
     editButton.className = "link-button";
     editButton.textContent = "✏️ 수정";
     editButton.addEventListener("click", () => showCommentEditForm(item, comment, isReply));
-    header.appendChild(editButton);
+    actions.appendChild(editButton);
 
     const deleteButton = document.createElement("button");
     deleteButton.type = "button";
     deleteButton.className = "link-button danger-link";
     deleteButton.textContent = "🗑️ 삭제";
     deleteButton.addEventListener("click", () => deleteComment(comment.id));
-    header.appendChild(deleteButton);
+    actions.appendChild(deleteButton);
   }
 
   if (!isReply && auth.authenticated) {
@@ -1132,9 +1156,13 @@ function createCommentElement(comment, auth, isReply = false) {
     replyButton.className = "link-button";
     replyButton.textContent = "답글";
     replyButton.addEventListener("click", () => toggleReplyForm(item, comment.id));
-    header.appendChild(replyButton);
+    actions.appendChild(replyButton);
   }
 
+  header.appendChild(identity);
+  if (actions.children.length > 0) {
+    header.appendChild(actions);
+  }
   item.append(header, content);
 
   if (isEdited(comment.createdAt, comment.updatedAt)) {
