@@ -60,6 +60,101 @@ function showToast(message, type = "info", options = {}) {
 
 window.showToast = showToast;
 
+function showConfirmModal({
+  title = "확인이 필요합니다.",
+  message = "계속 진행하시겠습니까?",
+  confirmText = "확인",
+  cancelText = "취소",
+  variant = "default",
+} = {}) {
+  if (!document.body) {
+    return Promise.resolve(false);
+  }
+
+  return new Promise((resolve) => {
+    const previousActiveElement = document.activeElement;
+    const normalizedVariant = variant === "danger" ? "danger" : "default";
+    const labelId = `confirm-modal-title-${Date.now()}`;
+    const overlay = document.createElement("div");
+    const modal = document.createElement("section");
+    const header = document.createElement("div");
+    const titleElement = document.createElement("h2");
+    const closeButton = document.createElement("button");
+    const messageElement = document.createElement("p");
+    const actions = document.createElement("div");
+    const cancelButton = document.createElement("button");
+    const confirmButton = document.createElement("button");
+
+    overlay.className = "modal-overlay";
+    modal.className = `confirm-modal confirm-modal-${normalizedVariant}`;
+    modal.setAttribute("role", "dialog");
+    modal.setAttribute("aria-modal", "true");
+    modal.setAttribute("aria-labelledby", labelId);
+
+    header.className = "confirm-modal-header";
+    titleElement.className = "confirm-modal-title";
+    titleElement.id = labelId;
+    titleElement.textContent = title;
+
+    closeButton.className = "confirm-modal-close";
+    closeButton.type = "button";
+    closeButton.setAttribute("aria-label", "확인 창 닫기");
+    closeButton.textContent = "×";
+
+    messageElement.className = "confirm-modal-message";
+    messageElement.textContent = message;
+
+    actions.className = "confirm-modal-actions";
+    cancelButton.className = "confirm-modal-cancel";
+    cancelButton.type = "button";
+    cancelButton.textContent = cancelText;
+
+    confirmButton.className = `confirm-modal-confirm ${normalizedVariant === "danger" ? "confirm-modal-confirm-danger" : ""}`.trim();
+    confirmButton.type = "button";
+    confirmButton.textContent = confirmText;
+
+    const close = (result) => {
+      document.removeEventListener("keydown", handleKeydown);
+      overlay.remove();
+
+      if (previousActiveElement instanceof HTMLElement) {
+        previousActiveElement.focus();
+      }
+
+      resolve(result);
+    };
+
+    const handleKeydown = (event) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        close(false);
+      }
+    };
+
+    overlay.addEventListener("click", (event) => {
+      if (event.target === overlay) {
+        close(false);
+      }
+    });
+    closeButton.addEventListener("click", () => close(false));
+    cancelButton.addEventListener("click", () => close(false));
+    confirmButton.addEventListener("click", () => close(true));
+    document.addEventListener("keydown", handleKeydown);
+
+    header.append(titleElement, closeButton);
+    actions.append(cancelButton, confirmButton);
+    modal.append(header, messageElement, actions);
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+
+    window.setTimeout(() => {
+      (normalizedVariant === "danger" ? cancelButton : confirmButton).focus();
+    }, 0);
+  });
+}
+
+window.showConfirmModal = showConfirmModal;
+
 function getStoredTheme() {
   try {
     return localStorage.getItem(THEME_STORAGE_KEY);
@@ -302,9 +397,13 @@ async function handleLogout() {
 }
 
 async function handleDeleteAccount() {
-  const confirmed = confirm(
-    "회원 탈퇴 시 작성한 게시글, 댓글, 좋아요가 삭제됩니다. 계속하시겠습니까?"
-  );
+  const confirmed = await showConfirmModal({
+    title: "회원 탈퇴",
+    message: "회원 탈퇴 시 작성한 게시글, 댓글, 좋아요, 북마크가 삭제됩니다. 계속 진행하시겠습니까?",
+    confirmText: "회원 탈퇴",
+    cancelText: "취소",
+    variant: "danger",
+  });
 
   if (!confirmed) {
     return;
