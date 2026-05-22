@@ -24,10 +24,67 @@
   <main class="page">
     <section class="page-title">
       <h1>마이페이지</h1>
-      <p>내 게시글, 댓글, 좋아요와 싫어요 활동을 확인합니다.</p>
+      <p>내 게시글, 댓글, 반응, 북마크 활동을 한눈에 확인합니다.</p>
     </section>
 
     <p class="form-message" id="mypage-message" role="status">활동 정보를 불러오는 중입니다.</p>
+
+    <section class="mypage-dashboard" aria-label="마이페이지 활동 요약">
+      <article class="profile-summary-card">
+        <div class="profile-avatar" aria-hidden="true">나</div>
+        <div class="profile-summary-content">
+          <p class="dashboard-eyebrow">내 계정</p>
+          <h2 id="dashboard-nickname">사용자 정보를 불러오는 중</h2>
+          <p id="dashboard-email" class="meta">-</p>
+          <dl class="profile-summary-meta">
+            <div>
+              <dt>가입일</dt>
+              <dd id="dashboard-created-at">-</dd>
+            </div>
+            <div>
+              <dt>계정 상태</dt>
+              <dd id="dashboard-status">로그인 확인 중</dd>
+            </div>
+          </dl>
+        </div>
+      </article>
+
+      <section class="activity-stats-grid" aria-label="활동 통계">
+        <article class="activity-stat-card">
+          <span class="activity-stat-label">작성 글</span>
+          <strong id="stat-posts">0</strong>
+        </article>
+        <article class="activity-stat-card">
+          <span class="activity-stat-label">댓글/답글</span>
+          <strong id="stat-comments">0</strong>
+        </article>
+        <article class="activity-stat-card">
+          <span class="activity-stat-label">좋아요</span>
+          <strong id="stat-likes">0</strong>
+        </article>
+        <article class="activity-stat-card">
+          <span class="activity-stat-label">싫어요</span>
+          <strong id="stat-dislikes">0</strong>
+        </article>
+        <article class="activity-stat-card">
+          <span class="activity-stat-label">북마크</span>
+          <strong id="stat-bookmarks">0</strong>
+        </article>
+      </section>
+
+      <section class="recent-activity-panel" aria-labelledby="recent-activity-title">
+        <div class="recent-activity-header">
+          <div>
+            <p class="dashboard-eyebrow">최근 활동</p>
+            <h2 id="recent-activity-title">최근 활동 요약</h2>
+          </div>
+          <span class="recent-activity-count" id="recent-activity-count">0개</span>
+        </div>
+        <div class="recent-activity-list" id="recent-activity-list">
+          <p class="activity-empty">활동 정보를 불러오는 중입니다.</p>
+        </div>
+      </section>
+    </section>
 
     <nav class="mypage-tabs" aria-label="마이페이지 메뉴">
       <button type="button" data-tab-target="profile-panel" class="active">내 정보</button>

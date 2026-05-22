@@ -118,10 +118,120 @@ function makePostLink(post) {
   return link;
 }
 
+function setText(selector, value) {
+  const element = document.querySelector(selector);
+
+  if (element) {
+    element.textContent = value;
+  }
+}
+
+function createActivityEmpty(message) {
+  const empty = document.createElement("p");
+  empty.className = "activity-empty";
+  empty.textContent = message;
+  return empty;
+}
+
+function renderActivityStats(activity) {
+  setText("#stat-posts", activity.posts.length);
+  setText("#stat-comments", activity.comments.length);
+  setText("#stat-likes", activity.likes.length);
+  setText("#stat-dislikes", activity.dislikes.length);
+  setText("#stat-bookmarks", activity.bookmarks.length);
+}
+
+function getRecentActivities(activity) {
+  const recentItems = [
+    ...activity.posts.map((post) => ({
+      type: "작성 글",
+      title: post.title,
+      description: `${getCategoryLabel(post.category)} · 조회 ${post.viewCount} · 댓글 ${post.commentCount}`,
+      href: `/post-detail.html?id=${post.id}`,
+      createdAt: post.createdAt,
+    })),
+    ...activity.comments.map((comment) => ({
+      type: comment.parentId ? "작성 답글" : "작성 댓글",
+      title: comment.post?.title || "원본 글",
+      description: comment.content,
+      href: comment.post?.id ? `/post-detail.html?id=${comment.post.id}` : "",
+      createdAt: comment.createdAt,
+    })),
+    ...activity.likes.map((like) => ({
+      type: "좋아요",
+      title: like.post.title,
+      description: `${getCategoryLabel(like.post.category)} · 작성자 ${getAuthorLabel(like.post)}`,
+      href: `/post-detail.html?id=${like.post.id}`,
+      createdAt: like.createdAt,
+    })),
+    ...activity.bookmarks.map((bookmark) => ({
+      type: "북마크",
+      title: bookmark.post.title,
+      description: `${getCategoryLabel(bookmark.post.category)} · 작성자 ${getAuthorLabel(bookmark.post)}`,
+      href: `/post-detail.html?id=${bookmark.post.id}`,
+      createdAt: bookmark.createdAt,
+    })),
+  ];
+
+  return recentItems
+    .filter((item) => item.createdAt && item.href)
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 5);
+}
+
+function renderRecentActivities(activity) {
+  const container = document.querySelector("#recent-activity-list");
+  const countElement = document.querySelector("#recent-activity-count");
+
+  if (!container) {
+    return;
+  }
+
+  const recentItems = getRecentActivities(activity);
+  container.innerHTML = "";
+
+  if (countElement) {
+    countElement.textContent = `${recentItems.length}개`;
+  }
+
+  if (recentItems.length === 0) {
+    container.appendChild(createActivityEmpty("아직 표시할 최근 활동이 없습니다."));
+    return;
+  }
+
+  recentItems.forEach((activityItem) => {
+    const item = document.createElement("a");
+    const type = document.createElement("span");
+    const body = document.createElement("span");
+    const title = document.createElement("strong");
+    const description = document.createElement("span");
+    const date = document.createElement("span");
+
+    item.className = "recent-activity-item";
+    item.href = activityItem.href;
+    type.className = "recent-activity-type";
+    type.textContent = activityItem.type;
+    body.className = "recent-activity-body";
+    title.textContent = activityItem.title;
+    description.className = "recent-activity-description";
+    description.textContent = activityItem.description;
+    date.className = "recent-activity-date";
+    date.textContent = formatDate(activityItem.createdAt);
+
+    body.append(title, description, date);
+    item.append(type, body);
+    container.appendChild(item);
+  });
+}
+
 function renderProfile(user) {
   document.querySelector("#profile-nickname").textContent = user.nickname;
   document.querySelector("#profile-email").textContent = user.email;
   document.querySelector("#profile-created-at").textContent = formatDate(user.createdAt);
+  setText("#dashboard-nickname", user.nickname);
+  setText("#dashboard-email", user.email);
+  setText("#dashboard-created-at", formatDate(user.createdAt));
+  setText("#dashboard-status", "활성 계정");
 
   const nicknameInput = document.querySelector("#nickname-input");
   if (nicknameInput) {
@@ -189,7 +299,11 @@ function renderMyPosts(posts) {
     const row = document.createElement("tr");
     const cell = document.createElement("td");
     cell.colSpan = 8;
-    cell.textContent = myPageState.postCategory === "all" ? "작성한 게시글이 없습니다." : "선택한 카테고리에 작성한 게시글이 없습니다.";
+    cell.appendChild(
+      createActivityEmpty(
+        myPageState.postCategory === "all" ? "작성한 게시글이 없습니다." : "선택한 카테고리에 작성한 게시글이 없습니다."
+      )
+    );
     row.appendChild(cell);
     tbody.appendChild(row);
     showPanel("#my-posts-panel");
@@ -259,7 +373,7 @@ function renderComments(comments) {
   container.innerHTML = "";
 
   if (comments.length === 0) {
-    container.textContent = "작성한 댓글이 없습니다.";
+    container.appendChild(createActivityEmpty("작성한 댓글이 없습니다."));
     showPanel("#my-comments-panel");
     return;
   }
@@ -305,7 +419,7 @@ function renderReactions(selector, panelSelector, reactions, emptyMessage, dateL
   container.innerHTML = "";
 
   if (reactions.length === 0) {
-    container.textContent = emptyMessage;
+    container.appendChild(createActivityEmpty(emptyMessage));
     showPanel(panelSelector);
     return;
   }
@@ -339,7 +453,7 @@ function renderBookmarks(bookmarks) {
   container.innerHTML = "";
 
   if (bookmarks.length === 0) {
-    container.textContent = "북마크한 게시글이 없습니다.";
+    container.appendChild(createActivityEmpty("북마크한 게시글이 없습니다."));
     showPanel("#my-bookmarks-panel");
     return;
   }
@@ -366,14 +480,24 @@ function renderBookmarks(bookmarks) {
 async function loadMyPage() {
   try {
     const activity = await api.request("/api/auth/me/activity");
+    const normalizedActivity = {
+      user: activity.user,
+      posts: activity.posts || [],
+      comments: activity.comments || [],
+      likes: activity.likes || [],
+      dislikes: activity.dislikes || [],
+      bookmarks: activity.bookmarks || [],
+    };
 
-    myPageState.posts = activity.posts;
-    renderProfile(activity.user);
+    myPageState.posts = normalizedActivity.posts;
+    renderProfile(normalizedActivity.user);
+    renderActivityStats(normalizedActivity);
+    renderRecentActivities(normalizedActivity);
     renderMyPosts(myPageState.posts);
-    renderComments(activity.comments);
-    renderReactions("#my-likes", "#my-likes-panel", activity.likes, "좋아요 누른 게시글이 없습니다.", "좋아요");
-    renderReactions("#my-dislikes", "#my-dislikes-panel", activity.dislikes, "싫어요 누른 게시글이 없습니다.", "싫어요");
-    renderBookmarks(activity.bookmarks || []);
+    renderComments(normalizedActivity.comments);
+    renderReactions("#my-likes", "#my-likes-panel", normalizedActivity.likes, "좋아요 누른 게시글이 없습니다.", "좋아요");
+    renderReactions("#my-dislikes", "#my-dislikes-panel", normalizedActivity.dislikes, "싫어요 누른 게시글이 없습니다.", "싫어요");
+    renderBookmarks(normalizedActivity.bookmarks);
     setMyPageMessage("");
     activateMyPageTab("profile-panel");
   } catch (error) {
