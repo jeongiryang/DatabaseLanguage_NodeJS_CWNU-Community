@@ -5,6 +5,7 @@ const postState = {
   q: "",
   category: "all",
   board: "all",
+  viewMode: "table",
 };
 
 const CATEGORY_LABELS = {
@@ -28,6 +29,16 @@ const BOARD_LABELS = {
 
 let currentDetailPost = null;
 let currentDetailAuth = { authenticated: false, user: null };
+
+const SORT_LABELS = {
+  latest: "최신순",
+  likes: "좋아요순",
+  views: "조회수순",
+  comments: "댓글순",
+};
+
+const VIEW_MODE_STORAGE_KEY = "cwnu.community.viewMode";
+const VIEW_MODES = ["table", "card"];
 
 function setLoadingContent(target, message) {
   const element = typeof target === "string" ? document.querySelector(target) : target;
@@ -195,6 +206,111 @@ function getCurrentBoardLabel() {
   }
 
   return postState.category === "all" ? BOARD_LABELS.all : getCategoryLabel(postState.category);
+}
+
+function getCurrentSortLabel() {
+  return SORT_LABELS[postState.sort] || SORT_LABELS.latest;
+}
+
+function createFilterChip(text, modifier = "") {
+  const chip = document.createElement("span");
+  chip.className = `filter-chip ${modifier}`.trim();
+  chip.textContent = text;
+  return chip;
+}
+
+function renderFilterSummary() {
+  const summary = document.querySelector("#filter-summary");
+
+  if (!summary) {
+    return;
+  }
+
+  summary.innerHTML = "";
+  summary.append(
+    createFilterChip(getCurrentBoardLabel(), "filter-chip-board"),
+    createFilterChip(getCurrentSortLabel(), "filter-chip-sort"),
+    createFilterChip(`${postState.pageSize}개씩 보기`, "filter-chip-size")
+  );
+
+  if (postState.q) {
+    summary.insertBefore(createFilterChip(`검색어: ${postState.q}`, "filter-chip-search"), summary.children[1]);
+  }
+}
+
+function renderResultSummary(posts = [], pagination = null) {
+  const summary = document.querySelector("#result-summary");
+
+  if (!summary) {
+    return;
+  }
+
+  const totalCount = pagination?.totalCount ?? posts.length;
+  const boardLabel = getCurrentBoardLabel();
+  const sortLabel = getCurrentSortLabel();
+  const pageLabel = `${postState.pageSize}개씩 보기`;
+
+  if (postState.q) {
+    summary.textContent = `"${postState.q}" 검색 결과 ${totalCount}건 · ${boardLabel} · ${sortLabel} · ${pageLabel}`;
+    return;
+  }
+
+  summary.textContent = `${boardLabel}에서 ${totalCount}개의 게시글 표시 중 · ${sortLabel} · ${pageLabel}`;
+}
+
+function isMobileViewport() {
+  return window.matchMedia?.("(max-width: 768px)").matches ?? false;
+}
+
+function getStoredViewMode() {
+  try {
+    const storedMode = localStorage.getItem(VIEW_MODE_STORAGE_KEY);
+    return VIEW_MODES.includes(storedMode) ? storedMode : null;
+  } catch (error) {
+    return null;
+  }
+}
+
+function storeViewMode(mode) {
+  try {
+    localStorage.setItem(VIEW_MODE_STORAGE_KEY, mode);
+  } catch (error) {
+    // Ignore storage failures and keep the current in-memory view mode.
+  }
+}
+
+function getPreferredViewMode() {
+  return getStoredViewMode() || (isMobileViewport() ? "card" : "table");
+}
+
+function applyViewMode() {
+  const panel = document.querySelector(".post-list-panel");
+  const normalizedMode = VIEW_MODES.includes(postState.viewMode) ? postState.viewMode : "table";
+
+  if (panel) {
+    panel.classList.toggle("is-table-view", normalizedMode === "table");
+    panel.classList.toggle("is-card-view", normalizedMode === "card");
+  }
+
+  document.querySelectorAll("[data-view-mode]").forEach((button) => {
+    const isActive = button.dataset.viewMode === normalizedMode;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-pressed", String(isActive));
+  });
+}
+
+function setViewMode(mode, { persist = true } = {}) {
+  if (!VIEW_MODES.includes(mode)) {
+    return;
+  }
+
+  postState.viewMode = mode;
+
+  if (persist) {
+    storeViewMode(mode);
+  }
+
+  applyViewMode();
 }
 
 function createCategoryChip(category) {
@@ -592,6 +708,10 @@ async function loadPostList() {
     return;
   }
 
+  renderFilterSummary();
+  setLoadingContent("#result-summary", "게시글 목록을 불러오는 중입니다.");
+  applyViewMode();
+
   postList.innerHTML = "";
 
   const loadingRow = document.createElement("tr");
@@ -629,6 +749,8 @@ async function loadPostList() {
     renderPostRows(result.posts);
     renderPostCards(result.posts);
     renderPagination(result.pagination);
+    renderResultSummary(result.posts, result.pagination);
+    applyViewMode();
   } catch (error) {
     postList.innerHTML = "";
     const row = document.createElement("tr");
@@ -638,6 +760,11 @@ async function loadPostList() {
     row.appendChild(cell);
     postList.appendChild(row);
     renderPostCardMessage(error.message);
+    const resultSummary = document.querySelector("#result-summary");
+    if (resultSummary) {
+      resultSummary.textContent = "게시글 목록을 불러오지 못했습니다.";
+    }
+    applyViewMode();
   }
 }
 
@@ -647,6 +774,7 @@ function bindPostListControls() {
   const searchForm = document.querySelector("#post-search-form");
   const searchInput = document.querySelector("#post-search");
   const searchClearButton = document.querySelector("#post-search-clear");
+  const viewModeToggle = document.querySelector("#view-mode-toggle");
 
   if (pageSizeSelect) {
     pageSizeSelect.addEventListener("change", () => {
@@ -674,8 +802,22 @@ function bindPostListControls() {
   }
 
   if (searchClearButton && searchInput) {
+    searchClearButton.textContent = "필터 초기화";
+    searchClearButton.title = "검색어와 게시판 필터를 초기화합니다.";
     searchClearButton.addEventListener("click", () => {
       window.location.href = "/";
+    });
+  }
+
+  if (viewModeToggle) {
+    viewModeToggle.addEventListener("click", (event) => {
+      const button = event.target instanceof Element ? event.target.closest("[data-view-mode]") : null;
+
+      if (!button) {
+        return;
+      }
+
+      setViewMode(button.dataset.viewMode);
     });
   }
 }
@@ -1655,8 +1797,11 @@ function bindGuideTour() {
 
 document.addEventListener("DOMContentLoaded", () => {
   initializeCategoryFilterFromQuery();
+  postState.viewMode = getPreferredViewMode();
   bindPostListControls();
   updateBoardUi();
+  renderFilterSummary();
+  applyViewMode();
   bindGuideTour();
   bindPostWriteForm();
   loadPostList();
