@@ -59,6 +59,42 @@ function setCommentMessage(message, type = "info") {
   messageElement.dataset.type = type;
 }
 
+function createStatePanel(options) {
+  if (typeof window.createStatePanel === "function") {
+    return window.createStatePanel(options);
+  }
+
+  const panel = document.createElement("div");
+  const title = document.createElement("strong");
+  const description = document.createElement("p");
+
+  panel.className = `state-panel state-${options.type || "empty"}`;
+  title.className = "state-title";
+  title.textContent = options.title || "";
+  description.className = "state-description";
+  description.textContent = options.description || "";
+  panel.append(title, description);
+  return panel;
+}
+
+function renderTableState(tbody, colSpan, options) {
+  tbody.innerHTML = "";
+
+  const row = document.createElement("tr");
+  const cell = document.createElement("td");
+
+  cell.colSpan = colSpan;
+  cell.className = "state-table-cell";
+  cell.appendChild(createStatePanel(options));
+  row.appendChild(cell);
+  tbody.appendChild(row);
+}
+
+function renderContainerState(container, options) {
+  container.innerHTML = "";
+  container.appendChild(createStatePanel(options));
+}
+
 function clearCommentUi() {
   const commentForm = document.querySelector("#comment-form");
   const commentList = document.querySelector("#comment-list");
@@ -344,12 +380,23 @@ function renderPostRows(posts) {
   postList.innerHTML = "";
 
   if (posts.length === 0) {
-    const row = document.createElement("tr");
-    const cell = document.createElement("td");
-    cell.colSpan = 9;
-    cell.textContent = postState.q ? "검색 결과가 없습니다." : "등록된 게시글이 없습니다.";
-    row.appendChild(cell);
-    postList.appendChild(row);
+    const boardName =
+      postState.board === "hot"
+        ? "인기글"
+        : postState.board === "notice"
+          ? "공지사항"
+          : postState.category !== "all"
+            ? getCategoryLabel(postState.category)
+            : "게시글";
+
+    renderTableState(postList, 9, {
+      type: "empty",
+      icon: postState.q ? "⌕" : "＋",
+      title: postState.q ? "검색 결과가 없습니다." : `${boardName}이 없습니다.`,
+      description: postState.q
+        ? "검색어를 바꾸거나 전체 보기로 조건을 초기화해보세요."
+        : "아직 등록된 글이 없습니다. 로그인 후 첫 게시글을 작성해보세요.",
+    });
     return;
   }
 
@@ -434,7 +481,12 @@ async function loadPostList() {
     return;
   }
 
-  postList.innerHTML = '<tr><td colspan="9">게시글 목록을 불러오는 중입니다.</td></tr>';
+  renderTableState(postList, 9, {
+    type: "loading",
+    icon: "…",
+    title: "게시글 목록을 불러오는 중입니다.",
+    description: "잠시만 기다려주세요.",
+  });
 
   try {
     const query = new URLSearchParams({
@@ -462,13 +514,19 @@ async function loadPostList() {
     renderPostRows(result.posts);
     renderPagination(result.pagination);
   } catch (error) {
-    postList.innerHTML = "";
-    const row = document.createElement("tr");
-    const cell = document.createElement("td");
-    cell.colSpan = 9;
-    cell.textContent = error.message;
-    row.appendChild(cell);
-    postList.appendChild(row);
+    renderTableState(postList, 9, {
+      type: "error",
+      icon: "!",
+      title: "게시글 목록을 불러오지 못했습니다.",
+      description: error.message || "네트워크 상태를 확인한 뒤 다시 시도해주세요.",
+      actionLabel: "다시 시도",
+      onAction: loadPostList,
+    });
+
+    const paginationElement = document.querySelector("#pagination");
+    if (paginationElement) {
+      paginationElement.innerHTML = "";
+    }
   }
 }
 
@@ -926,7 +984,12 @@ async function loadComments(postId, auth = currentDetailAuth) {
     return;
   }
 
-  commentList.textContent = "댓글을 불러오는 중입니다.";
+  renderContainerState(commentList, {
+    type: "loading",
+    icon: "…",
+    title: "댓글을 불러오는 중입니다.",
+    description: "댓글과 답글을 정리하는 중입니다.",
+  });
 
   try {
     const result = await api.request(`/api/posts/${postId}/comments`);
@@ -936,7 +999,14 @@ async function loadComments(postId, auth = currentDetailAuth) {
       updatePostMeta(currentDetailPost, result.commentCount ?? countComments(result.comments));
     }
   } catch (error) {
-    commentList.textContent = error.message;
+    renderContainerState(commentList, {
+      type: "error",
+      icon: "!",
+      title: "댓글을 불러오지 못했습니다.",
+      description: error.message || "잠시 후 다시 시도해주세요.",
+      actionLabel: "다시 시도",
+      onAction: () => loadComments(postId, auth),
+    });
   }
 }
 
@@ -954,7 +1024,12 @@ function renderComments(comments, auth) {
   commentList.innerHTML = "";
 
   if (comments.length === 0) {
-    commentList.textContent = "아직 댓글이 없습니다.";
+    renderContainerState(commentList, {
+      type: "empty",
+      icon: "💬",
+      title: "아직 댓글이 없습니다.",
+      description: "첫 댓글을 남겨 게시글 이야기를 이어가보세요.",
+    });
     return;
   }
 

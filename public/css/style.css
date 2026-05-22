@@ -801,6 +801,97 @@ html[data-theme="dark"] .shortcut-group {
   color: var(--danger);
 }
 
+.state-table-cell {
+  padding: 28px 16px !important;
+}
+
+.state-panel {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  width: min(100%, 640px);
+  margin: 0 auto;
+  padding: 28px 24px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--surface) 88%, var(--surface-soft)), var(--surface));
+  box-shadow: var(--shadow-xs);
+  color: var(--text);
+  text-align: center;
+}
+
+.state-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-pill);
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-size: 20px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.state-loading .state-icon {
+  animation: state-pulse 1.15s ease-in-out infinite;
+}
+
+.state-error .state-icon {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.state-info .state-icon {
+  background: var(--surface-soft);
+  color: var(--muted);
+}
+
+.state-title {
+  display: block;
+  color: var(--color-text-strong);
+  font-size: 17px;
+  font-weight: 900;
+}
+
+.state-description {
+  max-width: 520px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.state-action {
+  margin-top: 4px;
+  padding-inline: 18px;
+}
+
+html[data-theme="dark"] .state-panel {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--surface) 84%, var(--surface-soft)), var(--surface));
+  border-color: var(--line-strong);
+}
+
+html[data-theme="dark"] .state-title {
+  color: var(--color-text-strong);
+}
+
+@keyframes state-pulse {
+  0%,
+  100% {
+    opacity: 0.58;
+    transform: scale(0.96);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 label {
   display: grid;
   gap: 8px;
@@ -2118,6 +2209,14 @@ html[data-theme="dark"] .guide-actions .guide-secondary:hover {
     padding: 10px 8px;
   }
 
+  .state-table-cell {
+    padding: 18px 10px !important;
+  }
+
+  .state-panel {
+    padding: 22px 16px;
+  }
+
   .post-table td:first-child {
     max-width: 230px;
     overflow-wrap: anywhere;
@@ -2248,6 +2347,16 @@ html[data-theme="dark"] .guide-actions .guide-secondary:hover {
     min-width: 700px;
   }
 
+  .state-panel {
+    padding: 20px 14px;
+  }
+
+  .state-icon {
+    width: 34px;
+    height: 34px;
+    font-size: 18px;
+  }
+
   .footer-meta {
     flex-direction: column;
   }
@@ -2304,6 +2413,10 @@ html[data-theme="dark"] .guide-actions .guide-secondary:hover {
 
   .toast,
   .toast.is-hiding {
+    animation: none;
+  }
+
+  .state-loading .state-icon {
     animation: none;
   }
 }
