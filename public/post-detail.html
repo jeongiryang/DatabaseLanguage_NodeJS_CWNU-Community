@@ -22,29 +22,41 @@
   </header>
 
   <main class="page">
-    <article class="panel">
-      <h1 id="post-title">게시글을 불러오는 중입니다.</h1>
-      <p class="category-badge" id="post-category" hidden></p>
-      <p class="meta" id="post-meta"></p>
-      <div class="content-block" id="post-content"></div>
-      <div class="actions">
-        <button type="button" id="share-post-button">🔗 공유</button>
-        <button type="button" id="bookmark-button" hidden>🔖 북마크</button>
-        <span class="meta" id="bookmark-status"></span>
-        <button type="button" id="like-button" hidden>👍 좋아요</button>
-        <span class="meta" id="like-status"></span>
-        <button type="button" id="dislike-button" hidden>👎 싫어요</button>
-        <span class="meta" id="dislike-status"></span>
-        <button type="button" id="edit-post-button" hidden>✏️ 수정</button>
-        <button type="button" id="delete-post-button" hidden>🗑️ 삭제</button>
+    <article class="panel post-detail-card">
+      <header class="post-detail-header">
+        <p class="category-badge" id="post-category" hidden></p>
+        <h1 class="post-detail-title" id="post-title">게시글을 불러오는 중입니다.</h1>
+        <p class="meta post-detail-meta" id="post-meta"></p>
+      </header>
+      <div class="content-block post-detail-body" id="post-content"></div>
+      <div class="actions post-detail-actions" aria-label="게시글 반응 및 관리">
+        <div class="reaction-actions" aria-label="게시글 반응">
+          <button type="button" id="bookmark-button" hidden>🔖 북마크</button>
+          <span class="meta" id="bookmark-status"></span>
+          <button type="button" id="like-button" hidden>👍 좋아요</button>
+          <span class="meta" id="like-status"></span>
+          <button type="button" id="dislike-button" hidden>👎 싫어요</button>
+          <span class="meta" id="dislike-status"></span>
+        </div>
+        <div class="owner-actions" aria-label="게시글 공유 및 관리">
+          <button type="button" id="share-post-button">🔗 공유</button>
+          <button type="button" id="edit-post-button" hidden>✏️ 수정</button>
+          <button type="button" id="delete-post-button" hidden>🗑️ 삭제</button>
+        </div>
       </div>
       <p class="form-message" id="post-message" role="status"></p>
     </article>
 
-    <section class="panel">
-      <h2>댓글</h2>
+    <section class="panel comment-panel">
+      <div class="comment-panel-header">
+        <div>
+          <p class="dashboard-eyebrow">댓글</p>
+          <h2>댓글과 답글</h2>
+        </div>
+        <p class="meta">질문, 보충 의견, 답글을 남길 수 있습니다.</p>
+      </div>
       <p class="form-message" id="comment-auth-message" role="status"></p>
-      <form class="comment-form" id="comment-form" hidden>
+      <form class="comment-form comment-composer" id="comment-form" hidden>
         <textarea name="content" rows="4" placeholder="따뜻한 댓글을 남겨주세요. 욕설과 비방은 삼가주세요." required></textarea>
         <label class="checkbox-label">
           <input type="checkbox" name="isAnonymous" value="true">
