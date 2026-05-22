@@ -40,6 +40,9 @@ const SORT_LABELS = {
 const VIEW_MODE_STORAGE_KEY = "cwnu.community.viewMode";
 const VIEW_MODES = ["table", "card"];
 const ALLOWED_PAGE_SIZES = [10, 20, 30, 40, 50];
+const RECENT_POSTS_STORAGE_KEY = "cwnu.community.recentPosts";
+const PREVIEW_POST_LIMIT = 3;
+const RECENT_POST_LIMIT = 5;
 
 function normalizePageSize(value) {
   const parsedValue = Number.parseInt(value, 10);
@@ -257,15 +260,14 @@ function renderResultSummary(posts = [], pagination = null) {
 
   const totalCount = pagination?.totalCount ?? posts.length;
   const boardLabel = getCurrentBoardLabel();
-  const sortLabel = getCurrentSortLabel();
-  const pageLabel = `${postState.pageSize}개씩 보기`;
+  const pageText = pagination?.totalPages > 1 ? ` · ${pagination.page}/${pagination.totalPages}페이지` : "";
 
   if (postState.q) {
-    summary.textContent = `"${postState.q}" 검색 결과 ${totalCount}건 · ${boardLabel} · ${sortLabel} · ${pageLabel}`;
+    summary.textContent = `"${postState.q}" 검색 결과 ${totalCount}건${pageText}`;
     return;
   }
 
-  summary.textContent = `${boardLabel}에서 ${totalCount}개의 게시글 표시 중 · ${sortLabel} · ${pageLabel}`;
+  summary.textContent = `${boardLabel} 게시글 ${totalCount}건 표시 중${pageText}`;
 }
 
 function isMobileViewport() {
@@ -330,6 +332,197 @@ function createCategoryChip(category) {
   chip.dataset.category = category || "free";
   chip.textContent = getCategoryLabel(category);
   return chip;
+}
+
+function getPostDetailUrl(postId) {
+  return `/post-detail.html?id=${postId}`;
+}
+
+function getPostPreviewMeta(post) {
+  const parts = [getCategoryLabel(post.category), formatDate(post.createdAt)];
+
+  if (Number.isFinite(post.commentCount)) {
+    parts.push(`댓글 ${post.commentCount}`);
+  }
+
+  if (Number.isFinite(post.likeCount)) {
+    parts.push(`좋아요 ${post.likeCount}`);
+  }
+
+  return parts.join(" · ");
+}
+
+function renderPreviewMessage(selector, message, isLoading = false) {
+  const container = document.querySelector(selector);
+
+  if (!container) {
+    return;
+  }
+
+  container.innerHTML = "";
+
+  const messageElement = document.createElement("p");
+  messageElement.className = "preview-empty";
+
+  if (isLoading) {
+    setLoadingContent(messageElement, message);
+  } else {
+    messageElement.textContent = message;
+  }
+
+  container.appendChild(messageElement);
+}
+
+function createPreviewItem(post) {
+  const link = document.createElement("a");
+  const title = document.createElement("strong");
+  const meta = document.createElement("span");
+
+  link.className = "preview-item";
+  link.href = getPostDetailUrl(post.id);
+  title.textContent = post.title;
+  meta.textContent = getPostPreviewMeta(post);
+
+  link.append(title, meta);
+  return link;
+}
+
+function renderPreviewList(selector, posts, emptyMessage = "표시할 게시글이 없습니다.", limit = PREVIEW_POST_LIMIT) {
+  const container = document.querySelector(selector);
+
+  if (!container) {
+    return;
+  }
+
+  container.innerHTML = "";
+
+  if (!posts.length) {
+    renderPreviewMessage(selector, emptyMessage);
+    return;
+  }
+
+  posts.slice(0, limit).forEach((post) => {
+    container.appendChild(createPreviewItem(post));
+  });
+}
+
+function readRecentPosts() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(RECENT_POSTS_STORAGE_KEY) || "[]");
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    return [];
+  }
+}
+
+function writeRecentPosts(posts) {
+  try {
+    localStorage.setItem(RECENT_POSTS_STORAGE_KEY, JSON.stringify(posts));
+  } catch (error) {
+    // Ignore storage failures. Recent view history is an optional UI enhancement.
+  }
+}
+
+function saveRecentPost(post) {
+  if (!post?.id) {
+    return;
+  }
+
+  const recentPost = {
+    id: post.id,
+    title: post.title,
+    category: post.category,
+    createdAt: post.createdAt,
+    commentCount: post.commentCount || 0,
+    likeCount: post.likeCount || 0,
+    viewedAt: new Date().toISOString(),
+  };
+  const nextPosts = [
+    recentPost,
+    ...readRecentPosts().filter((item) => item.id !== post.id),
+  ].slice(0, RECENT_POST_LIMIT);
+
+  writeRecentPosts(nextPosts);
+}
+
+function getRecentPosts(excludeId = null) {
+  return readRecentPosts()
+    .filter((post) => post?.id && post.id !== excludeId)
+    .sort((a, b) => new Date(b.viewedAt || b.createdAt).getTime() - new Date(a.viewedAt || a.createdAt).getTime())
+    .slice(0, RECENT_POST_LIMIT);
+}
+
+function renderRecentViewedList(selector, excludeId = null) {
+  renderPreviewList(selector, getRecentPosts(excludeId), "아직 최근 본 게시글이 없습니다.", RECENT_POST_LIMIT);
+}
+
+function updateDashboardMetric(selector, value) {
+  const element = document.querySelector(selector);
+
+  if (element) {
+    element.textContent = String(value);
+  }
+}
+
+async function fetchPreviewPosts(query) {
+  const result = await api.request(`/api/posts?${query.toString()}`);
+  return result;
+}
+
+function getPostCount(result) {
+  return result?.pagination?.totalCount ?? result?.posts?.length ?? 0;
+}
+
+async function loadDashboardSections() {
+  if (!document.querySelector("#hot-preview-list")) {
+    return;
+  }
+
+  renderPreviewMessage("#hot-preview-list", "인기글을 불러오는 중입니다.", true);
+  renderPreviewMessage("#notice-preview-list", "공지사항을 불러오는 중입니다.", true);
+  renderPreviewMessage("#latest-preview-list", "최근글을 불러오는 중입니다.", true);
+  renderRecentViewedList("#recent-viewed-list");
+
+  const previewQueries = {
+    hot: new URLSearchParams({ board: "hot", pageSize: "10" }),
+    notice: new URLSearchParams({ board: "notice", pageSize: "10" }),
+    latest: new URLSearchParams({ sort: "latest", pageSize: "10" }),
+  };
+  const [hotResult, noticeResult, latestResult] = await Promise.allSettled([
+    fetchPreviewPosts(previewQueries.hot),
+    fetchPreviewPosts(previewQueries.notice),
+    fetchPreviewPosts(previewQueries.latest),
+  ]);
+
+  if (hotResult.status === "fulfilled") {
+    renderPreviewList("#hot-preview-list", hotResult.value.posts, "아직 인기글이 없습니다.");
+    updateDashboardMetric("#dashboard-hot-posts", getPostCount(hotResult.value));
+  } else {
+    renderPreviewMessage("#hot-preview-list", "인기글을 불러오지 못했습니다.");
+    updateDashboardMetric("#dashboard-hot-posts", "-");
+  }
+
+  if (noticeResult.status === "fulfilled") {
+    renderPreviewList("#notice-preview-list", noticeResult.value.posts, "등록된 공지사항이 없습니다.");
+    updateDashboardMetric("#dashboard-notice-posts", getPostCount(noticeResult.value));
+  } else {
+    renderPreviewMessage("#notice-preview-list", "공지사항을 불러오지 못했습니다.");
+    updateDashboardMetric("#dashboard-notice-posts", "-");
+  }
+
+  if (latestResult.status === "fulfilled") {
+    const latestPosts = latestResult.value.posts;
+    renderPreviewList("#latest-preview-list", latestPosts, "최근 게시글이 없습니다.");
+    updateDashboardMetric("#dashboard-total-posts", getPostCount(latestResult.value));
+    updateDashboardMetric(
+      "#dashboard-comment-count",
+      latestPosts.reduce((sum, post) => sum + (post.commentCount || 0), 0)
+    );
+  } else {
+    renderPreviewMessage("#latest-preview-list", "최근글을 불러오지 못했습니다.");
+    updateDashboardMetric("#dashboard-total-posts", "-");
+    updateDashboardMetric("#dashboard-comment-count", "-");
+  }
 }
 
 function initializeCategoryFilterFromQuery() {
@@ -539,7 +732,7 @@ function renderPostRows(posts) {
     const likeCell = document.createElement("td");
     const dislikeCell = document.createElement("td");
 
-    titleLink.href = `/post-detail.html?id=${post.id}`;
+    titleLink.href = getPostDetailUrl(post.id);
     titleLink.textContent = post.title;
     titleCell.appendChild(titleLink);
     categoryCell.appendChild(createCategoryChip(post.category));
@@ -595,7 +788,7 @@ function createPostCard(post) {
   const meta = document.createElement("div");
   const dateMeta = document.createElement("p");
   const stats = document.createElement("div");
-  const detailUrl = `/post-detail.html?id=${post.id}`;
+  const detailUrl = getPostDetailUrl(post.id);
   const updatedAt = formatUpdatedAt(post.createdAt, post.updatedAt);
 
   card.className = "post-card";
@@ -917,6 +1110,8 @@ async function loadPostDetail() {
     bindLikeButton(post, auth);
     bindDislikeButton(post, auth);
     bindCommentForm(post.id, auth);
+    saveRecentPost(post);
+    await loadDetailRecommendations(post);
     await loadComments(post.id, auth);
   } catch (error) {
     titleElement.textContent = error.message;
@@ -925,6 +1120,58 @@ async function loadPostDetail() {
     clearCommentUi();
     clearLikeUi();
   }
+}
+
+function buildRelatedPostQuery(post) {
+  const query = new URLSearchParams({
+    pageSize: "10",
+    sort: "latest",
+  });
+
+  if (post.category === "notice") {
+    query.set("board", "notice");
+  } else {
+    query.set("category", post.category);
+  }
+
+  return query;
+}
+
+async function loadDetailRecommendations(post) {
+  if (!document.querySelector("#detail-recommendations")) {
+    return;
+  }
+
+  renderPreviewMessage("#related-posts-list", "관련 게시글을 불러오는 중입니다.", true);
+  renderPreviewMessage("#detail-hot-posts-list", "인기글을 불러오는 중입니다.", true);
+  renderRecentViewedList("#detail-recent-viewed-list", post.id);
+
+  const [relatedResult, hotResult] = await Promise.allSettled([
+    fetchPreviewPosts(buildRelatedPostQuery(post)),
+    fetchPreviewPosts(new URLSearchParams({ board: "hot", pageSize: "10" })),
+  ]);
+
+  if (relatedResult.status === "fulfilled") {
+    renderPreviewList(
+      "#related-posts-list",
+      relatedResult.value.posts.filter((item) => item.id !== post.id),
+      "같은 카테고리의 다른 글이 없습니다."
+    );
+  } else {
+    renderPreviewMessage("#related-posts-list", "관련 게시글을 불러오지 못했습니다.");
+  }
+
+  if (hotResult.status === "fulfilled") {
+    renderPreviewList(
+      "#detail-hot-posts-list",
+      hotResult.value.posts.filter((item) => item.id !== post.id),
+      "표시할 인기글이 없습니다."
+    );
+  } else {
+    renderPreviewMessage("#detail-hot-posts-list", "인기글을 불러오지 못했습니다.");
+  }
+
+  renderRecentViewedList("#detail-recent-viewed-list", post.id);
 }
 
 function bindPostDelete(post, auth) {
@@ -1815,6 +2062,7 @@ document.addEventListener("DOMContentLoaded", () => {
   applyViewMode();
   bindGuideTour();
   bindPostWriteForm();
+  loadDashboardSections();
   loadPostList();
   ensureWriteAccess();
   loadPostEditForm();
