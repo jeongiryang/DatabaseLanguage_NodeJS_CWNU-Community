@@ -1350,6 +1350,113 @@ button.is-loading:hover,
   }
 }
 
+.skeleton {
+  --skeleton-width: 100%;
+  position: relative;
+  display: block;
+  width: var(--skeleton-width);
+  max-width: 100%;
+  overflow: hidden;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--surface-muted) 88%, var(--line)) 0%,
+    color-mix(in srgb, var(--surface-raised) 92%, var(--primary-soft)) 48%,
+    color-mix(in srgb, var(--surface-muted) 88%, var(--line)) 100%
+  );
+  color: transparent;
+}
+
+.skeleton::after {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, #fff 42%, transparent), transparent);
+  content: "";
+  transform: translateX(-100%);
+  animation: skeleton-shimmer 1.35s ease-in-out infinite;
+}
+
+.skeleton-title {
+  height: 20px;
+  border-radius: var(--radius-sm);
+}
+
+.skeleton-title-lg {
+  height: 36px;
+}
+
+.skeleton-text {
+  height: 14px;
+  margin-bottom: 10px;
+  border-radius: var(--radius-sm);
+}
+
+.skeleton-meta {
+  height: 13px;
+}
+
+.skeleton-chip,
+.skeleton-pill {
+  height: 28px;
+}
+
+.skeleton-counter {
+  height: 34px;
+  border-radius: var(--radius-sm);
+}
+
+.skeleton-block {
+  height: 120px;
+  margin-top: 12px;
+  border-radius: var(--radius-md);
+}
+
+.skeleton-card {
+  pointer-events: none;
+}
+
+.skeleton-preview-item {
+  cursor: default;
+}
+
+.skeleton-row td {
+  vertical-align: middle;
+}
+
+.skeleton-row.is-optional {
+  opacity: 0.72;
+}
+
+.post-detail-actions.is-skeleton > :not([data-detail-actions-skeleton]) {
+  visibility: hidden;
+}
+
+.skeleton-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  width: 100%;
+}
+
+html[data-theme="dark"] .skeleton {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--surface-muted) 76%, #020617) 0%,
+    color-mix(in srgb, var(--surface-raised) 74%, var(--primary-soft)) 48%,
+    color-mix(in srgb, var(--surface-muted) 76%, #020617) 100%
+  );
+}
+
+html[data-theme="dark"] .skeleton::after {
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, #dbeafe 16%, transparent), transparent);
+}
+
+@keyframes skeleton-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
 label {
   display: grid;
   gap: 8px;
@@ -3738,7 +3845,8 @@ html[data-theme="dark"] .guide-actions .guide-secondary:hover {
   }
 
   .loading-spinner,
-  .button-spinner {
+  .button-spinner,
+  .skeleton::after {
     animation: none;
   }
 }
