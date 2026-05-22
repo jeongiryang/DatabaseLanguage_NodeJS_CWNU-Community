@@ -29,6 +29,32 @@ const BOARD_LABELS = {
 let currentDetailPost = null;
 let currentDetailAuth = { authenticated: false, user: null };
 
+function setLoadingContent(target, message) {
+  const element = typeof target === "string" ? document.querySelector(target) : target;
+
+  if (!element) {
+    return;
+  }
+
+  if (typeof window.setLoadingMessage === "function") {
+    window.setLoadingMessage(element, message);
+    return;
+  }
+
+  element.textContent = message;
+}
+
+function setPendingButton(button, isLoading, loadingText) {
+  if (typeof window.setButtonLoading === "function") {
+    window.setButtonLoading(button, isLoading, loadingText);
+    return;
+  }
+
+  if (button) {
+    button.disabled = isLoading;
+  }
+}
+
 function setPostMessage(message, type = "info") {
   const messageElement = document.querySelector("#post-message");
 
@@ -413,7 +439,7 @@ function renderPostRows(posts) {
   });
 }
 
-function renderPostCardMessage(message) {
+function renderPostCardMessage(message, isLoading = false) {
   const cardList = document.querySelector("#post-card-list");
 
   if (!cardList) {
@@ -424,7 +450,13 @@ function renderPostCardMessage(message) {
 
   const messageElement = document.createElement("p");
   messageElement.className = "post-card-empty";
-  messageElement.textContent = message;
+
+  if (isLoading) {
+    setLoadingContent(messageElement, message);
+  } else {
+    messageElement.textContent = message;
+  }
+
   cardList.appendChild(messageElement);
 }
 
@@ -560,8 +592,16 @@ async function loadPostList() {
     return;
   }
 
-  postList.innerHTML = '<tr><td colspan="9">게시글 목록을 불러오는 중입니다.</td></tr>';
-  renderPostCardMessage("게시글 목록을 불러오는 중입니다.");
+  postList.innerHTML = "";
+
+  const loadingRow = document.createElement("tr");
+  const loadingCell = document.createElement("td");
+
+  loadingCell.colSpan = 9;
+  setLoadingContent(loadingCell, "게시글 목록을 불러오는 중입니다.");
+  loadingRow.appendChild(loadingCell);
+  postList.appendChild(loadingRow);
+  renderPostCardMessage("게시글 목록을 불러오는 중입니다.", true);
 
   try {
     const query = new URLSearchParams({
@@ -819,7 +859,7 @@ function bindShareButton(post) {
   }
 
   shareButton.addEventListener("click", async () => {
-    shareButton.disabled = true;
+    setPendingButton(shareButton, true, "복사 중...");
 
     try {
       const copied = await copyText(getShareUrl(post.id));
@@ -827,7 +867,7 @@ function bindShareButton(post) {
     } catch (error) {
       setPostMessage("링크 복사에 실패했습니다.", "error");
     } finally {
-      shareButton.disabled = false;
+      setPendingButton(shareButton, false);
     }
   });
 }
@@ -1002,6 +1042,9 @@ async function loadPostEditForm() {
 async function handlePostCreate(form) {
   const postId = getPostIdFromQuery();
   const isEditMode = Boolean(postId);
+  const submitButton = form.querySelector('button[type="submit"]');
+
+  setPendingButton(submitButton, true, isEditMode ? "수정 중..." : "등록 중...");
   setPostMessage(isEditMode ? "게시글 수정 중입니다." : "게시글 등록 중입니다.");
 
   try {
@@ -1016,6 +1059,8 @@ async function handlePostCreate(form) {
     window.location.href = `/post-detail.html?id=${result.post.id}`;
   } catch (error) {
     setPostMessage(error.message, "error");
+  } finally {
+    setPendingButton(submitButton, false);
   }
 }
 
@@ -1039,12 +1084,15 @@ function bindCommentForm(postId, auth) {
     event.preventDefault();
     const contentInput = commentForm.elements.content;
     const anonymousInput = commentForm.elements.isAnonymous;
+    const submitButton = commentForm.querySelector('button[type="submit"]');
     const content = contentInput.value.trim();
 
     if (!content) {
       setCommentMessage("댓글 내용을 입력하세요.", "error");
       return;
     }
+
+    setPendingButton(submitButton, true, "등록 중...");
 
     try {
       await api.request(`/api/posts/${postId}/comments`, {
@@ -1057,6 +1105,8 @@ function bindCommentForm(postId, auth) {
       await loadComments(postId, auth);
     } catch (error) {
       setCommentMessage(error.message, "error");
+    } finally {
+      setPendingButton(submitButton, false);
     }
   });
 }
@@ -1068,7 +1118,7 @@ async function loadComments(postId, auth = currentDetailAuth) {
     return;
   }
 
-  commentList.textContent = "댓글을 불러오는 중입니다.";
+  setLoadingContent(commentList, "댓글을 불러오는 중입니다.");
 
   try {
     const result = await api.request(`/api/posts/${postId}/comments`);
@@ -1226,6 +1276,8 @@ function createCommentEditForm(comment, isReply) {
       return;
     }
 
+    setPendingButton(saveButton, true, "저장 중...");
+
     try {
       await api.request(`/api/comments/${comment.id}`, {
         method: "PUT",
@@ -1235,6 +1287,8 @@ function createCommentEditForm(comment, isReply) {
       await loadComments(currentDetailPost.id, currentDetailAuth);
     } catch (error) {
       setCommentMessage(error.message, "error");
+    } finally {
+      setPendingButton(saveButton, false);
     }
   });
 
@@ -1284,6 +1338,8 @@ function createReplyForm(parentId) {
       return;
     }
 
+    setPendingButton(submitButton, true, "작성 중...");
+
     try {
       await api.request(`/api/posts/${currentDetailPost.id}/comments`, {
         method: "POST",
@@ -1297,6 +1353,8 @@ function createReplyForm(parentId) {
       await loadComments(currentDetailPost.id, currentDetailAuth);
     } catch (error) {
       setCommentMessage(error.message, "error");
+    } finally {
+      setPendingButton(submitButton, false);
     }
   });
 
