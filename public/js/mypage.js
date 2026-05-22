@@ -111,42 +111,6 @@ function setMyPageMessage(message, type = "info") {
   messageElement.dataset.type = type;
 }
 
-function createStatePanel(options) {
-  if (typeof window.createStatePanel === "function") {
-    return window.createStatePanel(options);
-  }
-
-  const panel = document.createElement("div");
-  const title = document.createElement("strong");
-  const description = document.createElement("p");
-
-  panel.className = `state-panel state-${options.type || "empty"}`;
-  title.className = "state-title";
-  title.textContent = options.title || "";
-  description.className = "state-description";
-  description.textContent = options.description || "";
-  panel.append(title, description);
-  return panel;
-}
-
-function renderTableState(tbody, colSpan, options) {
-  tbody.innerHTML = "";
-
-  const row = document.createElement("tr");
-  const cell = document.createElement("td");
-
-  cell.colSpan = colSpan;
-  cell.className = "state-table-cell";
-  cell.appendChild(createStatePanel(options));
-  row.appendChild(cell);
-  tbody.appendChild(row);
-}
-
-function renderContainerState(container, options) {
-  container.innerHTML = "";
-  container.appendChild(createStatePanel(options));
-}
-
 function makePostLink(post) {
   const link = document.createElement("a");
   link.href = `/post-detail.html?id=${post.id}`;
@@ -222,15 +186,12 @@ function renderMyPosts(posts) {
   tbody.innerHTML = "";
 
   if (filteredPosts.length === 0) {
-    renderTableState(tbody, 8, {
-      type: "empty",
-      icon: "📝",
-      title: myPageState.postCategory === "all" ? "작성한 게시글이 없습니다." : "선택한 카테고리에 작성한 게시글이 없습니다.",
-      description:
-        myPageState.postCategory === "all"
-          ? "새 게시글을 작성하면 이곳에서 내 글을 확인할 수 있습니다."
-          : "카테고리 조건을 바꾸거나 전체 목록을 확인해보세요.",
-    });
+    const row = document.createElement("tr");
+    const cell = document.createElement("td");
+    cell.colSpan = 8;
+    cell.textContent = myPageState.postCategory === "all" ? "작성한 게시글이 없습니다." : "선택한 카테고리에 작성한 게시글이 없습니다.";
+    row.appendChild(cell);
+    tbody.appendChild(row);
     showPanel("#my-posts-panel");
     return;
   }
@@ -298,12 +259,7 @@ function renderComments(comments) {
   container.innerHTML = "";
 
   if (comments.length === 0) {
-    renderContainerState(container, {
-      type: "empty",
-      icon: "💬",
-      title: "작성한 댓글이 없습니다.",
-      description: "게시글에 댓글이나 답글을 남기면 이곳에 표시됩니다.",
-    });
+    container.textContent = "작성한 댓글이 없습니다.";
     showPanel("#my-comments-panel");
     return;
   }
@@ -349,12 +305,7 @@ function renderReactions(selector, panelSelector, reactions, emptyMessage, dateL
   container.innerHTML = "";
 
   if (reactions.length === 0) {
-    renderContainerState(container, {
-      type: "empty",
-      icon: "☆",
-      title: emptyMessage,
-      description: "관심 있는 게시글에 반응하면 이곳에서 다시 확인할 수 있습니다.",
-    });
+    container.textContent = emptyMessage;
     showPanel(panelSelector);
     return;
   }
@@ -388,12 +339,7 @@ function renderBookmarks(bookmarks) {
   container.innerHTML = "";
 
   if (bookmarks.length === 0) {
-    renderContainerState(container, {
-      type: "empty",
-      icon: "🔖",
-      title: "북마크한 게시글이 없습니다.",
-      description: "나중에 다시 볼 게시글을 북마크하면 이곳에 저장됩니다.",
-    });
+    container.textContent = "북마크한 게시글이 없습니다.";
     showPanel("#my-bookmarks-panel");
     return;
   }
@@ -432,20 +378,6 @@ async function loadMyPage() {
     activateMyPageTab("profile-panel");
   } catch (error) {
     setMyPageMessage("마이페이지를 보려면 로그인하세요.", "error");
-    const profilePanel = document.querySelector("#profile-panel");
-
-    if (profilePanel) {
-      profilePanel.hidden = false;
-      profilePanel.appendChild(
-        createStatePanel({
-          type: "error",
-          icon: "!",
-          title: "마이페이지를 불러오지 못했습니다.",
-          description: error.message || "로그인 후 다시 시도해주세요.",
-        })
-      );
-    }
-
     window.setTimeout(() => {
       window.location.href = "/login.html";
     }, 1000);
