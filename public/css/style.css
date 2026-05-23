@@ -855,6 +855,10 @@ html[data-theme="dark"] .board-shortcut {
   color: #d6e4f7;
 }
 
+html[data-theme="dark"] .board-shortcut[data-board-link="all"] .shortcut-desc {
+  color: #dbeafe;
+}
+
 .board-shortcut:hover,
 .board-shortcut.active {
   background: var(--primary);
@@ -880,7 +884,8 @@ html[data-theme="dark"] .board-shortcut {
 
 html[data-theme="dark"] .board-shortcut[data-board-link="all"].active .shortcut-desc,
 html[data-theme="dark"] .board-shortcut[data-board-link="all"]:hover .shortcut-desc {
-  color: color-mix(in srgb, var(--color-on-primary) 92%, #1f3b5f);
+  color: #07111f;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 
 .board-shortcut.hot {
@@ -1120,7 +1125,7 @@ html[data-theme="dark"] .board-shortcut[data-category-link="lost"] {
   transform: translateY(-2px);
 }
 
-.preview-panel-hot {
+.dashboard-preview-grid .preview-panel.preview-panel-hot {
   --preview-accent: #e11d48;
   --preview-accent-soft: #fff1f5;
   --preview-accent-text: #9f1239;
@@ -1137,7 +1142,7 @@ html[data-theme="dark"] .board-shortcut[data-category-link="lost"] {
   --preview-rank-end: #fb7185;
 }
 
-.preview-panel-notice {
+.dashboard-preview-grid .preview-panel.preview-panel-notice {
   --preview-accent: #f59e0b;
   --preview-accent-soft: #fff7e6;
   --preview-accent-text: #9a5b00;
@@ -1151,7 +1156,7 @@ html[data-theme="dark"] .board-shortcut[data-category-link="lost"] {
   --preview-shadow-color: rgba(217, 119, 6, 0.24);
 }
 
-.preview-panel-latest {
+.dashboard-preview-grid .preview-panel.preview-panel-latest {
   --preview-accent: #0284c7;
   --preview-accent-soft: #e0f7ff;
   --preview-accent-text: #075985;
@@ -1373,7 +1378,7 @@ html[data-theme="dark"] .dashboard-preview-grid .preview-panel {
   border-color: var(--line-strong);
 }
 
-html[data-theme="dark"] .preview-panel-hot {
+html[data-theme="dark"] .dashboard-preview-grid .preview-panel.preview-panel-hot {
   --preview-accent: #fb7185;
   --preview-accent-soft: #3a1f2e;
   --preview-accent-text: #ffccd8;
@@ -1390,7 +1395,7 @@ html[data-theme="dark"] .preview-panel-hot {
   --preview-rank-end: #fda4af;
 }
 
-html[data-theme="dark"] .preview-panel-notice {
+html[data-theme="dark"] .dashboard-preview-grid .preview-panel.preview-panel-notice {
   --preview-accent: #fbbf24;
   --preview-accent-soft: #3a2b13;
   --preview-accent-text: #ffe4a8;
@@ -1404,7 +1409,7 @@ html[data-theme="dark"] .preview-panel-notice {
   --preview-shadow-color: rgba(251, 191, 36, 0.18);
 }
 
-html[data-theme="dark"] .preview-panel-latest {
+html[data-theme="dark"] .dashboard-preview-grid .preview-panel.preview-panel-latest {
   --preview-accent: #38bdf8;
   --preview-accent-soft: #123142;
   --preview-accent-text: #c7f0ff;
