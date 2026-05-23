@@ -680,21 +680,32 @@ function renderDashboardMetricSkeletons() {
   );
 }
 
-function createPreviewItem(post) {
+function createPreviewItem(post, options = {}) {
   const link = document.createElement("a");
   const title = document.createElement("strong");
   const meta = document.createElement("span");
 
   link.className = "preview-item";
   link.href = getPostDetailUrl(post.id);
+  title.className = "preview-item-title";
   title.textContent = post.title;
+  meta.className = "preview-item-meta";
   meta.textContent = getPostPreviewMeta(post);
+
+  if (Number.isInteger(options.rank)) {
+    const rank = document.createElement("span");
+    link.classList.add("has-rank");
+    rank.className = "preview-item-rank";
+    rank.setAttribute("aria-label", `${options.rank}위`);
+    rank.textContent = `#${options.rank}`;
+    link.appendChild(rank);
+  }
 
   link.append(title, meta);
   return link;
 }
 
-function renderPreviewList(selector, posts, emptyMessage = "표시할 게시글이 없습니다.", limit = PREVIEW_POST_LIMIT) {
+function renderPreviewList(selector, posts, emptyMessage = "표시할 게시글이 없습니다.", limit = PREVIEW_POST_LIMIT, options = {}) {
   const container = document.querySelector(selector);
 
   if (!container) {
@@ -708,8 +719,8 @@ function renderPreviewList(selector, posts, emptyMessage = "표시할 게시글�
     return;
   }
 
-  posts.slice(0, limit).forEach((post) => {
-    container.appendChild(createPreviewItem(post));
+  posts.slice(0, limit).forEach((post, index) => {
+    container.appendChild(createPreviewItem(post, options.showRank ? { rank: index + 1 } : {}));
   });
 }
 
@@ -803,7 +814,9 @@ async function loadDashboardSections() {
   ]);
 
   if (hotResult.status === "fulfilled") {
-    renderPreviewList("#hot-preview-list", hotResult.value.posts, "아직 인기글이 없습니다.");
+    renderPreviewList("#hot-preview-list", hotResult.value.posts, "아직 인기글이 없습니다.", PREVIEW_POST_LIMIT, {
+      showRank: true,
+    });
     updateDashboardMetric("#dashboard-hot-posts", getPostCount(hotResult.value));
   } else {
     renderPreviewMessage("#hot-preview-list", "인기글을 불러오지 못했습니다.");
