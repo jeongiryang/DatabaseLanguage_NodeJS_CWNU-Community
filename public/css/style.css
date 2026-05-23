@@ -551,21 +551,49 @@ html[data-theme="dark"] .shortcut-group h2 {
 }
 
 .help-button {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
   margin-top: 12px;
   margin-left: 8px;
-  border: 1px solid var(--color-primary-border);
-  background: var(--surface);
-  box-shadow: var(--shadow-sm);
-  color: var(--primary-dark);
+  border: 1px solid color-mix(in srgb, var(--color-warning) 62%, #ffffff);
+  border-radius: var(--radius-pill);
+  background:
+    linear-gradient(135deg, #fff8d6 0%, #ffd66b 54%, #f59e0b 100%);
+  box-shadow:
+    0 12px 24px rgba(217, 119, 6, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.58);
+  color: #5f3800;
+  font-weight: 900;
+  padding-inline: 16px;
 }
 
-.help-button:hover {
-  border-color: var(--primary);
-  background: var(--primary-soft);
-  color: var(--primary-dark);
+.help-button::before {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.72);
+  color: #8a5200;
+  content: "?";
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.help-button:hover,
+.help-button:focus-visible {
+  border-color: color-mix(in srgb, var(--color-warning) 78%, #ffffff);
+  background:
+    linear-gradient(135deg, #fffbe8 0%, #ffe08a 52%, #f6ad1b 100%);
+  box-shadow:
+    0 16px 30px rgba(217, 119, 6, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.66);
+  color: #4f2f00;
+  transform: translateY(-1px);
 }
 
 .floating-write-button {
@@ -620,14 +648,25 @@ html[data-theme="dark"] .current-board {
 }
 
 html[data-theme="dark"] .help-button {
-  background: var(--surface-raised);
-  border-color: var(--color-primary-border);
-  color: #dbeafe;
+  background:
+    linear-gradient(135deg, #4f3a12 0%, #d59620 58%, #ffcf68 100%);
+  border-color: color-mix(in srgb, var(--color-warning) 60%, var(--line-strong));
+  box-shadow:
+    0 14px 28px rgba(0, 0, 0, 0.34),
+    0 0 0 1px rgba(255, 213, 138, 0.12);
+  color: #fff4cf;
 }
 
-html[data-theme="dark"] .help-button:hover {
-  background: color-mix(in srgb, var(--primary-soft) 82%, var(--surface));
-  border-color: var(--primary);
+html[data-theme="dark"] .help-button::before {
+  background: rgba(16, 24, 39, 0.56);
+  color: #ffe7a3;
+}
+
+html[data-theme="dark"] .help-button:hover,
+html[data-theme="dark"] .help-button:focus-visible {
+  background:
+    linear-gradient(135deg, #5c4517 0%, #e1a12a 58%, #ffdb81 100%);
+  border-color: var(--color-warning);
   color: #ffffff;
 }
 
@@ -887,6 +926,143 @@ html[data-theme="dark"] .board-shortcut.notice {
   box-shadow:
     inset 0 0 0 1px rgba(255, 255, 255, 0.42),
     0 8px 18px rgba(217, 119, 6, 0.2);
+}
+
+.board-shortcut[data-category-link] {
+  --shortcut-accent: var(--primary);
+  --shortcut-accent-soft: var(--primary-soft);
+  --shortcut-accent-text: var(--primary-dark);
+
+  position: relative;
+  overflow: hidden;
+  border-color: color-mix(in srgb, var(--shortcut-accent) 28%, var(--line));
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--shortcut-accent-soft) 54%, transparent), transparent 72%),
+    color-mix(in srgb, var(--surface-soft) 76%, var(--surface));
+  color: var(--shortcut-accent-text);
+}
+
+.board-shortcut[data-category-link]::before {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 4px;
+  background: var(--shortcut-accent);
+  content: "";
+  opacity: 0.86;
+}
+
+.board-shortcut[data-category-link] .shortcut-desc {
+  color: color-mix(in srgb, var(--shortcut-accent-text) 58%, var(--muted));
+}
+
+.board-shortcut[data-category-link]:hover,
+.board-shortcut[data-category-link].active {
+  border-color: var(--shortcut-accent);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--shortcut-accent-soft) 72%, transparent), transparent 74%),
+    var(--surface);
+  color: var(--shortcut-accent-text);
+  box-shadow: 0 14px 26px color-mix(in srgb, var(--shortcut-accent) 18%, transparent);
+}
+
+.board-shortcut[data-category-link]:hover .shortcut-desc,
+.board-shortcut[data-category-link].active .shortcut-desc {
+  color: color-mix(in srgb, var(--shortcut-accent-text) 70%, var(--muted));
+}
+
+.board-shortcut[data-category-link].active {
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--shortcut-accent) 30%, transparent),
+    0 10px 22px color-mix(in srgb, var(--shortcut-accent) 20%, transparent);
+}
+
+.board-shortcut[data-category-link="free"] {
+  --shortcut-accent: var(--primary);
+  --shortcut-accent-soft: var(--primary-soft);
+  --shortcut-accent-text: var(--primary-dark);
+}
+
+.board-shortcut[data-category-link="study"] {
+  --shortcut-accent: #15803d;
+  --shortcut-accent-soft: #e8f7ef;
+  --shortcut-accent-text: #166534;
+}
+
+.board-shortcut[data-category-link="question"] {
+  --shortcut-accent: #d97706;
+  --shortcut-accent-soft: #fff5df;
+  --shortcut-accent-text: #965f00;
+}
+
+.board-shortcut[data-category-link="info"] {
+  --shortcut-accent: #0284c7;
+  --shortcut-accent-soft: #e9f7ff;
+  --shortcut-accent-text: #075985;
+}
+
+.board-shortcut[data-category-link="market"] {
+  --shortcut-accent: #7c3aed;
+  --shortcut-accent-soft: #f3edff;
+  --shortcut-accent-text: #5b35a8;
+}
+
+.board-shortcut[data-category-link="lost"] {
+  --shortcut-accent: #dc2626;
+  --shortcut-accent-soft: #fff0f0;
+  --shortcut-accent-text: #b42318;
+}
+
+html[data-theme="dark"] .board-shortcut[data-category-link] {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--shortcut-accent-soft) 68%, transparent), transparent 72%),
+    var(--surface-soft);
+  border-color: color-mix(in srgb, var(--shortcut-accent) 38%, var(--line-strong));
+  color: var(--shortcut-accent-text);
+}
+
+html[data-theme="dark"] .board-shortcut[data-category-link]:hover,
+html[data-theme="dark"] .board-shortcut[data-category-link].active {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--shortcut-accent-soft) 80%, transparent), transparent 74%),
+    var(--surface);
+  border-color: color-mix(in srgb, var(--shortcut-accent) 58%, var(--line-strong));
+  color: var(--shortcut-accent-text);
+}
+
+html[data-theme="dark"] .board-shortcut[data-category-link="free"] {
+  --shortcut-accent: var(--primary);
+  --shortcut-accent-soft: #17345c;
+  --shortcut-accent-text: #dbeafe;
+}
+
+html[data-theme="dark"] .board-shortcut[data-category-link="study"] {
+  --shortcut-accent: #5bd184;
+  --shortcut-accent-soft: #183524;
+  --shortcut-accent-text: #a9edc1;
+}
+
+html[data-theme="dark"] .board-shortcut[data-category-link="question"] {
+  --shortcut-accent: #ffd58a;
+  --shortcut-accent-soft: #3b2d15;
+  --shortcut-accent-text: #f6d78f;
+}
+
+html[data-theme="dark"] .board-shortcut[data-category-link="info"] {
+  --shortcut-accent: #67d4ff;
+  --shortcut-accent-soft: #133142;
+  --shortcut-accent-text: #abe4ff;
+}
+
+html[data-theme="dark"] .board-shortcut[data-category-link="market"] {
+  --shortcut-accent: #b69cff;
+  --shortcut-accent-soft: #2c2445;
+  --shortcut-accent-text: #d8c8ff;
+}
+
+html[data-theme="dark"] .board-shortcut[data-category-link="lost"] {
+  --shortcut-accent: #ff8f98;
+  --shortcut-accent-soft: #3b2024;
+  --shortcut-accent-text: #ffb4bb;
 }
 
 .dashboard-preview-grid {
