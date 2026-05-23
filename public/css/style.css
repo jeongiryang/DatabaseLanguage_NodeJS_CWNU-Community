@@ -878,6 +878,11 @@ html[data-theme="dark"] .board-shortcut {
     0 8px 18px rgba(21, 91, 181, 0.18);
 }
 
+html[data-theme="dark"] .board-shortcut[data-board-link="all"].active .shortcut-desc,
+html[data-theme="dark"] .board-shortcut[data-board-link="all"]:hover .shortcut-desc {
+  color: color-mix(in srgb, var(--color-on-primary) 92%, #1f3b5f);
+}
+
 .board-shortcut.hot {
   background: var(--color-hot-soft);
   border-color: color-mix(in srgb, var(--color-hot) 28%, var(--color-hot-soft));
@@ -1092,8 +1097,8 @@ html[data-theme="dark"] .board-shortcut[data-category-link="lost"] {
   overflow: hidden;
   border-color: var(--line);
   background:
-    radial-gradient(circle at top right, var(--preview-panel-tint), transparent 46%),
-    linear-gradient(180deg, color-mix(in srgb, var(--preview-panel-tint) 64%, transparent), transparent 74%),
+    radial-gradient(circle at top right, color-mix(in srgb, var(--preview-panel-tint) 92%, transparent), transparent 48%),
+    linear-gradient(180deg, color-mix(in srgb, var(--preview-panel-tint) 82%, transparent), transparent 78%),
     var(--surface);
   transition:
     border-color var(--motion-base),
@@ -1104,8 +1109,8 @@ html[data-theme="dark"] .board-shortcut[data-category-link="lost"] {
 .dashboard-preview-grid .preview-panel::before {
   position: absolute;
   inset: 0 0 auto;
-  height: 4px;
-  background: linear-gradient(90deg, var(--preview-left-bar), color-mix(in srgb, var(--preview-left-bar) 34%, transparent));
+  height: 5px;
+  background: linear-gradient(90deg, var(--preview-left-bar), color-mix(in srgb, var(--preview-left-bar) 52%, transparent));
   content: "";
 }
 
@@ -1119,14 +1124,14 @@ html[data-theme="dark"] .board-shortcut[data-category-link="lost"] {
   --preview-accent: #e11d48;
   --preview-accent-soft: #fff1f5;
   --preview-accent-text: #9f1239;
-  --preview-panel-tint: #ffe4ec;
-  --preview-item-tint: #fff5f8;
-  --preview-item-hover-tint: #ffe9f0;
-  --preview-item-border: #ffc2d0;
+  --preview-panel-tint: #ffd6e1;
+  --preview-item-tint: #ffe9f0;
+  --preview-item-hover-tint: #ffdbe7;
+  --preview-item-border: #fda4af;
   --preview-left-bar: #e11d48;
-  --preview-label-bg: #ffe4ec;
-  --preview-label-border: #fda4af;
-  --preview-shadow-color: rgba(225, 29, 72, 0.2);
+  --preview-label-bg: #ffdbe7;
+  --preview-label-border: #fb7185;
+  --preview-shadow-color: rgba(225, 29, 72, 0.24);
   --preview-rank-start: #be123c;
   --preview-rank-mid: #e11d48;
   --preview-rank-end: #fb7185;
@@ -1136,28 +1141,28 @@ html[data-theme="dark"] .board-shortcut[data-category-link="lost"] {
   --preview-accent: #f59e0b;
   --preview-accent-soft: #fff7e6;
   --preview-accent-text: #9a5b00;
-  --preview-panel-tint: #fff0c2;
-  --preview-item-tint: #fff9ec;
-  --preview-item-hover-tint: #fff1cf;
-  --preview-item-border: #f6d58a;
+  --preview-panel-tint: #ffe6a3;
+  --preview-item-tint: #fff3d6;
+  --preview-item-hover-tint: #ffe9b8;
+  --preview-item-border: #eebf55;
   --preview-left-bar: #f59e0b;
-  --preview-label-bg: #fff0c2;
-  --preview-label-border: #f2c45f;
-  --preview-shadow-color: rgba(217, 119, 6, 0.2);
+  --preview-label-bg: #ffe9b8;
+  --preview-label-border: #e9ac35;
+  --preview-shadow-color: rgba(217, 119, 6, 0.24);
 }
 
 .preview-panel-latest {
   --preview-accent: #0284c7;
   --preview-accent-soft: #e0f7ff;
   --preview-accent-text: #075985;
-  --preview-panel-tint: #d9f3ff;
-  --preview-item-tint: #eefaff;
-  --preview-item-hover-tint: #ddf4ff;
-  --preview-item-border: #a9def5;
-  --preview-left-bar: #0284c7;
-  --preview-label-bg: #d9f3ff;
-  --preview-label-border: #8bd4f5;
-  --preview-shadow-color: rgba(2, 132, 199, 0.18);
+  --preview-panel-tint: #c9efff;
+  --preview-item-tint: #e3f8ff;
+  --preview-item-hover-tint: #cff0ff;
+  --preview-item-border: #83d4f6;
+  --preview-left-bar: #0ea5e9;
+  --preview-label-bg: #cff0ff;
+  --preview-label-border: #67c9ef;
+  --preview-shadow-color: rgba(14, 165, 233, 0.22);
 }
 
 .preview-panel,
@@ -1246,11 +1251,11 @@ html[data-theme="dark"] .board-shortcut[data-category-link="lost"] {
 .dashboard-preview-grid .preview-item::before {
   position: absolute;
   inset: 12px auto 12px 0;
-  width: 3px;
+  width: 4px;
   border-radius: 0 var(--radius-pill) var(--radius-pill) 0;
   background: var(--preview-left-bar);
   content: "";
-  opacity: 0.82;
+  opacity: 0.96;
 }
 
 .dashboard-preview-grid .preview-item.has-rank {
@@ -1298,7 +1303,7 @@ html[data-theme="dark"] .board-shortcut[data-category-link="lost"] {
 
 .dashboard-preview-grid .preview-item-meta {
   grid-column: 2;
-  color: color-mix(in srgb, var(--preview-accent-text) 52%, var(--muted));
+  color: color-mix(in srgb, var(--preview-accent-text) 62%, var(--muted));
   font-weight: 800;
   line-height: 1.35;
 }
