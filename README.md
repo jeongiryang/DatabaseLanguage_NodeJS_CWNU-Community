@@ -37,35 +37,31 @@
 
 ## 미리보기
 
-아래는 최종 구현된 CWNU Community의 대표 화면임.
+아래는 v1.2.0 기준 최종 구현된 CWNU Community의 대표 화면임.
 
 ### 미리보기 - CWNU Community
 
-| ![메인 게시판](docs/screenshots/99-final/main-board-preview.gif) |
+| ![메인 대시보드](docs/screenshots/99-final/main-dashboard-preview-v12.gif) |
 |:--:|
-| **▲ 메인 게시판: 전체글, 인기글, 공지사항, 카테고리 바로가기** |
+| **▲ 메인 대시보드: 요약 카드, 주요 게시판, Hot/Notice/Latest 프리뷰** |
 
-| ![게시글 상세](docs/screenshots/99-final/post-detail.png) | ![댓글 답글](docs/screenshots/03-comments/comment-replies.png) |
+| ![검색과 보기 모드](docs/screenshots/99-final/search-view-mode-preview-v12.gif) | ![글쓰기 UX](docs/screenshots/99-final/post-write-preview-v12.gif) |
 |:--:|:--:|
-| **▲ 게시글 상세 화면** | **▲ 댓글과 1단계 답글** |
+| **▲ 검색, 최근 검색어, 표/카드 보기 전환** | **▲ 작성 가이드, 미리보기, 임시저장** |
 
-| ![마이페이지](docs/screenshots/99-final/mypage-preview.gif) | ![다크모드](docs/screenshots/99-final/dark-mode.png) |
+| ![게시글 상세 UX](docs/screenshots/99-final/post-detail-preview-v12.gif) | ![마이페이지 활동 시각화](docs/screenshots/99-final/mypage-activity-preview-v12.gif) |
 |:--:|:--:|
-| **▲ 마이페이지** | **▲ 다크모드 화면** |
+| **▲ 상세 헤더, 반응, 댓글 이동, 추천 게시글** | **▲ 활동 타임라인과 활동 요약** |
 
-| ![도움말 투어](docs/screenshots/99-final/help-tour-preview.gif) |
+| ![다크모드](docs/screenshots/99-final/dark-mode-v12.png) |
 |:--:|
-| **▲ 메인 페이지 사용 가이드 투어** |
+| **▲ v1.2.0 다크모드 대표 화면** |
 
 ### 모바일 뷰포트
 
-| ![모바일 메인 게시판](docs/screenshots/99-final/mobile-main-board.png) | ![모바일 목록 화면](docs/screenshots/99-final/mobile-board-list.png) |
+| ![모바일 대시보드](docs/screenshots/99-final/mobile-dashboard-preview-v12.gif) | ![모바일 상세 화면](docs/screenshots/99-final/mobile-post-detail-v12.png) |
 |:--:|:--:|
-| **▲ 모바일 메인 게시판과 게시판 바로가기** | **▲ 모바일 필터와 게시글 목록** |
-
-| ![모바일 마이페이지](docs/screenshots/99-final/mobile-mypage.png) | ![모바일 다크모드](docs/screenshots/99-final/mobile-dark-mode.png) |
-|:--:|:--:|
-| **▲ 모바일 마이페이지** | **▲ 모바일 다크모드** |
+| **▲ 모바일 대시보드와 Floating 글쓰기 버튼** | **▲ 모바일 게시글 상세/반응 UI** |
 
 ---
 
@@ -657,21 +653,21 @@ COOKIE_SECURE=true
 
 #### 인증 / 회원 기능
 
-| ![회원가입](docs/screenshots/01-auth/register.png) | ![로그인 후 헤더](docs/screenshots/01-auth/auth-header.png) |
+| ![로그인](docs/screenshots/01-auth/login-v12.png) | ![마이페이지 프로필](docs/screenshots/01-auth/mypage-profile-v12.png) |
 |:--:|:--:|
-| **▲ 회원가입 화면** | **▲ 로그인 후 사용자 표시** |
+| **▲ 테스트 계정 로그인 화면** | **▲ 로그인 후 계정 요약** |
 
 #### 게시글 / 댓글 기능
 
-| ![게시글 상세](docs/screenshots/02-posts/post-detail.png) | ![댓글 답글](docs/screenshots/03-comments/comment-replies.png) |
+| ![게시글 상세](docs/screenshots/02-posts/post-detail-header-v12.png) | ![댓글 답글](docs/screenshots/03-comments/comments-replies-v12.png) |
 |:--:|:--:|
-| **▲ 게시글 상세 화면** | **▲ 댓글과 1단계 답글** |
+| **▲ v1.2.0 상세 헤더와 메타 정보** | **▲ 댓글과 1단계 답글** |
 
 #### 반응 / 마이페이지
 
-| ![반응 버튼](docs/screenshots/04-likes/reactions-bookmark.png) | ![마이페이지](docs/screenshots/99-final/mypage.png) |
+| ![반응 버튼](docs/screenshots/02-posts/post-detail-actions-v12.png) | ![마이페이지](docs/screenshots/99-final/mypage-dashboard-v12.png) |
 |:--:|:--:|
-| **▲ 좋아요 · 싫어요 · 북마크** | **▲ 마이페이지 활동 목록** |
+| **▲ 좋아요 · 싫어요 · 북마크 · 공유** | **▲ 마이페이지 대시보드** |
 
 #### DB 검증
 
@@ -681,16 +677,12 @@ COOKIE_SECURE=true
 
 #### UI/UX
 
-| ![다크모드](docs/screenshots/99-final/dark-mode.png) | ![도움말 투어](docs/screenshots/99-final/help-tour.png) |
+| ![다크모드](docs/screenshots/99-final/dark-mode-v12.png) | ![프리뷰 패널](docs/screenshots/99-final/main-preview-panels-v12.png) |
 |:--:|:--:|
-| **▲ 다크모드 화면** | **▲ 도움말 투어 화면** |
+| **▲ v1.2.0 다크모드 화면** | **▲ Hot / Notice / Latest 프리뷰 패널** |
 
 #### 모바일 최적화
 
-| ![모바일 메인 게시판](docs/screenshots/99-final/mobile-main-board.png) | ![모바일 목록 화면](docs/screenshots/99-final/mobile-board-list.png) |
+| ![모바일 대시보드](docs/screenshots/99-final/mobile-dashboard-preview-v12.gif) | ![모바일 상세 화면](docs/screenshots/99-final/mobile-post-detail-v12.png) |
 |:--:|:--:|
-| **▲ 모바일 게시판 바로가기** | **▲ 모바일 필터와 게시글 목록** |
-
-| ![모바일 마이페이지](docs/screenshots/99-final/mobile-mypage.png) | ![모바일 다크모드](docs/screenshots/99-final/mobile-dark-mode.png) |
-|:--:|:--:|
-| **▲ 모바일 마이페이지 화면** | **▲ 모바일 다크모드 화면** |
+| **▲ 모바일 대시보드와 FAB** | **▲ 모바일 상세/반응 UI** |
