@@ -35,7 +35,7 @@
         <div class="profile-summary-content">
           <p class="dashboard-eyebrow">내 계정</p>
           <h2 id="dashboard-nickname">사용자 정보를 불러오는 중</h2>
-          <p id="dashboard-email" class="meta">-</p>
+          <p id="dashboard-login-id" class="meta">-</p>
           <dl class="profile-summary-meta">
             <div>
               <dt>가입일</dt>
@@ -129,8 +129,8 @@
           <dd id="profile-nickname"></dd>
         </div>
         <div>
-          <dt>이메일</dt>
-          <dd id="profile-email"></dd>
+          <dt>아이디</dt>
+          <dd id="profile-login-id"></dd>
         </div>
         <div>
           <dt>가입일</dt>
@@ -143,6 +143,22 @@
           <input type="text" name="nickname" id="nickname-input" minlength="2" maxlength="20" required>
         </label>
         <button type="submit">변경</button>
+      </form>
+      <h3>비밀번호 변경</h3>
+      <form class="nickname-form" id="password-form">
+        <label>
+          현재 비밀번호
+          <input type="password" name="currentPassword" autocomplete="current-password" minlength="8" required>
+        </label>
+        <label>
+          새 비밀번호
+          <input type="password" name="newPassword" autocomplete="new-password" minlength="8" required>
+        </label>
+        <label>
+          새 비밀번호 확인
+          <input type="password" name="confirmPassword" autocomplete="new-password" minlength="8" required>
+        </label>
+        <button type="submit">비밀번호 변경</button>
       </form>
     </section>
 

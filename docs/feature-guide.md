@@ -1,6 +1,6 @@
 ﻿# CWNU Community 기능 설명서
 
-데이터베이스개론 과제 제출용 기능 설명서임. 본 문서는 `DatabaseLanguage_NodeJS_CWNU-Community` 프로젝트의 페이지별 기능, 동작 방식, 관련 API/DB, 캡처 위치, 검증 내용을 정리함. 현재 문서는 v1.2.0 기준 UI/UX 확장 기능과 최종 시연용 seed 데이터 구성을 함께 반영함.
+데이터베이스개론 과제 제출용 기능 설명서임. 본 문서는 `DatabaseLanguage_NodeJS_CWNU-Community` 프로젝트의 페이지별 기능, 동작 방식, 관련 API/DB, 캡처 위치, 검증 내용을 정리함. 현재 문서는 v1.2.0 기준 UI/UX 확장 기능과 v2.0.0 후보 계정 구조 리팩터링, 최종 시연용 seed 데이터 구성을 함께 반영함.
 
 > 이 문서는 `docs/feature-guide.md`에 위치하므로, 이미지 경로는 `docs` 폴더 기준 상대경로인 `./screenshots/...` 형식으로 작성함.
 
@@ -10,7 +10,7 @@
 - [2. 기술 스택](#2-기술-스택)
 - [3. DBMS/ORM 사용 설명](#3-dbmsorm-사용-설명)
 - [4. 회원가입 / 로그인 / 로그아웃](#4-회원가입--로그인--로그아웃)
-- [5. 비밀번호 보기 / 닉네임 변경 / 회원 탈퇴](#5-비밀번호-보기--닉네임-변경--회원-탈퇴)
+- [5. 비밀번호 보기 / 닉네임 변경 / 비밀번호 변경 / 회원 탈퇴](#5-비밀번호-보기--닉네임-변경--비밀번호-변경--회원-탈퇴)
 - [6. 게시글 목록 / 게시판 / 공지사항 / 인기글](#6-게시글-목록--게시판--공지사항--인기글)
 - [7. 검색 / 정렬 / 페이징](#7-검색--정렬--페이징)
 - [8. 게시글 작성 / 상세 / 수정 / 삭제](#8-게시글-작성--상세--수정--삭제)
@@ -260,11 +260,12 @@ model Like {
 
 ### 기능 설명
 
-사용자는 이메일, 닉네임, 비밀번호로 회원가입할 수 있고, 로그인 후 JWT httpOnly cookie로 인증 상태가 유지됨.
+사용자는 아이디, 닉네임, 비밀번호로 회원가입할 수 있고, 로그인 후 JWT httpOnly cookie로 인증 상태가 유지됨.
 
 ### 동작 방식
 
-- 회원가입 시 이메일과 닉네임 중복을 검사함.
+- 회원가입 시 아이디와 닉네임 중복을 검사함.
+- 아이디는 4~30자의 영문, 숫자, `_`, `-`, `.`, `@` 조합을 허용하며 `@`는 필수가 아님.
 - 비밀번호는 bcrypt로 hash 처리하여 저장함.
 - 로그인 성공 시 JWT를 httpOnly cookie에 저장함.
 - 로그아웃 시 인증 cookie를 제거함.
@@ -281,7 +282,7 @@ model Like {
 
 | DB 모델 | 관련 필드 |
 |---|---|
-| User | `email`, `nickname`, `passwordHash`, `createdAt` |
+| User | `loginId`, `nickname`, `passwordHash`, `createdAt` |
 
 ### 관련 코드
 
@@ -291,7 +292,7 @@ model Like {
 const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
 const user = await prisma.user.create({
   data: {
-    email,
+    loginId,
     nickname,
     passwordHash,
   },
@@ -307,7 +308,7 @@ setAuthCookie(res, token);
 const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
 
 if (!isPasswordValid) {
-  return res.status(401).json({ message: "Invalid email or password." });
+  return res.status(401).json({ message: "아이디 또는 비밀번호가 올바르지 않습니다." });
 }
 
 const token = signAuthToken(user);
@@ -344,23 +345,24 @@ function clearAuthCookie(res) {
 ### 검증 내용
 
 - 새 계정으로 회원가입이 되는지 확인함.
-- 같은 이메일 또는 같은 닉네임으로 중복 가입 거부 여부 확인.
+- 같은 아이디 또는 같은 닉네임으로 중복 가입 거부 여부 확인.
 - 로그인 후 헤더에 사용자 닉네임 표시 여부 확인.
 - 로그아웃 후 `/api/auth/me`가 비로그인 상태를 반환하는지 확인함.
 
 ---
 
-## 5. 비밀번호 보기 / 닉네임 변경 / 회원 탈퇴
+## 5. 비밀번호 보기 / 닉네임 변경 / 비밀번호 변경 / 회원 탈퇴
 
 ### 기능 설명
 
-회원가입/로그인 화면에서는 비밀번호 보기/숨기기를 지원함. 로그인 사용자는 마이페이지에서 닉네임을 변경하거나 계정을 탈퇴할 수 있음.
+회원가입/로그인 화면에서는 비밀번호 보기/숨기기를 지원함. 로그인 사용자는 마이페이지에서 닉네임과 비밀번호를 변경하거나 계정을 탈퇴할 수 있음.
 
 ### 동작 방식
 
 - 비밀번호 보기 버튼은 input type을 `password`와 `text`로 전환함.
 - 닉네임 변경은 로그인 사용자 본인의 `User.nickname`만 수정함.
 - 닉네임은 trim 처리 후 2자 이상 20자 이하로 검증함.
+- 비밀번호 변경은 현재 비밀번호 확인 후 새 비밀번호 hash를 저장함.
 - 회원 탈퇴 시 현재 로그인 사용자 기준으로 계정과 관련 데이터를 삭제하고 인증 cookie를 제거함.
 
 ### 관련 API 또는 DB
@@ -368,12 +370,13 @@ function clearAuthCookie(res) {
 | Method | Endpoint | 설명 |
 |---|---|---|
 | PATCH | `/api/auth/me` | 닉네임 변경 |
+| PATCH | `/api/auth/password` | 비밀번호 변경 |
 | DELETE | `/api/auth/me` | 회원 탈퇴 |
 | GET | `/api/auth/me/activity` | 마이페이지 활동 조회 |
 
 | DB 모델 | 관련 필드 |
 |---|---|
-| User | `nickname`, `email`, `createdAt` |
+| User | `nickname`, `loginId`, `passwordHash`, `createdAt` |
 | Post/Comment/Like/Dislike/Bookmark | 회원 탈퇴 시 정리 대상 |
 
 ### 관련 코드
@@ -403,7 +406,7 @@ const user = await prisma.user.update({
   data: { nickname },
   select: {
     id: true,
-    email: true,
+    loginId: true,
     nickname: true,
     createdAt: true,
   },
@@ -1081,8 +1084,8 @@ await prisma.bookmark.upsert({
 - 비로그인 사용자가 접근하면 로그인 안내 또는 로그인 페이지 이동 처리를 함.
 - 로그인 사용자는 내 정보, 작성한 글, 작성한 댓글/답글, 좋아요, 싫어요, 북마크 목록을 확인함.
 - 작성한 글 목록은 카테고리 필터를 지원함.
-- 닉네임 변경과 회원 탈퇴도 마이페이지에서 수행함.
-- 상단 프로필 요약 카드에는 닉네임, 이메일, 가입일, 계정 상태를 표시함.
+- 닉네임 변경, 비밀번호 변경, 회원 탈퇴도 마이페이지에서 수행함.
+- 상단 프로필 요약 카드에는 닉네임, 아이디, 가입일, 계정 상태를 표시함.
 - 활동 통계 카드는 작성 글, 댓글/답글, 좋아요, 싫어요, 북마크 수를 표시함.
 - 최근 활동 타임라인은 작성 글, 댓글/답글, 좋아요, 싫어요, 북마크 활동을 최신순으로 통합 표시함.
 - 많이 활동한 게시판은 작성 글과 반응 데이터의 category를 기반으로 상위 3개를 계산함.
@@ -1094,11 +1097,12 @@ await prisma.bookmark.upsert({
 |---|---|---|
 | GET | `/api/auth/me/activity` | 현재 사용자 활동 조회 |
 | PATCH | `/api/auth/me` | 닉네임 변경 |
+| PATCH | `/api/auth/password` | 비밀번호 변경 |
 | DELETE | `/api/auth/me` | 회원 탈퇴 |
 
 | DB 모델 | 표시 데이터 |
 |---|---|
-| User | 닉네임, 이메일, 가입일 |
+| User | 닉네임, 아이디, 가입일 |
 | Post | 내가 작성한 게시글 |
 | Comment | 내가 작성한 댓글/답글 |
 | Like/Dislike/Bookmark | 내가 반응한 게시글 |
@@ -1113,7 +1117,7 @@ const [user, posts, comments, likes, dislikes, bookmarks] = await Promise.all([
     where: { id: userId },
     select: {
       id: true,
-      email: true,
+      loginId: true,
       nickname: true,
       createdAt: true,
     },
@@ -1452,7 +1456,7 @@ window.setButtonLoading = setButtonLoading;
 
 ### 기능 설명
 
-개발 및 기능 설명서 캡처를 위해 테스트 데이터를 자동 생성하는 seed 스크립트를 제공함. v1.2.0 기준 seed는 메인 대시보드, 인기글 TOP 3, 공지사항, 최근글, 검색 하이라이트, 마이페이지 활동 시각화가 자연스럽게 보이도록 재구성함.
+개발 및 기능 설명서 캡처를 위해 테스트 데이터를 자동 생성하는 seed 스크립트를 제공함. v2.0.0 후보 기준 seed는 loginId 기반 테스트 계정과 함께 메인 대시보드, 인기글 TOP 3, 공지사항, 최근글, 검색 하이라이트, 마이페이지 활동 시각화가 자연스럽게 보이도록 재구성함.
 
 ### 동작 방식
 
@@ -1464,7 +1468,7 @@ window.setButtonLoading = setButtonLoading;
 - 테스트 사용자는 10명으로 구성함.
 - 게시글은 49개이며 `notice/free/study/question/info/market/lost` 각 7개씩 구성함.
 - 댓글 148개, 답글 62개, 좋아요 224개, 싫어요 41개, 북마크 192개를 포함함.
-- 대표 시연 계정은 `assignment@cwnu.ac.kr` / `과제폭격기`이며 비밀번호는 `test1234!`임.
+- 대표 시연 계정은 `assignment` / `과제폭격기`이며 비밀번호는 `test1234!`임.
 - 검색 시연을 위해 `Prisma`, `SQL`, `셔틀`, `분실`, `중고`, `롤`, `고양이`, `배포` 키워드를 자연스럽게 포함함.
 - 일부 글/댓글은 익명 작성과 수정일을 포함해 익명 배지와 수정됨 표시를 확인할 수 있게 구성함.
 
@@ -1504,11 +1508,11 @@ const PASSWORD = "test1234!";
 const SALT_ROUNDS = 12;
 
 const users = [
-  { email: "algorithm@cwnu.ac.kr", nickname: "알고리즘장인" },
-  { email: "library@cwnu.ac.kr", nickname: "새벽도서관" },
-  { email: "campuscat@cwnu.ac.kr", nickname: "캠퍼스고양이" },
-  { email: "assignment@cwnu.ac.kr", nickname: "과제폭격기" },
-  { email: "dbmaster@cwnu.ac.kr", nickname: "DB마스터" },
+  { loginId: "algorithm", nickname: "알고리즘장인" },
+  { loginId: "library", nickname: "새벽도서관" },
+  { loginId: "campuscat", nickname: "캠퍼스고양이" },
+  { loginId: "assignment", nickname: "과제폭격기" },
+  { loginId: "dbmaster", nickname: "DB마스터" },
 ];
 ```
 

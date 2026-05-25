@@ -10,7 +10,7 @@ datasource db {
 
 model User {
   id           Int       @id @default(autoincrement())
-  email        String    @unique
+  loginId      String    @unique
   nickname     String    @unique
   passwordHash String    @map("password_hash")
   posts        Post[]

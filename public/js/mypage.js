@@ -164,7 +164,7 @@ function createLocalSkeletonLine(className = "skeleton-line", width = "") {
 
 function renderMyPageSkeleton() {
   const nickname = document.querySelector("#dashboard-nickname");
-  const email = document.querySelector("#dashboard-email");
+  const loginId = document.querySelector("#dashboard-login-id");
   const createdAt = document.querySelector("#dashboard-created-at");
   const status = document.querySelector("#dashboard-status");
   const recentList = document.querySelector("#recent-activity-list");
@@ -172,7 +172,7 @@ function renderMyPageSkeleton() {
   const typeSummary = document.querySelector("#activity-type-summary");
 
   nickname?.replaceChildren(createLocalSkeletonLine("skeleton-title", "62%"));
-  email?.replaceChildren(createLocalSkeletonLine("skeleton-meta", "72%"));
+  loginId?.replaceChildren(createLocalSkeletonLine("skeleton-meta", "72%"));
   createdAt?.replaceChildren(createLocalSkeletonLine("skeleton-meta", "88px"));
   status?.replaceChildren(createLocalSkeletonLine("skeleton-meta", "72px"));
 
@@ -478,10 +478,10 @@ function renderActivityVisuals(activity) {
 
 function renderProfile(user) {
   document.querySelector("#profile-nickname").textContent = user.nickname;
-  document.querySelector("#profile-email").textContent = user.email;
+  document.querySelector("#profile-login-id").textContent = user.loginId;
   document.querySelector("#profile-created-at").textContent = formatDate(user.createdAt);
   setText("#dashboard-nickname", user.nickname);
-  setText("#dashboard-email", user.email);
+  setText("#dashboard-login-id", user.loginId);
   setText("#dashboard-created-at", formatDate(user.createdAt));
   setText("#dashboard-status", "활성 계정");
 
@@ -536,6 +536,56 @@ function bindNicknameForm() {
   form.addEventListener("submit", (event) => {
     event.preventDefault();
     handleNicknameUpdate(form);
+  });
+}
+
+async function handlePasswordUpdate(form) {
+  const currentPassword = form.elements.currentPassword.value;
+  const newPassword = form.elements.newPassword.value;
+  const confirmPassword = form.elements.confirmPassword.value;
+  const submitButton = form.querySelector('button[type="submit"]');
+
+  if (!currentPassword || !newPassword || !confirmPassword) {
+    setMyPageMessage("현재 비밀번호와 새 비밀번호를 모두 입력해주세요.", "error");
+    return;
+  }
+
+  if (newPassword !== confirmPassword) {
+    setMyPageMessage("새 비밀번호 확인이 일치하지 않습니다.", "error");
+    return;
+  }
+
+  if (newPassword.length < 8) {
+    setMyPageMessage("새 비밀번호는 8자 이상이어야 합니다.", "error");
+    return;
+  }
+
+  try {
+    window.setButtonLoading?.(submitButton, true, "변경 중...");
+    const result = await api.request("/api/auth/password", {
+      method: "PATCH",
+      body: JSON.stringify({ currentPassword, newPassword, confirmPassword }),
+    });
+
+    form.reset();
+    setMyPageMessage(result.message || "비밀번호가 변경되었습니다.", "success");
+  } catch (error) {
+    setMyPageMessage(error.message, "error");
+  } finally {
+    window.setButtonLoading?.(submitButton, false);
+  }
+}
+
+function bindPasswordForm() {
+  const form = document.querySelector("#password-form");
+
+  if (!form) {
+    return;
+  }
+
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    handlePasswordUpdate(form);
   });
 }
 
@@ -772,5 +822,6 @@ document.addEventListener("DOMContentLoaded", () => {
   bindMyPageTabs();
   bindMyPostCategoryFilter();
   bindNicknameForm();
+  bindPasswordForm();
   loadMyPage();
 });

@@ -22,7 +22,7 @@ async function requireAuth(req, res, next) {
       where: { id: userId },
       select: {
         id: true,
-        email: true,
+        loginId: true,
         nickname: true,
       },
     });
