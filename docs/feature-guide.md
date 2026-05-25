@@ -95,9 +95,9 @@ module.exports = app;
 - `public/post-write.html`
 - `public/mypage.html`
 
-| ![메인 게시판](./screenshots/99-final/main-board.png) |
+| ![메인 대시보드](./screenshots/99-final/main-dashboard-v12.png) |
 |:--:|
-| **▲ 메인 게시판** |
+| **▲ v1.2.0 메인 커뮤니티 대시보드** |
 
 ### 검증 내용
 
@@ -333,7 +333,7 @@ function clearAuthCookie(res) {
 - `public/login.html`
 - `public/index.html` 상단 사용자 영역
 
-| ![회원가입 화면](./screenshots/01-auth/register.png) | ![로그인 화면](./screenshots/01-auth/login.png) |
+| ![회원가입 화면](./screenshots/01-auth/register.png) | ![로그인 화면](./screenshots/01-auth/login-v12.png) |
 |:--:|:--:|
 | **▲ 회원가입 화면** | **▲ 로그인 화면** |
 
@@ -429,7 +429,7 @@ await prisma.$transaction(async (tx) => {
 - `public/login.html`
 - `public/mypage.html`
 
-| ![비밀번호 보기 숨기기](./screenshots/01-auth/password-toggle.png) | ![닉네임 변경](./screenshots/01-auth/update-nickname.png) |
+| ![비밀번호 보기 숨기기](./screenshots/01-auth/password-toggle.png) | ![닉네임 변경](./screenshots/01-auth/mypage-info-v12.png) |
 |:--:|:--:|
 | **▲ 비밀번호 보기 숨기기** | **▲ 닉네임 변경** |
 
@@ -543,13 +543,13 @@ function saveRecentPost(post) {
 
 - `public/index.html`
 
-| ![메인 게시판](./screenshots/05-pagination-sort/main-board.png) | ![인기글 게시판](./screenshots/05-pagination-sort/hot-board.png) |
+| ![메인 대시보드](./screenshots/99-final/main-dashboard-v12.png) | ![인기글/공지사항/최근글 프리뷰](./screenshots/99-final/main-preview-panels-v12.png) |
 |:--:|:--:|
-| **▲ 메인 게시판** | **▲ 인기글 게시판** |
+| **▲ 메인 대시보드** | **▲ Hot / Notice / Latest 프리뷰** |
 
-| ![공지사항 게시판](./screenshots/05-pagination-sort/notice-board.png) | ![중고장터 게시판](./screenshots/05-pagination-sort/market-board.png) |
+| ![주요 게시판 카드](./screenshots/99-final/main-category-cards-v12.png) | ![카테고리 게시판](./screenshots/05-pagination-sort/category-board-v12.png) |
 |:--:|:--:|
-| **▲ 공지사항 게시판** | **▲ 중고장터 게시판** |
+| **▲ 주요 게시판 카드** | **▲ 카테고리 게시판 목록** |
 
 ### 검증 내용
 
@@ -680,17 +680,17 @@ function setViewMode(mode) {
 
 - `public/index.html`
 
-| ![검색 기능](./screenshots/05-pagination-sort/search.png) | ![최신순 정렬](./screenshots/05-pagination-sort/sort-latest.png) |
+| ![검색어 하이라이트](./screenshots/05-pagination-sort/search-highlight-v12.png) | ![필터 요약](./screenshots/05-pagination-sort/filter-summary-v12.png) |
 |:--:|:--:|
-| **▲ 검색 기능** | **▲ 최신순 정렬** |
+| **▲ 검색어 하이라이트** | **▲ filter summary / result summary** |
 
-| ![좋아요순 정렬](./screenshots/05-pagination-sort/sort-likes.png) | ![조회수순 정렬](./screenshots/05-pagination-sort/sort-views.png) |
+| ![검색/정렬 컨트롤](./screenshots/05-pagination-sort/filter-controls-v12.png) | ![표 보기](./screenshots/02-posts/post-table-view-v12.png) |
 |:--:|:--:|
-| **▲ 좋아요순 정렬** | **▲ 조회수순 정렬** |
+| **▲ 검색/정렬/표시 개수 컨트롤** | **▲ 표 보기 목록** |
 
-| ![댓글순 정렬](./screenshots/05-pagination-sort/sort-comments.png) | ![페이징 기능](./screenshots/05-pagination-sort/pagination.png) |
+| ![카드 보기](./screenshots/02-posts/post-card-view-v12.png) | ![카테고리 게시판](./screenshots/05-pagination-sort/category-board-v12.png) |
 |:--:|:--:|
-| **▲ 댓글순 정렬** | **▲ 페이징 기능** |
+| **▲ 카드 보기 목록** | **▲ 카테고리/게시판 필터 결과** |
 
 ### 검증 내용
 
@@ -826,17 +826,17 @@ function updatePostMeta(post, commentCount = post.commentCount) {
 - `public/post-detail.html`
 - `public/index.html`
 
-| ![게시글 작성](./screenshots/02-posts/post-write.png) | ![게시글 상세](./screenshots/02-posts/post-detail.png) |
+| ![게시글 작성 가이드](./screenshots/02-posts/post-write-guide-v12.png) | ![게시글 상세 헤더](./screenshots/02-posts/post-detail-header-v12.png) |
 |:--:|:--:|
-| **▲ 게시글 작성** | **▲ 게시글 상세** |
+| **▲ 카테고리별 작성 가이드** | **▲ 게시글 상세 헤더** |
 
-| ![게시글 수정](./screenshots/02-posts/post-edit.png) | ![게시글 삭제](./screenshots/02-posts/post-delete.png) |
+| ![게시글 작성 미리보기](./screenshots/02-posts/post-write-preview-v12.png) | ![게시글 삭제 확인](./screenshots/02-posts/post-delete-v12.png) |
 |:--:|:--:|
-| **▲ 게시글 수정** | **▲ 게시글 삭제** |
+| **▲ 작성/미리보기 탭** | **▲ 게시글 삭제 Confirm Modal** |
 
-| ![익명 게시글](./screenshots/02-posts/anonymous-post.png) |
+| ![질문 게시글 미리보기](./screenshots/02-posts/post-write-question-preview-v12.png) |
 |:--:|
-| **▲ 익명 게시글** |
+| **▲ 익명/카테고리 글쓰기 미리보기** |
 
 ### 검증 내용
 
@@ -935,13 +935,13 @@ const comment = await prisma.comment.update({
 
 - `public/post-detail.html`
 
-| ![댓글 목록](./screenshots/03-comments/comments.png) | ![답글 작성](./screenshots/03-comments/comment-replies.png) |
+| ![댓글 작성 영역](./screenshots/03-comments/comment-composer-v12.png) | ![댓글/답글 목록](./screenshots/03-comments/comments-replies-v12.png) |
 |:--:|:--:|
-| **▲ 댓글 목록** | **▲ 답글 작성** |
+| **▲ 댓글 작성 영역** | **▲ 댓글/답글 목록** |
 
-| ![댓글 수정](./screenshots/03-comments/comment-edit.png) | ![익명 댓글](./screenshots/03-comments/anonymous-comment.png) |
+| ![댓글 삭제 확인](./screenshots/03-comments/confirm-modal-v12.png) | ![익명 댓글](./screenshots/03-comments/anonymous-comment.png) |
 |:--:|:--:|
-| **▲ 댓글 수정** | **▲ 익명 댓글** |
+| **▲ 댓글 삭제 Confirm Modal** | **▲ 익명 댓글** |
 
 | ![답글의 답글 제한](./screenshots/03-comments/reply-depth-limit.png) |
 |:--:|
@@ -1053,11 +1053,11 @@ await prisma.bookmark.upsert({
 - `public/index.html`
 - `public/mypage.html`
 
-| ![좋아요 싫어요 북마크](./screenshots/04-likes/reactions-bookmark.png) | ![좋아요 싫어요 전환](./screenshots/04-likes/like-dislike-switch.png) |
+| ![좋아요 싫어요 북마크](./screenshots/02-posts/post-detail-actions-v12.png) | ![좋아요 토스트](./screenshots/04-likes/like-toast-v12.png) |
 |:--:|:--:|
-| **▲ 좋아요 싫어요 북마크** | **▲ 좋아요 싫어요 전환** |
+| **▲ 반응/북마크 버튼** | **▲ 반응 Toast 피드백** |
 
-| ![북마크 목록](./screenshots/04-likes/bookmark-list.png) |
+| ![북마크 목록](./screenshots/04-likes/mypage-bookmarks-v12.png) |
 |:--:|
 | **▲ 북마크 목록** |
 
@@ -1187,13 +1187,13 @@ function getRecentActivities(activity) {
 
 - `public/mypage.html`
 
-| ![마이페이지 내 정보](./screenshots/99-final/mypage.png) | ![마이페이지 작성 글](./screenshots/02-posts/mypage-posts.png) |
+| ![마이페이지 대시보드](./screenshots/99-final/mypage-dashboard-v12.png) | ![마이페이지 작성 글](./screenshots/02-posts/mypage-posts-v12.png) |
 |:--:|:--:|
-| **▲ 마이페이지 내 정보** | **▲ 마이페이지 작성 글** |
+| **▲ 마이페이지 대시보드** | **▲ 마이페이지 작성 글** |
 
-| ![마이페이지 댓글](./screenshots/03-comments/mypage-comments.png) | ![마이페이지 북마크](./screenshots/04-likes/mypage-bookmarks.png) |
+| ![마이페이지 활동 타임라인](./screenshots/99-final/mypage-activity-timeline-v12.png) | ![마이페이지 북마크](./screenshots/04-likes/mypage-bookmarks-v12.png) |
 |:--:|:--:|
-| **▲ 마이페이지 댓글** | **▲ 마이페이지 북마크** |
+| **▲ 최근 활동 타임라인** | **▲ 마이페이지 북마크** |
 
 ### 검증 내용
 
@@ -1258,9 +1258,9 @@ function bindShareButton(post) {
 
 - `public/post-detail.html`
 
-| ![게시글 공유](./screenshots/04-likes/share-link.png) |
+| ![게시글 공유](./screenshots/04-likes/share-toast-v12.png) |
 |:--:|
-| **▲ 게시글 공유** |
+| **▲ 공유 링크 복사 Toast** |
 
 ### 검증 내용
 
@@ -1428,7 +1428,7 @@ window.setButtonLoading = setButtonLoading;
 - `public/post-detail.html`
 - `public/mypage.html`
 
-| ![라이트모드 대표 화면](./screenshots/99-final/main-board.png) | ![다크모드](./screenshots/99-final/dark-mode.png) |
+| ![라이트모드 대표 화면](./screenshots/99-final/main-dashboard-v12.png) | ![다크모드](./screenshots/99-final/dark-mode-v12.png) |
 |:--:|:--:|
 | **▲ 라이트모드 대표 화면** | **▲ 다크모드** |
 
@@ -1738,11 +1738,11 @@ await prisma.$transaction(async (tx) => {
 - `public/register.html`
 - `public/mypage.html`
 
-| ![모바일 메인 게시판](./screenshots/99-final/mobile-main-board.png) | ![모바일 목록 화면](./screenshots/99-final/mobile-board-list.png) |
+| ![모바일 메인 대시보드](./screenshots/99-final/mobile-dashboard-preview-v12.gif) | ![모바일 상세 화면](./screenshots/99-final/mobile-post-detail-v12.png) |
 |:--:|:--:|
-| **▲ 모바일 메인 게시판과 게시판 바로가기** | **▲ 모바일 필터와 게시글 목록** |
+| **▲ 모바일 메인 대시보드 흐름** | **▲ 모바일 게시글 상세 화면** |
 
-| ![모바일 마이페이지](./screenshots/99-final/mobile-mypage.png) | ![모바일 다크모드](./screenshots/99-final/mobile-dark-mode.png) |
+| ![모바일 마이페이지](./screenshots/99-final/mypage-dashboard-v12.png) | ![모바일 다크모드](./screenshots/99-final/dark-mode-v12.png) |
 |:--:|:--:|
 | **▲ 모바일 마이페이지** | **▲ 모바일 다크모드** |
 
@@ -1814,7 +1814,13 @@ renderActivityVisuals(normalizedActivity);
 - `public/post-detail.html`
 - `public/mypage.html`
 
-> 현재 문서의 스크린샷 경로는 기존 캡처 기준으로 유지함. v1.2.0 최종 스크린샷/GIF 재촬영과 이미지 교체는 후속 작업에서 별도로 진행 예정임.
+| ![메인 대시보드 GIF](./screenshots/99-final/main-dashboard-preview-v12.gif) | ![검색/보기 모드 GIF](./screenshots/99-final/search-view-mode-preview-v12.gif) |
+|:--:|:--:|
+| **▲ 메인 대시보드 탐색 흐름** | **▲ 검색/필터/table-card 보기 전환** |
+
+| ![글쓰기 UX GIF](./screenshots/99-final/post-write-preview-v12.gif) | ![마이페이지 활동 GIF](./screenshots/99-final/mypage-activity-preview-v12.gif) |
+|:--:|:--:|
+| **▲ 글쓰기 UX 흐름** | **▲ 마이페이지 활동 시각화** |
 
 ### 검증 내용
 
@@ -1853,11 +1859,11 @@ renderActivityVisuals(normalizedActivity);
 - 전체 주요 페이지
 - 기능 설명서용 최종 캡처 화면
 
-| ![최종 메인 화면](./screenshots/99-final/main-board.png) | ![최종 상세 화면](./screenshots/99-final/post-detail.png) |
+| ![최종 메인 화면](./screenshots/99-final/main-dashboard-v12.png) | ![최종 상세 화면](./screenshots/99-final/post-detail-v12.png) |
 |:--:|:--:|
 | **▲ 최종 메인 화면** | **▲ 최종 상세 화면** |
 
-| ![최종 마이페이지](./screenshots/99-final/mypage.png) |
+| ![최종 마이페이지](./screenshots/99-final/mypage-dashboard-v12.png) |
 |:--:|
 | **▲ 최종 마이페이지** |
 

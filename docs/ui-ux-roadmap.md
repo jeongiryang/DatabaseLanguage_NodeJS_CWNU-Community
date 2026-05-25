@@ -1,113 +1,98 @@
-# v1.1.0 UI/UX 고도화 계획서
+# v1.2.0 UI/UX 고도화 및 확장 로드맵
 
 ## 1. 문서 목적
 
-- `v1.0.0`은 데이터베이스개론 제출 버전으로, **Node.js + Express + PostgreSQL + Prisma ORM** 기반 게시판 기능 구현과 검증에 초점을 둠.
-- `v1.1.0`은 포트폴리오용 서비스형 커뮤니티로 보이도록 UI/UX 완성도를 높이는 고도화 버전으로 정의함.
-- 기능 추가보다 사용성, 시각적 일관성, 모바일 경험, 상태 피드백 개선을 우선함.
-- DB schema 변경 없이 `public/`의 HTML/CSS/Vanilla JS 중심 개선을 기본 원칙으로 삼음.
+- `v1.1.0`과 `v1.2.0`에서 진행한 CWNU Community UI/UX 개선 작업의 완료 상태를 정리함.
+- 기능 추가보다 사용성, 정보 탐색, 모바일 접근성, 상태 피드백, 문서 증빙 완성도를 기준으로 정리함.
+- DB schema, migration, API 응답 구조는 유지하고 HTML/CSS/Vanilla JS와 문서 자산 중심으로 고도화함.
+- 이후 작업은 운영 기능 확장, 테스트 자동화, 접근성 전문 점검처럼 별도 범위가 필요한 항목으로 분리함.
 
 ---
 
-## 2. 현재 UI/UX 상태 요약
+## 2. 현재 완료 상태 요약
 
-### 이미 구현된 요소
-
-- 다크모드/라이트모드 전환 적용.
-- 모바일 뷰포트 최적화 적용.
-- 버튼, 카드, 링크 hover 효과 적용.
-- 과제 정보와 GitHub, CWNU Smart Portal 링크를 포함한 footer 구성.
-- 메인 페이지 도움말 투어 구현.
-- 좋아요, 싫어요, 북마크 반응 버튼 UI 개선.
-- 게시판 바로가기 영역과 인기글/공지사항/카테고리 이동 구조 구성.
-
-### 아직 고도화할 수 있는 요소
-
-- 토스트 알림 시스템 부재.
-- 목록/상세/API 요청 중 로딩 상태 표현 부족.
-- 검색 결과 없음, 북마크 없음, 작성 글 없음 같은 빈 상태 UI 보강 가능.
-- API 실패 또는 권한 오류에 대한 에러 상태 UI 개선 가능.
-- 모바일 게시글 목록을 테이블 대신 카드형으로 전환 가능.
-- 삭제/회원 탈퇴 확인을 브라우저 기본 confirm 대신 커스텀 모달로 개선 가능.
-- 마이페이지 활동 현황을 요약 카드로 제공 가능.
-- 검색/정렬/필터 영역의 사용 흐름을 더 직관적으로 정리 가능.
+| 버전 | 상태 | 핵심 결과 |
+|---|---|---|
+| `v1.0.0` | 완료 | Node.js + Express + PostgreSQL + Prisma ORM 기반 게시판 기능 구현 |
+| `v1.1.0` | 완료 | 디자인 시스템, Toast, Confirm Modal, 모바일 카드형 목록, 마이페이지 대시보드, 상세 화면 UX 고도화 |
+| `v1.2.0` | 완료 | 글쓰기 UX, Skeleton Loading, 검색 UX, Floating 글쓰기 버튼, 활동 시각화, 상세 읽기 UX, 메인 대시보드 polish, 시연 seed 데이터 반영 |
+| `v1.2.0` 문서 자산 | 완료 | 최신 PNG/GIF를 `raw-v1.2.0`으로 분리하고 README/feature-guide 대표 이미지 갱신 |
 
 ---
 
-## 3. v1.1.0 UI/UX 개선 후보
+## 3. v1.1.0 완료 항목
 
-| 우선순위 | 개선 항목 | 설명 | 예상 수정 범위 | DB 변경 |
-|---:|---|---|---|---|
-| 1 | 디자인 시스템 정리 | 색상, spacing, radius, shadow, typography 기준을 CSS 변수와 공통 class로 정리 | `public/css/style.css` | 없음 |
-| 2 | 공통 버튼/카드/입력창 스타일 통일 | 페이지별 버튼, 카드, 폼 요소의 크기와 상태 표현을 통일 | `public/css/style.css`, 필요한 HTML class | 없음 |
-| 3 | 토스트 알림 시스템 | 저장, 삭제, 복사, 오류 발생 시 상단/하단 toast로 피드백 제공 | `public/js/auth.js`, `public/js/posts.js`, `public/js/mypage.js`, CSS | 없음 |
-| 4 | 로딩/빈 상태/에러 상태 UI | 목록 로딩, 검색 결과 없음, API 실패 상태를 화면 안에서 명확히 표시 | `public/js/posts.js`, `public/js/mypage.js`, CSS | 없음 |
-| 5 | 모바일 카드형 게시글 목록 | 좁은 화면에서 테이블 대신 카드형 목록을 제공해 가독성 개선 | `public/index.html`, `public/js/posts.js`, CSS | 없음 |
-| 6 | 삭제/회원 탈퇴 커스텀 모달 | 기본 confirm을 서비스형 모달로 대체해 위험 작업 인지 강화 | HTML, `public/js/posts.js`, `public/js/mypage.js`, CSS | 없음 |
-| 7 | 마이페이지 활동 요약 카드 | 작성 글, 댓글, 북마크, 좋아요, 싫어요 개수를 요약 카드로 표시 | `public/mypage.html`, `public/js/mypage.js`, CSS | 없음 |
-| 8 | 검색/정렬/필터 UX 개선 | 현재 게시판 상태, 검색어, 정렬 조건을 더 명확히 표시 | `public/index.html`, `public/js/posts.js`, CSS | 없음 |
-| 9 | 게시글 상세 가독성 개선 | 본문 줄간격, 메타 정보, 반응 버튼 그룹, 댓글 영역 시각 구조 개선 | `public/post-detail.html`, `public/js/posts.js`, CSS | 없음 |
-| 10 | 접근성 개선 | focus-visible, aria-label, 키보드 조작, 색 대비를 보강 | HTML, CSS, JS | 없음 |
-| 11 | 스크린샷/GIF 재정리 | v1.1.0 UI 기준 README/기능 설명서 대표 화면 재촬영 | `docs/screenshots/` 문서 자산 | 없음 |
-
----
-
-## 4. 추천 구현 순서
-
-1. 디자인 시스템 정리.
-2. 토스트 알림 추가.
-3. 로딩/빈 상태/에러 상태 추가.
-4. 모바일 카드형 게시글 목록 추가.
-5. 커스텀 확인 모달 추가.
-6. 마이페이지 대시보드화.
-7. 최종 스크린샷/GIF 재촬영.
-8. README/feature-guide 업데이트.
+| 항목 | 완료 내용 | 주요 범위 |
+|---|---|---|
+| 디자인 시스템 정리 | CSS 변수, card/button/input/table 스타일, 라이트/다크모드 토큰 정리 | `public/css/style.css` |
+| Toast UI | 저장, 삭제, 공유, 오류 피드백을 toast로 제공 | `public/js/auth.js`, CSS |
+| 모바일 카드형 목록 | 모바일에서 게시글 table 대신 card list 중심으로 표시 | `public/index.html`, `public/js/posts.js`, CSS |
+| 커스텀 Confirm Modal | 게시글/댓글/답글 삭제, 회원 탈퇴 확인 UI 개선 | `public/js/auth.js`, `public/js/posts.js`, `public/js/mypage.js` |
+| 마이페이지 대시보드 | 프로필 요약, 활동 통계, 최근 활동 영역 추가 | `public/mypage.html`, `public/js/mypage.js` |
+| 게시글 상세 UX | 상세 헤더, 본문, 반응/액션, 댓글 영역 가독성 개선 | `public/post-detail.html`, `public/js/posts.js` |
+| 로딩 피드백 | spinner와 버튼 pending 상태 추가 | 공통 JS/CSS |
+| 검색/필터/보기 모드 | filter summary, result summary, table/card 보기 전환 추가 | `public/index.html`, `public/js/posts.js` |
+| 메인 대시보드 | hero, 요약 카드, Hot/Notice/Latest 프리뷰, 최근 본 글 추가 | `public/index.html`, `public/js/posts.js` |
+| 안정화 | 중복 스타일/헬퍼, 접근성, 모바일, 다크모드 회귀 위험 점검 | 프론트 JS/CSS/HTML |
 
 ---
 
-## 5. 구현 단위별 Codex 작업 기준
+## 4. v1.2.0 완료 항목
 
-| 작업 | 목표 | 권장 수정 범위 | 검증 기준 |
-|---|---|---|---|
-| 작업 1 | CSS 디자인 토큰 정리 | `public/css/style.css` | 주요 페이지 라이트/다크모드 색상 유지 |
-| 작업 2 | Toast UI 추가 | 공통 JS 또는 기존 JS 최소 수정, CSS | 로그인, 저장, 삭제, 공유 복사 피드백 확인 |
-| 작업 3 | 목록 loading/empty/error 상태 추가 | `public/js/posts.js`, `public/js/mypage.js` | 검색 결과 없음, API 실패 상황 표시 확인 |
-| 작업 4 | 모바일 카드형 목록 추가 | `public/index.html`, `public/js/posts.js`, CSS | 360px 뷰포트에서 목록 가독성 확인 |
-| 작업 5 | 삭제 확인 modal 추가 | `public/post-detail.html`, `public/mypage.html`, JS, CSS | 게시글 삭제, 댓글 삭제, 회원 탈퇴 동작 유지 |
-| 작업 6 | 마이페이지 요약 카드 추가 | `public/mypage.html`, `public/js/mypage.js`, CSS | activity 응답 구조 변경 없이 렌더링 확인 |
-| 작업 7 | 접근성 보강 | HTML, CSS, JS | 키보드 focus와 다크모드 대비 확인 |
-| 작업 8 | 문서/스크린샷 갱신 | README, feature-guide, screenshots | v1.1.0 화면과 문서 불일치 제거 |
-
----
-
-## 6. 스크린샷 전략
-
-- 기능 구현 완료 후 한 번에 스크린샷과 GIF를 재촬영함.
-- `docs/screenshots/raw/`에는 원본 캡처를 보존함.
-- `docs/screenshots/99-final/`에는 README 대표 이미지와 GIF만 배치함.
-- `docs/feature-guide.md`에는 기능별 폴더의 정적 캡처를 사용함.
-- 새로 필요한 스크린샷 목록은 v1.1.0 구현 완료 후 `screenshot-map.csv` 기준으로 다시 정리함.
-- 모바일 화면은 메인, 목록, 상세, 마이페이지, 다크모드 중심으로 재촬영함.
+| 항목 | 완료 내용 | 주요 범위 |
+|---|---|---|
+| 글쓰기 UX 고도화 | 카테고리별 작성 가이드, placeholder, 글자 수 카운터, 작성/미리보기 탭, localStorage 임시저장, 작성 중 나가기 경고 추가 | `public/post-write.html`, `public/js/posts.js`, CSS |
+| Skeleton Loading | 메인 대시보드, 게시글 목록 table/card, 게시글 상세, 마이페이지 대시보드 로딩 골격 UI 추가 | `public/js/posts.js`, `public/js/mypage.js`, CSS |
+| 검색 UX 추가 고도화 | 검색어 지우기 버튼, 최근 검색어 chip, 검색어 하이라이트, result summary 정리 | `public/index.html`, `public/js/posts.js`, CSS |
+| 모바일 Floating 글쓰기 버튼 | 모바일 오른쪽 아래 글쓰기 FAB 추가, 로그인/비로그인 흐름 유지 | `public/index.html`, `public/js/posts.js`, CSS |
+| 마이페이지 활동 시각화 | 최근 활동 타임라인, 활동 유형 배지, 많이 활동한 게시판 Top 3 추가 | `public/mypage.html`, `public/js/mypage.js`, CSS |
+| 게시글 상세 읽기 UX | 댓글 이동 버튼, 맨 위 이동 버튼, 읽기 진행 보조 UI, 상세 헤더 정보 위계 정리 | `public/post-detail.html`, `public/js/posts.js`, CSS |
+| 메인 대시보드 polish | 도움말 CTA, 카테고리 카드 색상, Hot/Notice/Latest 프리뷰 색상 체계 보완 | `public/index.html`, CSS |
+| 최종 시연 seed 데이터 | v1.2.0 UI/UX를 잘 보여주는 users/posts/comments/replies/likes/dislikes/bookmarks 데이터 재구성 | `scripts/seed-dev.js`, `README.md` |
+| 문서 최신화 | feature-guide와 ai-usage를 v1.2.0 현재 기능 기준으로 갱신 | `docs/feature-guide.md`, `docs/ai-usage.md` |
+| 스크린샷/GIF 정리 | 최신 캡처를 `raw-v1.2.0`에 분리하고 README/feature-guide 이미지 경로 갱신 | `README.md`, `docs/screenshots/*`, `docs/feature-guide.md` |
 
 ---
 
-## 7. v1.1.0에서 하지 않을 것
+## 5. 스크린샷/GIF 정리 기준
 
-| 제외 항목 | 제외 이유 |
+- 기존 `docs/screenshots/raw/`는 과거 원본 보존용으로 유지함.
+- v1.2.0 최신 원본은 `docs/screenshots/raw-v1.2.0/`에 별도로 보존함.
+- README 대표 미리보기는 `docs/screenshots/99-final/`의 GIF와 PNG를 사용함.
+- 기능 설명서는 `01-auth`, `02-posts`, `03-comments`, `04-likes`, `05-pagination-sort`, `06-database` 기능별 폴더 이미지를 사용함.
+- 자동 매핑 결과는 다음 파일로 관리함.
+  - `docs/screenshots/screenshot-inventory-v1.2.0.md`
+  - `docs/screenshots/screenshot-contact-sheet-v1.2.0.html`
+  - `docs/screenshots/screenshot-map-v1.2.0.csv`
+  - `docs/screenshots/screenshot-map-v1.2.0-review.md`
+
+---
+
+## 6. 다음 후보 작업
+
+| 후보 | 설명 |
 |---|---|
-| CI/CD 구축 | 현재 목표가 UI/UX 고도화이며 자동화 파이프라인은 별도 단계에 적합함 |
-| 대규모 API 문서화 | 기존 기능 설명서와 README로 제출/포트폴리오 설명 가능함 |
-| TypeScript 전환 | 전체 코드 구조 변경이 커서 UI/UX 고도화 범위를 벗어남 |
-| React/Next.js 전환 | 현재 프로젝트는 HTML/CSS/Vanilla JS 기반 과제 구조를 유지함 |
-| 이미지 업로드 | DB schema와 파일 저장 전략이 필요한 기능으로 별도 버전에 적합함 |
-| 알림 DB 기능 | 새 테이블과 이벤트 설계가 필요해 UI 개선 범위를 벗어남 |
-| 관리자/신고 기능 | 권한 모델과 DB 구조 확장이 필요해 별도 버전에서 진행하는 것이 적절함 |
+| 관리자/신고 기능 | 운영자 권한, 신고 처리, 숨김/삭제 정책 설계 필요 |
+| 알림 기능 | 댓글/답글/반응 알림과 읽음 상태 모델 설계 필요 |
+| 이미지 업로드 | 파일 저장 위치, 용량 제한, 보안 검사, DB 모델 확장 필요 |
+| API/e2e 자동화 테스트 | 주요 API와 브라우저 흐름을 자동화해 회귀 위험 감소 |
+| 접근성/Lighthouse 전문 점검 | 색 대비, 키보드 접근, 모바일 성능을 정량 지표로 점검 |
+| CSS/JS 역할 분리 | Vanilla JS 파일이 커졌으므로 기능 단위 모듈화 검토 |
+| 운영 환경 보안 강화 | Vercel/Neon 환경변수, cookie 옵션, 운영 seed 차단 정책 추가 점검 |
+
+---
+
+## 7. 제외 및 후속 분리 기준
+
+- DB schema, migration, API 응답 구조 변경이 필요한 작업은 v1.2.0 UI/UX 범위에서 제외함.
+- 신규 의존성 도입, React/Next.js 전환, TypeScript 전환은 별도 대규모 작업으로 분리함.
+- 스크린샷/GIF는 최신 캡처 반영을 완료했지만, 향후 기능 추가 시 버전별 raw 폴더를 새로 분리해 관리함.
+- 운영 데이터와 개발 seed 데이터는 분리해 다루며, seed 실행은 명시적 확인이 있을 때만 수행함.
 
 ---
 
 ## 8. 결론
 
-- `v1.1.0`의 목적은 운영 가능한 서비스처럼 보이는 게시판 UI/UX 완성도 강화임.
-- 기능 수를 늘리는 것보다 사용자가 상태를 이해하고 자연스럽게 이동할 수 있는 화면 흐름을 만드는 데 집중함.
-- DB 구조 변경이 큰 기능은 제외하고, 기존 기능을 더 명확하고 안정적으로 보이게 만드는 방향으로 진행함.
-- 우선순위는 디자인 시스템, 피드백 UI, 상태 UI, 모바일 경험, 문서/스크린샷 정리 순서로 설정함.
+- `v1.1.0`은 기본 게시판을 서비스형 UI로 보이게 만드는 고도화 단계로 완료함.
+- `v1.2.0`은 글쓰기, 검색, 상세 읽기, 마이페이지 활동, 모바일 접근성, 로딩 경험, 문서 증빙까지 확장한 단계로 완료함.
+- 다음 단계는 새로운 UI polish보다 운영 기능, 자동화 테스트, 접근성/성능 검수처럼 제품 안정성을 높이는 작업이 적합함.
