@@ -416,6 +416,23 @@ const user = await prisma.user.update({
 관련 파일: `server/controllers/auth.controller.js`
 
 ```js
+const isPasswordValid = await bcrypt.compare(currentPassword, user.passwordHash);
+
+if (!isPasswordValid) {
+  return res.status(400).json({ message: "현재 비밀번호가 올바르지 않습니다." });
+}
+
+const passwordHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
+
+await prisma.user.update({
+  where: { id: req.user.id },
+  data: { passwordHash },
+});
+```
+
+관련 파일: `server/controllers/auth.controller.js`
+
+```js
 await prisma.$transaction(async (tx) => {
   await tx.post.deleteMany({ where: { userId } });
   await tx.comment.deleteMany({ where: { userId } });
@@ -436,14 +453,15 @@ await prisma.$transaction(async (tx) => {
 |:--:|:--:|
 | **▲ 비밀번호 보기 숨기기** | **▲ 닉네임 변경** |
 
-| ![회원 탈퇴 확인](./screenshots/01-auth/delete-account.png) |
-|:--:|
-| **▲ 회원 탈퇴 확인** |
+| ![비밀번호 변경](./screenshots/01-auth/password-change-v2.png) | ![회원 탈퇴 확인](./screenshots/01-auth/delete-account.png) |
+|:--:|:--:|
+| **▲ 현재 비밀번호 확인 후 새 비밀번호 변경** | **▲ 회원 탈퇴 확인** |
 
 ### 검증 내용
 
 - 비밀번호 보기/숨기기 버튼이 정상 전환되는지 확인함.
 - 닉네임 변경 후 헤더와 마이페이지에 변경된 닉네임 표시 여부 확인.
+- 비밀번호 변경 시 현재 비밀번호 오류, 새 비밀번호 확인 불일치, 성공 케이스를 확인함.
 - 비로그인 상태에서 닉네임 변경 API 요청 시 401 반환 여부 확인.
 - 회원 탈퇴 후 로그인 상태가 해제되고 사용자 데이터 삭제 여부 확인.
 
@@ -1199,12 +1217,17 @@ function getRecentActivities(activity) {
 |:--:|:--:|
 | **▲ 최근 활동 타임라인** | **▲ 마이페이지 북마크** |
 
+| ![비밀번호 변경](./screenshots/01-auth/password-change-v2.png) |
+|:--:|
+| **▲ 마이페이지 비밀번호 변경 폼** |
+
 ### 검증 내용
 
 - 로그인 후 마이페이지 접근 가능 여부 확인.
 - 비로그인 상태에서 마이페이지 접근 제한 여부 확인.
 - 작성한 글, 댓글, 좋아요, 싫어요, 북마크 목록 표시 여부 확인.
 - 닉네임 변경 후 헤더와 마이페이지 정보가 갱신되는지 확인함.
+- 비밀번호 변경 성공/실패 toast와 로그인 유지 여부를 확인함.
 - 프로필 요약 카드와 활동 통계 카드가 `/api/auth/me/activity` 응답 기준으로 표시되는지 확인.
 - 최근 활동 타임라인과 활동 유형 배지가 실제 활동과 맞는지 확인.
 - 많이 활동한 게시판 Top 3가 사용 가능한 category 데이터 기준으로 표시되는지 확인.
