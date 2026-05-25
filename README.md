@@ -1,6 +1,6 @@
 # 데이터베이스개론 과제: CWNU Community 게시판 시스템
 
-[![Version](https://img.shields.io/badge/Version-v1.2.0-155bb5)](https://github.com/jeongiryang/DatabaseLanguage_NodeJS_CWNU-Community/releases/tag/v1.2.0)
+[![Version](https://img.shields.io/badge/Version-v2.0.0-155bb5)](https://github.com/jeongiryang/DatabaseLanguage_NodeJS_CWNU-Community/releases/tag/v2.0.0)
 ![Node.js](https://img.shields.io/badge/Node.js-Express-339933)
 ![DBMS](https://img.shields.io/badge/DBMS-PostgreSQL-4169E1)
 ![ORM](https://img.shields.io/badge/ORM-Prisma-2D3748)
@@ -37,7 +37,7 @@
 
 ## 미리보기
 
-아래는 v1.2.0 기준 최종 구현된 CWNU Community의 대표 화면임.
+아래는 v2.0.0 기준 최종 구현된 CWNU Community의 대표 화면임. v1.2.x UI/UX는 유지하고 계정 식별자를 아이디 기반으로 전환함.
 
 ### 미리보기 - CWNU Community
 
@@ -52,6 +52,10 @@
 | ![게시글 상세 UX](docs/screenshots/99-final/post-detail-preview-v12.gif) | ![마이페이지 활동 시각화](docs/screenshots/99-final/mypage-activity-preview-v12.gif) |
 |:--:|:--:|
 | **▲ 상세 헤더, 반응, 댓글 이동, 추천 게시글** | **▲ 활동 타임라인과 활동 요약** |
+
+| ![비밀번호 변경](docs/screenshots/99-final/password-change-v2.png) |
+|:--:|
+| **▲ v2.0.0 마이페이지 비밀번호 변경** |
 
 | ![다크모드](docs/screenshots/99-final/dark-mode-v12.png) |
 |:--:|
@@ -149,6 +153,7 @@
 | DBMS 활용 | O | PostgreSQL 사용 | [Prisma Studio](docs/screenshots/06-database/prisma-studio-models.png) |
 | ORM 또는 Promise 기반 쿼리 | O | Prisma ORM 사용 | [Prisma Studio](docs/screenshots/06-database/prisma-studio-models.png) |
 | 회원가입/로그인/로그아웃 | O | `/api/auth` API | [회원가입](docs/screenshots/01-auth/register.png), [로그인](docs/screenshots/01-auth/login-v12.png) |
+| 비밀번호 변경 | O | `PATCH /api/auth/password` | [비밀번호 변경](docs/screenshots/01-auth/password-change-v2.png) |
 | 비밀번호 암호화 | O | bcrypt hash 저장 | - |
 | 쿠키 방식 로그인 유지 | O | JWT httpOnly cookie | [로그인 후 헤더](docs/screenshots/01-auth/auth-header.png) |
 | 전체 글 조회 | O | `GET /api/posts` | [메인 대시보드](docs/screenshots/99-final/main-dashboard-v12.png) |
@@ -657,6 +662,10 @@ COOKIE_SECURE=true
 | ![로그인](docs/screenshots/01-auth/login-v12.png) | ![마이페이지 프로필](docs/screenshots/01-auth/mypage-profile-v12.png) |
 |:--:|:--:|
 | **▲ 테스트 계정 로그인 화면** | **▲ 로그인 후 계정 요약** |
+
+| ![비밀번호 변경](docs/screenshots/01-auth/password-change-v2.png) |
+|:--:|
+| **▲ 현재 비밀번호 확인 후 새 비밀번호 변경** |
 
 #### 게시글 / 댓글 기능
 
