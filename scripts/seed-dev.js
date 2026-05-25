@@ -21,16 +21,16 @@ const CATEGORY_LABELS = {
 };
 
 const USER_SEEDS = [
-  { key: "algorithm", email: "algorithm@cwnu.ac.kr", nickname: "알고리즘장인" },
-  { key: "library", email: "library@cwnu.ac.kr", nickname: "새벽도서관" },
-  { key: "potato", email: "potato@cwnu.ac.kr", nickname: "코딩하는감자" },
-  { key: "campuscat", email: "campuscat@cwnu.ac.kr", nickname: "캠퍼스고양이" },
-  { key: "dbmaster", email: "dbmaster@cwnu.ac.kr", nickname: "DB마스터" },
-  { key: "assignment", email: "assignment@cwnu.ac.kr", nickname: "과제폭격기" },
-  { key: "hello543", email: "hello543@cwnu.ac.kr", nickname: "hello543" },
-  { key: "quietroom", email: "quietroom@cwnu.ac.kr", nickname: "조용한열람실" },
-  { key: "sparrow", email: "sparrow@cwnu.ac.kr", nickname: "버그잡는참새" },
-  { key: "frontend", email: "frontend@cwnu.ac.kr", nickname: "프론트는어려워" },
+  { key: "algorithm", loginId: "algorithm", nickname: "알고리즘장인" },
+  { key: "library", loginId: "library", nickname: "새벽도서관" },
+  { key: "potato", loginId: "potato", nickname: "코딩하는감자" },
+  { key: "campuscat", loginId: "campuscat", nickname: "캠퍼스고양이" },
+  { key: "dbmaster", loginId: "dbmaster", nickname: "DB마스터" },
+  { key: "assignment", loginId: "assignment", nickname: "과제폭격기" },
+  { key: "hello543", loginId: "hello543", nickname: "hello543" },
+  { key: "quietroom", loginId: "quietroom", nickname: "조용한열람실" },
+  { key: "sparrow", loginId: "sparrow", nickname: "버그잡는참새" },
+  { key: "frontend", loginId: "frontend", nickname: "프론트는어려워" },
 ];
 
 const POST_SEEDS = {
@@ -114,7 +114,7 @@ const POST_SEEDS = {
       commentTarget: 2,
     },
     {
-      title: "v1.2.0 시연 데이터 구성 안내",
+      title: "v2.0.0 시연 데이터 구성 안내",
       content:
         "현재 데이터는 메인 대시보드, 인기글 TOP 3, 검색 하이라이트, 게시글 상세 추천, 마이페이지 활동 시각화가 잘 보이도록 재구성한 시연용 seed 데이터입니다.",
       authorKey: "assignment",
@@ -871,7 +871,7 @@ async function seedUsers(tx, passwordHash) {
 
     const user = await tx.user.create({
       data: {
-        email: seed.email,
+        loginId: seed.loginId,
         nickname: seed.nickname,
         passwordHash,
         createdAt,
@@ -1089,14 +1089,14 @@ async function buildSummary() {
     hotCandidates,
     recentPosts,
     demoAccount: USER_SEEDS.find((user) => user.key === DEMO_USER_KEY),
-    accounts: USER_SEEDS.map(({ email, nickname }) => ({ email, nickname })),
+    accounts: USER_SEEDS.map(({ loginId, nickname }) => ({ loginId, nickname })),
   };
 }
 
 async function main() {
   assertSafeToRun();
 
-  console.log("기존 DB 데이터를 삭제하고 v1.2.0 시연용 seed 데이터로 교체합니다.");
+  console.log("기존 DB 데이터를 삭제하고 v2.0.0 loginId 기반 시연용 seed 데이터로 교체합니다.");
 
   const passwordHash = await bcrypt.hash(PASSWORD, SALT_ROUNDS);
 
@@ -1135,7 +1135,7 @@ async function main() {
   console.table(summary.recentPosts);
   console.log("대표 시연 계정:");
   console.table({
-    email: summary.demoAccount.email,
+    loginId: summary.demoAccount.loginId,
     nickname: summary.demoAccount.nickname,
     password: PASSWORD,
   });

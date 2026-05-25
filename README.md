@@ -254,7 +254,7 @@ PostgreSQL
 
 | 모델 | 역할 | 주요 필드 | 관계 및 제약 |
 |---|---|---|---|
-| User | 사용자 계정 | `email`, `nickname`, `passwordHash` | Post, Comment, Like, Dislike, Bookmark와 1:N |
+| User | 사용자 계정 | `loginId`, `nickname`, `passwordHash` | Post, Comment, Like, Dislike, Bookmark와 1:N |
 | Post | 게시글 | `title`, `content`, `category`, `isAnonymous`, `viewCount` | User에 속함, Comment/Like/Dislike/Bookmark 보유 |
 | Comment | 댓글/답글 | `content`, `parentId`, `isAnonymous` | Post/User에 속함, `parentId`로 1단계 답글 관리 |
 | Like | 좋아요 | `postId`, `userId` | `postId + userId` unique |
@@ -299,7 +299,7 @@ PostgreSQL
 
 | 영역 | 기능 | 설명 |
 |---|---|---|
-| 사용자 | 닉네임 변경/회원 탈퇴 | 마이페이지에서 계정 관리, 탈퇴 시 관련 데이터 정리 |
+| 사용자 | 닉네임 변경/비밀번호 변경/회원 탈퇴 | 마이페이지에서 계정 관리, 비밀번호 재설정, 탈퇴 시 관련 데이터 정리 |
 | 게시글 | 수정/익명/공유 | 수정일 표시, 익명 작성, 상세 링크 복사 |
 | 게시판 | 공지사항/인기글/카테고리 | Smart Portal 연계 URL 지원 |
 | 댓글 | 답글/수정/익명 | 1단계 답글, 답글의 답글 제한, 익명 댓글/답글 |
@@ -358,6 +358,7 @@ hotScore = viewCount + likeCount * 10 + commentCount * 5 - dislikeCount * 3
 | POST | `/api/auth/logout` | 로그아웃 |
 | GET | `/api/auth/me` | 현재 사용자 조회 |
 | PATCH | `/api/auth/me` | 닉네임 변경 |
+| PATCH | `/api/auth/password` | 비밀번호 변경 |
 | DELETE | `/api/auth/me` | 회원 탈퇴 |
 | GET | `/api/auth/me/activity` | 마이페이지 활동 조회 |
 
@@ -432,7 +433,7 @@ hotScore = viewCount + likeCount * 10 + commentCount * 5 - dislikeCount * 3
 | 생성 규모 | 사용자 10명, 게시글 49개, 댓글 148개, 답글 62개, 좋아요 224개, 싫어요 41개, 북마크 192개 |
 | 카테고리별 게시글 | `notice`, `free`, `study`, `question`, `info`, `market`, `lost` 각 7개 |
 | 생성 데이터 | 사용자, 카테고리별 게시글, 댓글/답글, 좋아요/싫어요, 북마크 |
-| 데이터 구성 | v1.2.0 UI/UX 시연을 고려한 메인 대시보드, 인기글, 공지사항, 최근글, 검색, 마이페이지 활동 데이터 포함 |
+| 데이터 구성 | v2.0.0 후보 loginId 계정 구조와 v1.2.0 UI/UX 시연을 고려한 메인 대시보드, 인기글, 공지사항, 최근글, 검색, 마이페이지 활동 데이터 포함 |
 | 시연 포인트 | 익명 게시글/댓글/답글, 수정됨 표시, 검색어 하이라이트용 제목, 인기글 TOP 3, 활동 타임라인용 반응 데이터 포함 |
 | 데이터 초기화 | 기존 데이터를 삭제한 뒤 더미 데이터 생성 |
 | 민감정보 보호 | DB URL, JWT secret 등 민감 환경변수 값 미출력 |
@@ -442,20 +443,20 @@ hotScore = viewCount + likeCount * 10 + commentCount * 5 - dislikeCount * 3
 
 seed 실행 후 사용할 수 있는 테스트 계정임. 모든 계정의 비밀번호는 `test1234!`로 통일함.
 
-대표 시연 계정은 `assignment@cwnu.ac.kr` / `과제폭격기`임. 이 계정은 작성 글, 댓글/답글, 좋아요, 싫어요, 북마크, 익명 활동이 포함되어 마이페이지 대시보드와 활동 타임라인 확인에 적합함.
+대표 시연 계정은 `assignment` / `과제폭격기`임. 이 계정은 작성 글, 댓글/답글, 좋아요, 싫어요, 북마크, 익명 활동이 포함되어 마이페이지 대시보드와 활동 타임라인 확인에 적합함.
 
-| 이메일 | 닉네임 |
+| 아이디 | 닉네임 |
 |---|---|
-| `algorithm@cwnu.ac.kr` | 알고리즘장인 |
-| `library@cwnu.ac.kr` | 새벽도서관 |
-| `potato@cwnu.ac.kr` | 코딩하는감자 |
-| `campuscat@cwnu.ac.kr` | 캠퍼스고양이 |
-| `dbmaster@cwnu.ac.kr` | DB마스터 |
-| `assignment@cwnu.ac.kr` | 과제폭격기 |
-| `hello543@cwnu.ac.kr` | hello543 |
-| `quietroom@cwnu.ac.kr` | 조용한열람실 |
-| `sparrow@cwnu.ac.kr` | 버그잡는참새 |
-| `frontend@cwnu.ac.kr` | 프론트는어려워 |
+| `algorithm` | 알고리즘장인 |
+| `library` | 새벽도서관 |
+| `potato` | 코딩하는감자 |
+| `campuscat` | 캠퍼스고양이 |
+| `dbmaster` | DB마스터 |
+| `assignment` | 과제폭격기 |
+| `hello543` | hello543 |
+| `quietroom` | 조용한열람실 |
+| `sparrow` | 버그잡는참새 |
+| `frontend` | 프론트는어려워 |
 
 #### 7-4. 기본 검증 명령
 

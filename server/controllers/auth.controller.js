@@ -5,9 +5,10 @@ const { clearAuthCookie, COOKIE_NAME, setAuthCookie } = require("../utils/authCo
 const { signAuthToken, verifyAuthToken } = require("../utils/jwt");
 
 const SALT_ROUNDS = 12;
+const LOGIN_ID_PATTERN = /^[A-Za-z0-9_.@-]+$/;
 
-function normalizeEmail(email) {
-  return typeof email === "string" ? email.trim().toLowerCase() : "";
+function normalizeLoginId(loginId) {
+  return typeof loginId === "string" ? loginId.trim().toLowerCase() : "";
 }
 
 function normalizeNickname(nickname) {
@@ -17,23 +18,27 @@ function normalizeNickname(nickname) {
 function toPublicUser(user) {
   return {
     id: user.id,
-    email: user.email,
+    loginId: user.loginId,
     nickname: user.nickname,
     createdAt: user.createdAt,
   };
 }
 
-function isValidEmail(email) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+function isValidLoginId(loginId) {
+  return loginId.length >= 4 && loginId.length <= 30 && LOGIN_ID_PATTERN.test(loginId);
 }
 
 async function register(req, res) {
-  const email = normalizeEmail(req.body.email);
+  const loginId = normalizeLoginId(req.body.loginId);
   const nickname = normalizeNickname(req.body.nickname || req.body.username);
   const password = typeof req.body.password === "string" ? req.body.password : "";
 
-  if (!isValidEmail(email)) {
-    return res.status(400).json({ message: "Valid email is required." });
+  if (!loginId) {
+    return res.status(400).json({ message: "아이디를 입력해주세요." });
+  }
+
+  if (!isValidLoginId(loginId)) {
+    return res.status(400).json({ message: "아이디는 4~30자의 영문, 숫자, _, -, ., @만 사용할 수 있습니다." });
   }
 
   if (nickname.length < 2 || nickname.length > 30) {
@@ -46,18 +51,18 @@ async function register(req, res) {
 
   const existingUser = await prisma.user.findFirst({
     where: {
-      OR: [{ email }, { nickname }],
+      OR: [{ loginId }, { nickname }],
     },
   });
 
   if (existingUser) {
-    return res.status(409).json({ message: "Email or nickname is already in use." });
+    return res.status(409).json({ message: "이미 사용 중인 아이디 또는 닉네임입니다." });
   }
 
   const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
   const user = await prisma.user.create({
     data: {
-      email,
+      loginId,
       nickname,
       passwordHash,
     },
@@ -73,25 +78,25 @@ async function register(req, res) {
 }
 
 async function login(req, res) {
-  const email = normalizeEmail(req.body.email);
+  const loginId = normalizeLoginId(req.body.loginId);
   const password = typeof req.body.password === "string" ? req.body.password : "";
 
-  if (!isValidEmail(email) || !password) {
-    return res.status(400).json({ message: "Email and password are required." });
+  if (!isValidLoginId(loginId) || !password) {
+    return res.status(400).json({ message: "아이디와 비밀번호를 입력해주세요." });
   }
 
   const user = await prisma.user.findUnique({
-    where: { email },
+    where: { loginId },
   });
 
   if (!user) {
-    return res.status(401).json({ message: "Invalid email or password." });
+    return res.status(401).json({ message: "아이디 또는 비밀번호가 올바르지 않습니다." });
   }
 
   const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
 
   if (!isPasswordValid) {
-    return res.status(401).json({ message: "Invalid email or password." });
+    return res.status(401).json({ message: "아이디 또는 비밀번호가 올바르지 않습니다." });
   }
 
   const token = signAuthToken(user);
@@ -140,7 +145,7 @@ async function updateMe(req, res) {
     data: { nickname },
     select: {
       id: true,
-      email: true,
+      loginId: true,
       nickname: true,
       createdAt: true,
     },
@@ -150,6 +155,52 @@ async function updateMe(req, res) {
     message: "Nickname updated.",
     user,
   });
+}
+
+async function changePassword(req, res) {
+  const currentPassword = typeof req.body.currentPassword === "string" ? req.body.currentPassword : "";
+  const newPassword = typeof req.body.newPassword === "string" ? req.body.newPassword : "";
+  const confirmPassword = typeof req.body.confirmPassword === "string" ? req.body.confirmPassword : "";
+
+  if (!currentPassword || !newPassword || !confirmPassword) {
+    return res.status(400).json({ message: "현재 비밀번호와 새 비밀번호를 모두 입력해주세요." });
+  }
+
+  if (newPassword !== confirmPassword) {
+    return res.status(400).json({ message: "새 비밀번호 확인이 일치하지 않습니다." });
+  }
+
+  if (newPassword.length < 8) {
+    return res.status(400).json({ message: "새 비밀번호는 8자 이상이어야 합니다." });
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: req.user.id },
+    select: {
+      id: true,
+      passwordHash: true,
+    },
+  });
+
+  if (!user) {
+    clearAuthCookie(res);
+    return res.status(401).json({ message: "Invalid authentication token." });
+  }
+
+  const isPasswordValid = await bcrypt.compare(currentPassword, user.passwordHash);
+
+  if (!isPasswordValid) {
+    return res.status(400).json({ message: "현재 비밀번호가 올바르지 않습니다." });
+  }
+
+  const passwordHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
+
+  await prisma.user.update({
+    where: { id: req.user.id },
+    data: { passwordHash },
+  });
+
+  return res.json({ message: "비밀번호가 변경되었습니다." });
 }
 
 function formatActivityPost(post) {
@@ -227,7 +278,7 @@ async function activity(req, res) {
       where: { id: userId },
       select: {
         id: true,
-        email: true,
+        loginId: true,
         nickname: true,
         createdAt: true,
       },
@@ -374,7 +425,7 @@ async function me(req, res) {
       where: { id: userId },
       select: {
         id: true,
-        email: true,
+        loginId: true,
         nickname: true,
         createdAt: true,
       },
@@ -403,6 +454,7 @@ module.exports = {
   login,
   logout,
   updateMe,
+  changePassword,
   deleteMe,
   activity,
   me,

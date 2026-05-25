@@ -14,7 +14,7 @@ function signAuthToken(user) {
   return jwt.sign(
     {
       sub: String(user.id),
-      email: user.email,
+      loginId: user.loginId,
       nickname: user.nickname,
     },
     getJwtSecret(),

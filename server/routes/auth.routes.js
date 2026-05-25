@@ -19,6 +19,8 @@ router.post("/logout", authController.logout);
 
 router.patch("/me", requireAuth, asyncHandler(authController.updateMe));
 
+router.patch("/password", requireAuth, asyncHandler(authController.changePassword));
+
 router.delete("/me", requireAuth, asyncHandler(authController.deleteMe));
 
 router.get("/me/activity", requireAuth, asyncHandler(authController.activity));
