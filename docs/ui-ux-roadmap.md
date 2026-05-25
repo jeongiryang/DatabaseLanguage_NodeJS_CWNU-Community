@@ -61,10 +61,10 @@
 - README 대표 미리보기는 `docs/screenshots/99-final/`의 GIF와 PNG를 사용함.
 - 기능 설명서는 `01-auth`, `02-posts`, `03-comments`, `04-likes`, `05-pagination-sort`, `06-database` 기능별 폴더 이미지를 사용함.
 - 자동 매핑 결과는 다음 파일로 관리함.
-  - `docs/screenshots/screenshot-inventory-v1.2.0.md`
-  - `docs/screenshots/screenshot-contact-sheet-v1.2.0.html`
-  - `docs/screenshots/screenshot-map-v1.2.0.csv`
-  - `docs/screenshots/screenshot-map-v1.2.0-review.md`
+  - `docs/screenshot-manifests/screenshot-inventory-v1.2.0.md`
+  - `docs/screenshot-manifests/screenshot-contact-sheet-v1.2.0.html`
+  - `docs/screenshot-manifests/screenshot-map-v1.2.0.csv`
+  - `docs/screenshot-manifests/screenshot-map-v1.2.0-review.md`
 
 ---
 
