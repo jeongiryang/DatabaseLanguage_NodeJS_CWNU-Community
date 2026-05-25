@@ -1515,12 +1515,13 @@ const users = [
 관련 파일: `scripts/seed-dev.js`
 
 ```js
-console.log("users count:", summary.counts.users);
-console.log("posts count:", summary.counts.posts);
-console.log("comments count:", summary.counts.comments);
-console.log("replies count:", summary.counts.replies);
-console.log("likes count:", summary.counts.likes);
-console.log("bookmarks count:", summary.counts.bookmarks);
+console.log(`users count: ${summary.users}`);
+console.log(`posts count: ${summary.posts}`);
+console.log(`comments count: ${summary.comments}`);
+console.log(`replies count: ${summary.replies}`);
+console.log(`likes count: ${summary.likes}`);
+console.log(`dislikes count: ${summary.dislikes}`);
+console.log(`bookmarks count: ${summary.bookmarks}`);
 ```
 
 ### 관련 화면

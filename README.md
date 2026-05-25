@@ -1,6 +1,6 @@
 # 데이터베이스개론 과제: CWNU Community 게시판 시스템
 
-[![Version](https://img.shields.io/badge/Version-v1.0.0-155bb5)](https://github.com/jeongiryang/DatabaseLanguage_NodeJS_CWNU-Community/releases)
+[![Version](https://img.shields.io/badge/Version-v1.2.0-155bb5)](https://github.com/jeongiryang/DatabaseLanguage_NodeJS_CWNU-Community/releases/tag/v1.2.0)
 ![Node.js](https://img.shields.io/badge/Node.js-Express-339933)
 ![DBMS](https://img.shields.io/badge/DBMS-PostgreSQL-4169E1)
 ![ORM](https://img.shields.io/badge/ORM-Prisma-2D3748)
@@ -148,20 +148,20 @@
 | EJS 미사용 | O | HTML/CSS/Vanilla JS 정적 프론트 | - |
 | DBMS 활용 | O | PostgreSQL 사용 | [Prisma Studio](docs/screenshots/06-database/prisma-studio-models.png) |
 | ORM 또는 Promise 기반 쿼리 | O | Prisma ORM 사용 | [Prisma Studio](docs/screenshots/06-database/prisma-studio-models.png) |
-| 회원가입/로그인/로그아웃 | O | `/api/auth` API | [회원가입](docs/screenshots/01-auth/register.png), [로그인](docs/screenshots/01-auth/login.png) |
+| 회원가입/로그인/로그아웃 | O | `/api/auth` API | [회원가입](docs/screenshots/01-auth/register.png), [로그인](docs/screenshots/01-auth/login-v12.png) |
 | 비밀번호 암호화 | O | bcrypt hash 저장 | - |
 | 쿠키 방식 로그인 유지 | O | JWT httpOnly cookie | [로그인 후 헤더](docs/screenshots/01-auth/auth-header.png) |
-| 전체 글 조회 | O | `GET /api/posts` | [메인 게시판](docs/screenshots/05-pagination-sort/main-board.png) |
-| 10/20/30/40/50 페이징 | O | `pageSize` 허용값 검증 | [페이징](docs/screenshots/05-pagination-sort/pagination.png) |
-| 목록에서 제목/게시자/등록일/댓글 수/좋아요 수 표시 | O | 게시글 목록 테이블에 표시 | [메인 게시판](docs/screenshots/05-pagination-sort/main-board.png) |
-| 좋아요순 또는 조회수순 정렬 | O | `sort=likes`, `sort=views` | [좋아요순](docs/screenshots/05-pagination-sort/sort-likes.png), [조회수순](docs/screenshots/05-pagination-sort/sort-views.png) |
-| 게시글 상세 조회 | O | `GET /api/posts/:id` | [게시글 상세](docs/screenshots/02-posts/post-detail.png) |
-| 게시글 내용 및 댓글 조회 | O | 상세 화면과 댓글 API | [댓글 목록](docs/screenshots/03-comments/comments.png) |
-| 게시글 작성 | O | 로그인 사용자만 작성 가능 | [게시글 작성](docs/screenshots/02-posts/post-write.png) |
-| 게시글 삭제 | O | 작성자 본인만 삭제 가능 | [게시글 삭제](docs/screenshots/02-posts/post-delete.png) |
+| 전체 글 조회 | O | `GET /api/posts` | [메인 대시보드](docs/screenshots/99-final/main-dashboard-v12.png) |
+| 10/20/30/40/50 페이징 | O | `pageSize` 허용값 검증 | [검색/목록 컨트롤](docs/screenshots/05-pagination-sort/filter-controls-v12.png) |
+| 목록에서 제목/게시자/등록일/댓글 수/좋아요 수 표시 | O | 게시글 목록 테이블에 표시 | [테이블 목록](docs/screenshots/02-posts/post-table-view-v12.png) |
+| 좋아요순 또는 조회수순 정렬 | O | `sort=likes`, `sort=views` | [필터 요약](docs/screenshots/05-pagination-sort/filter-summary-v12.png) |
+| 게시글 상세 조회 | O | `GET /api/posts/:id` | [게시글 상세](docs/screenshots/02-posts/post-detail-header-v12.png) |
+| 게시글 내용 및 댓글 조회 | O | 상세 화면과 댓글 API | [댓글 목록](docs/screenshots/03-comments/comments-replies-v12.png) |
+| 게시글 작성 | O | 로그인 사용자만 작성 가능 | [게시글 작성](docs/screenshots/02-posts/post-write-guide-v12.png) |
+| 게시글 삭제 | O | 작성자 본인만 삭제 가능 | [게시글 삭제](docs/screenshots/02-posts/post-delete-v12.png) |
 | 게시글 삭제 시 댓글/좋아요 삭제 | O | Prisma cascade 삭제 | [게시글 삭제 cascade](docs/screenshots/06-database/cascade-post-delete.png) |
-| 댓글 작성/삭제 | O | 로그인 사용자 작성, 작성자 본인 삭제 | [댓글 목록](docs/screenshots/03-comments/comments.png) |
-| 좋아요/좋아요 취소 | O | Like 모델과 API | [반응 버튼](docs/screenshots/04-likes/reactions-bookmark.png) |
+| 댓글 작성/삭제 | O | 로그인 사용자 작성, 작성자 본인 삭제 | [댓글/답글](docs/screenshots/03-comments/comments-replies-v12.png) |
+| 좋아요/좋아요 취소 | O | Like 모델과 API | [반응 버튼](docs/screenshots/02-posts/post-detail-actions-v12.png) |
 | 기능 설명서용 화면 구성 | O | 주요 기능별 화면 구성 | [기능 설명서](docs/feature-guide.md) |
 
 기본 댓글 작성/삭제는 필수 기능으로 구현하고, 1단계 답글은 추가 구현 기능으로 확장함. 답글의 답글은 서버에서 제한하여 댓글 구조가 과도하게 깊어지지 않도록 처리함.
