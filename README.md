@@ -1,16 +1,43 @@
-# 데이터베이스개론 과제: CWNU Community 게시판 시스템
+# CWNU Community
 
-[![Version](https://img.shields.io/badge/Version-v2.0.0-155bb5)](https://github.com/jeongiryang/DatabaseLanguage_NodeJS_CWNU-Community/releases/tag/v2.0.0)
-![Node.js](https://img.shields.io/badge/Node.js-Express-339933)
-![DBMS](https://img.shields.io/badge/DBMS-PostgreSQL-4169E1)
-![ORM](https://img.shields.io/badge/ORM-Prisma-2D3748)
-![Frontend](https://img.shields.io/badge/Frontend-HTML%2FCSS%2FVanilla%20JS-f7df1e)
+국립창원대학교 구성원을 위한 커뮤니티 게시판.
 
-- [GitHub 저장소 바로가기](https://github.com/jeongiryang/DatabaseLanguage_NodeJS_CWNU-Community.git)
-- [Vercel 배포 사이트 바로가기](https://cwnu-community.vercel.app/)
-- [기능 설명서 바로가기](docs/feature-guide.md)
-- [AI 활용 명시 바로가기](docs/ai-usage.md)
-- [UI/UX 고도화 로드맵 바로가기](docs/ui-ux-roadmap.md)
+![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat-square&logo=nodedotjs&logoColor=white) ![Express](https://img.shields.io/badge/Express-000000?style=flat-square&logo=express&logoColor=white) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=flat-square&logo=postgresql&logoColor=white) ![Prisma](https://img.shields.io/badge/Prisma-2D3748?style=flat-square&logo=prisma&logoColor=white) ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black) ![Vercel](https://img.shields.io/badge/Vercel-000000?style=flat-square&logo=vercel&logoColor=white)
+
+[사이트 열기](https://cwnu-community.vercel.app/) · [기능 설명서](docs/feature-guide.md) · [DB 설계](#3-db-설계) · [로컬 실행](#로컬-실행) · [개발 기록](#개발-기록)
+
+[![메인 대시보드에서 게시판 목록과 공지·댓글을 읽는 실제 배포 화면](docs/media/demo.gif)](https://cwnu-community.vercel.app/)
+
+메인 대시보드 → 게시판 목록 → 공지·댓글 읽기
+
+## 주요 기능
+
+- **게시판** — 카테고리, 검색, 표·카드 보기, 최신·좋아요·조회수 정렬과 페이지 크기 선택
+- **글과 댓글** — 작성·수정·삭제, 익명 작성, 1단계 답글, 좋아요·싫어요·북마크
+- **계정** — 회원가입, 로그인, 닉네임·비밀번호 변경, 회원 탈퇴
+- **화면** — 다크 모드, 모바일 레이아웃, 마이페이지 활동 내역
+
+데이터베이스개론 개인 과제로 DB 설계, REST API, 정적 프런트엔드와 Vercel 배포를 구성했다. 사용자·게시글·댓글·반응은 PostgreSQL에 저장하고 Prisma로 관계와 삭제 규칙을 관리한다.
+
+## 로컬 실행
+
+Node.js와 PostgreSQL이 필요하다. `.env.example`을 복사해 `.env`를 만들고 개발용 DB 연결 정보와 `JWT_SECRET`을 설정한다.
+
+```sh
+npm ci
+npm run prisma:generate
+npm run prisma:migrate
+npm run dev
+```
+
+브라우저에서 [localhost:3000](http://localhost:3000)을 연다. 환경변수와 DB 확인 방법은 아래 개발 기록의 [로컬 실행 순서](#7-1-로컬-실행-순서)에 정리했다.
+
+## 개발 기록
+
+[기능 설명서](docs/feature-guide.md) · [AI 활용 명시](docs/ai-usage.md) · [UI/UX 로드맵](docs/ui-ux-roadmap.md)
+
+<details>
+<summary>과제 보고서 · DB 설계 · API · 구현 과정</summary>
 
 ## 기획
 
@@ -696,3 +723,5 @@ COOKIE_SECURE=true
 | ![모바일 대시보드](docs/screenshots/99-final/mobile-dashboard-preview-v12.gif) | ![모바일 상세 화면](docs/screenshots/99-final/mobile-post-detail-v12.png) |
 |:--:|:--:|
 | **▲ 모바일 대시보드와 FAB** | **▲ 모바일 상세/반응 UI** |
+
+</details>

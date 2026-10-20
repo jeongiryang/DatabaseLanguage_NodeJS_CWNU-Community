@@ -1,0 +1,22 @@
+{
+  "file": "demo.gif",
+  "sourceUrl": "https://cwnu-community.vercel.app/",
+  "capturedAt": "2026-10-20T04:52:15.789Z",
+  "scene": "공개 대시보드 → 게시판 목록 → 공지·댓글 읽기",
+  "scope": "실제 배포 사이트를 브라우저에서 열고 조작한 화면.",
+  "originalViewport": {
+    "width": 1280,
+    "height": 800
+  },
+  "originalFrameCount": 43,
+  "gif": {
+    "size": [
+      960,
+      600
+    ],
+    "frames": 14,
+    "durationMs": 12880,
+    "bytes": 460388
+  },
+  "sha256": "f757f0e751fbc2df1618bb165170aa1bb99df7f3b65bbea2bf139484b868aa85"
+}
